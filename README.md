@@ -173,3 +173,11 @@ fade-in,
 smooth transitions,
 glow effects,
 storytelling sections.
+
+## Uruchomienie projektu
+Frontend
+npm install
+npm run dev
+Backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload

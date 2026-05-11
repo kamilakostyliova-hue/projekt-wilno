@@ -4,9 +4,12 @@ import "./Navbar.css";
 import {
   FaBars,
   FaChevronDown,
+  FaCopy,
+  FaExternalLinkAlt,
   FaGlobeEurope,
   FaMoon,
   FaPowerOff,
+  FaQrcode,
   FaSignOutAlt,
   FaSun,
   FaTimes,
@@ -217,4 +220,3 @@ function Navbar({
 }
 
 export default Navbar;
-
