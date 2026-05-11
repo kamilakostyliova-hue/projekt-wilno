@@ -1,5 +1,13 @@
-# Na Rossie
+## Na Rossie — interaktywna aplikacja edukacyjno-historyczna
+Na Rossie to nowoczesna aplikacja webowa stworzona jako projekt uniwersytecki poświęcony zabytkowemu Cmentarzowi Na Rossie w Wilnie.
+Projekt łączy historię, mapy, geolokalizację i funkcje spacerowe w formie interaktywnego przewodnika edukacyjnego.
 
+Aplikacja pozwala użytkownikowi:
+odnajdywać ważne postacie historyczne,
+przeglądać groby i miejsca pamięci na mapie,
+wyznaczać trasy spacerowe,
+korzystać z przewodnika audio,
+odkrywać historię Rossy w nowoczesnej formie.
 Aplikacja turystyczno-historyczna dla Cmentarza Na Rossie w Wilnie. Projekt składa się z frontendu React + TypeScript oraz backendu FastAPI z trwałą bazą SQLite.
 
 ## Zakres
