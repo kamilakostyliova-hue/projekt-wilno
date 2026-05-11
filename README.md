@@ -10,6 +10,9 @@ korzystać z przewodnika audio,
 odkrywać historię Rossy w nowoczesnej formie.
 Aplikacja turystyczno-historyczna dla Cmentarza Na Rossie w Wilnie. Projekt składa się z frontendu React + TypeScript oraz backendu FastAPI z trwałą bazą SQLite.
 
+## Link na Git:
+https://github.com/kamilakostyliova-hue/projekt-wilno
+
 ## Zakres
 
 - Lista 10+ wybranych osób historycznych.

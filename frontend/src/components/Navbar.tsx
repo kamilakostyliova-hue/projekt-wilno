@@ -74,12 +74,42 @@ function Navbar({
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const effectiveOnline = onlineMode && networkOnline;
+  const projectShareUrl = (() => {
+    if (typeof window === "undefined") return "";
+
+    const url = new URL(window.location.href);
+    url.pathname = "/";
+    url.search = "?view=project";
+    url.hash = "";
+    return url.toString();
+  })();
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=16&data=${encodeURIComponent(
+    projectShareUrl
+  )}`;
 
   const goToView = (view: ViewId) => {
     onViewChange(view);
     setMenuOpen(false);
     setProfileOpen(false);
+  };
+
+  const openShare = () => {
+    setCopied(false);
+    setShareOpen(true);
+    setMenuOpen(false);
+    setProfileOpen(false);
+  };
+
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(projectShareUrl);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
   };
 
   return (
