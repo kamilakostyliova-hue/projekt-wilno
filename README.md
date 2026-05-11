@@ -20,6 +20,15 @@ Aplikacja turystyczno-historyczna dla Cmentarza Na Rossie w Wilnie. Projekt skł
 - Backend waliduje dane i przygotowuje paczkę /api/offline-bundle.
 - Testy automatyczne dla wymagań projektowych.
 
+## Interaktywna mapa
+mapa OpenStreetMap + Leaflet,
+markery grobów i punktów historycznych,
+tooltipy z opisami i zdjęciami,
+fullscreen mapy,
+mini kompas,
+animowane markery,
+efekty glow i pulse.
+
 ## Architektura
 
 Frontend:
