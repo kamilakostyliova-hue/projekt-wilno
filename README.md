@@ -80,6 +80,17 @@ interaktywne punkty historii,
 ciekawostka dnia,
 spacer dnia.
 
+## Wielojęzyczność
+Obsługiwane języki:
+🇵🇱 Polski
+🇬🇧 English
+Funkcje:
+dynamiczna zmiana języka,
+tłumaczenie UI,
+tłumaczenie komunikatów,
+tłumaczenie audio przewodnika,
+zapis języka użytkownika.
+
 ## Architektura
 
 Frontend:
