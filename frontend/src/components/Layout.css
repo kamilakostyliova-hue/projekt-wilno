@@ -4162,7 +4162,7 @@ html[data-theme="night"] .walk-route-step {
   justify-self: end;
   color: #7aa7df;
   font-size: 22px;
-  content: "â€º";
+  content: ">";
 }
 
 .list-layout .item {

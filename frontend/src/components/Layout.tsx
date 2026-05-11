@@ -2107,9 +2107,9 @@ function Layout({
                         <span>
                           <strong>{category.label}</strong>
                           <small>
-                            {routePlaces.length} {copy.items} â€¢{" "}
+                            {routePlaces.length} {copy.items}{" - "}
                             {routePlaces.length > 1
-                              ? `${formatDistance(routeDistance)} â€¢ ${formatDuration(
+                              ? `${formatDistance(routeDistance)} - ${formatDuration(
                                   routeTime
                                 )}`
                               : copy.singlePoint}
@@ -2263,9 +2263,9 @@ function Layout({
                     {routeStatus}.{" "}
                     <strong>
                       {!onlineMode
-                        ? `${formatDistance(fallbackRouteDistance)} â€¢ ${formatDuration(fallbackRouteTime)} offline`
+                        ? `${formatDistance(fallbackRouteDistance)} - ${formatDuration(fallbackRouteTime)} offline`
                         : routeSummary
-                          ? `${formatDistance(routeSummary.distance)} â€¢ ${formatDuration(routeSummary.time)} â€¢ ${copy.transport[transportMode]}`
+                          ? `${formatDistance(routeSummary.distance)} - ${formatDuration(routeSummary.time)} - ${copy.transport[transportMode]}`
                           : `${copy.about} ${formatDistance(fallbackRouteDistance)}`}
                     </strong>
                     .
@@ -2539,9 +2539,9 @@ function Layout({
                   <span>
                     <strong>
                       {!onlineMode
-                        ? `${formatDistance(fallbackRouteDistance)} â€¢ ${formatDuration(fallbackRouteTime)} offline`
+                        ? `${formatDistance(fallbackRouteDistance)} - ${formatDuration(fallbackRouteTime)} offline`
                         : routeSummary
-                        ? `${formatDistance(routeSummary.distance)} â€¢ ${formatDuration(routeSummary.time)} â€¢ ${copy.transport[transportMode]}`
+                        ? `${formatDistance(routeSummary.distance)} - ${formatDuration(routeSummary.time)} - ${copy.transport[transportMode]}`
                         : `${copy.about} ${formatDistance(fallbackRouteDistance)}`}
                     </strong>
                     <small>
