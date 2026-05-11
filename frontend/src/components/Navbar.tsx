@@ -253,6 +253,46 @@ function Navbar({
           )}
         </div>
       </div>
+      {shareOpen && (
+        <div className="share-shell" role="dialog" aria-modal="true">
+          <button
+            aria-label={t("share.close")}
+            className="share-backdrop"
+            onClick={() => setShareOpen(false)}
+            type="button"
+          />
+          <section className="share-card">
+            <button
+              aria-label={t("share.close")}
+              className="share-close"
+              onClick={() => setShareOpen(false)}
+              type="button"
+            >
+              <FaTimes />
+            </button>
+            <span className="share-eyebrow">{t("share.eyebrow")}</span>
+            <h2>{t("share.title")}</h2>
+            <p>{t("share.description")}</p>
+
+            <div className="qr-frame">
+              <img alt={t("share.qrAlt")} src={qrImageUrl} />
+            </div>
+
+            <code>{projectShareUrl}</code>
+
+            <div className="share-actions">
+              <button onClick={copyShareLink} type="button">
+                <FaCopy /> {copied ? t("share.copied") : t("share.copy")}
+              </button>
+              <a href={projectShareUrl} rel="noreferrer" target="_blank">
+                <FaExternalLinkAlt /> {t("share.openProject")}
+              </a>
+            </div>
+
+            <small>{t("share.localHint")}</small>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
