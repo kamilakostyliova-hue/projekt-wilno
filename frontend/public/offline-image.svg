@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
+  <rect width="900" height="620" fill="#f4f0e8"/>
+  <path d="M0 470 C146 424 238 520 384 456 C530 392 618 430 900 330 V620 H0Z" fill="#d8c3a6"/>
+  <path d="M130 372 C232 284 318 320 420 244 C544 152 668 188 808 104" fill="none" stroke="#17362f" stroke-width="18" stroke-linecap="round" opacity="0.2"/>
+  <circle cx="450" cy="250" r="86" fill="#c79a61" opacity="0.78"/>
+  <path d="M450 142 v216 M362 250 h176" stroke="#fffdf8" stroke-width="18" stroke-linecap="round" opacity="0.92"/>
+  <text x="450" y="500" text-anchor="middle" font-family="Georgia, serif" font-size="44" fill="#17362f">Na Rossie</text>
+  <text x="450" y="542" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#857d70">obraz dostepny offline</text>
+</svg>

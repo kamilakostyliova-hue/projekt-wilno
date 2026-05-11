@@ -1,0 +1,19 @@
+{
+  "name": "Na Rossie",
+  "short_name": "Na Rossie",
+  "description": "Aplikacja turystyczno-historyczna dla Cmentarza Na Rossie w Wilnie.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#eef5ff",
+  "theme_color": "#123a63",
+  "lang": "pl",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

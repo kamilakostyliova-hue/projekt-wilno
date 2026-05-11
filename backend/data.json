@@ -1,0 +1,112 @@
+[
+{
+"id": 1,
+"name": "Maria Piłsudska",
+"category": "polityk",
+"lat": 54.679,
+"lng": 25.303,
+"years": "1842–1884",
+"description": "Matka Józefa Piłsudskiego. Została pochowana na cmentarzu na Rossie. Jej grób ma duże znaczenie historyczne i symboliczne.",
+"image": "/img1.jpg"
+},
+{
+"id": 2,
+"name": "Józef Piłsudski (serce)",
+"category": "polityk",
+"lat": 54.679,
+"lng": 25.303,
+"years": "1867–1935",
+"description": "Marszałek Polski i jedna z najważniejszych postaci w historii kraju. Jego serce zostało pochowane na Rossie. Miejsce to ma ogromne znaczenie narodowe.",
+"image": "/img2.jpg"
+},
+{
+"id": 3,
+"name": "Antoni Wiwulski",
+"category": "artysta",
+"lat": 54.678,
+"lng": 25.302,
+"years": "1877–1919",
+"description": "Rzeźbiarz i architekt. Twórca wielu ważnych dzieł w Wilnie. Jego grób znajduje się na Rossie.",
+"image": "/img3.jpg"
+},
+{
+"id": 4,
+"name": "Euzebiusz Słowacki",
+"category": "naukowiec",
+"lat": 54.677,
+"lng": 25.301,
+"years": "1773–1814",
+"description": "Teoretyk literatury i profesor. Ojciec Juliusza Słowackiego. Był ważną postacią życia naukowego Wilna.",
+"image": "/img4.jpg"
+},
+{
+"id": 5,
+"name": "Onufry Pietraszkiewicz",
+"category": "naukowiec",
+"lat": 54.676,
+"lng": 25.300,
+"years": "1793–1863",
+"description": "Filareta i przyjaciel Adama Mickiewicza. Brał udział w działalności patriotycznej. Jego grób znajduje się na Rossie.",
+"image": "/img5.jpg"
+},
+{
+"id": 6,
+"name": "Józef Montwiłł",
+"category": "polityk",
+"lat": 54.675,
+"lng": 25.299,
+"years": "1850–1911",
+"description": "Bankier i filantrop. Działał na rzecz rozwoju Wilna. Był ważną postacią życia społecznego.",
+"image": "/img6.jpg"
+},
+{
+"id": 7,
+"name": "Adam Piłsudski",
+"category": "polityk",
+"lat": 54.674,
+"lng": 25.298,
+"years": "1869–1935",
+"description": "Brat Józefa Piłsudskiego. Wiceprezydent Wilna. Zaangażowany w działalność społeczną i polityczną.",
+"image": "/img7.jpg"
+},
+{
+"id": 9,
+"name": "Bolesław Bałzukiewicz",
+"category": "artysta",
+"lat": 54.672,
+"lng": 25.296,
+"years": "1879–1935",
+"description": "Rzeźbiarz związany z Wilnem. Autor wielu dzieł artystycznych. Ważna postać kultury.",
+"image": "/img9.jpg"
+},
+{
+"id": 10,
+"name": "Żołnierz Armii Krajowej",
+"category": "wojskowy",
+"lat": 54.671,
+"lng": 25.295,
+"years": "1944",
+"description": "Żołnierz Armii Krajowej poległy podczas walk o Wilno. Symbol walki o wolność. Pochowany na Rossie.",
+"image": "/img10.jpg"
+},
+{
+"id": 11,
+"name": "Powstaniec styczniowy",
+"category": "wojskowy",
+"lat": 54.670,
+"lng": 25.294,
+"years": "1863",
+"description": "Uczestnik powstania styczniowego. Walczył przeciwko zaborcom. Jego grób ma znaczenie historyczne.",
+"image": "/img11.jpg"
+},
+{
+"id": 12,
+"name": "Kapelan wojskowy",
+"category": "duchowny",
+"lat": 54.669,
+"lng": 25.293,
+"years": "XX w.",
+"description": "Duchowny związany z wojskiem. Udzielał wsparcia żołnierzom. Ważna postać życia religijnego.",
+"image": "/img12.jpg"
+}
+]
