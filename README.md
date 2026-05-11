@@ -29,6 +29,17 @@ mini kompas,
 animowane markery,
 efekty glow i pulse.
 
+## Nawigacja i trasy
+wyznaczanie tras do grobów,
+tryb:
+pieszy,
+rowerowy,
+samochodowy,
+lokalizacja GPS użytkownika,
+przybliżona trasa offline,
+animowana linia trasy,
+komunikaty o błędach GPS i internetu.
+
 ## Architektura
 
 Frontend:
