@@ -70,6 +70,16 @@ progress ring,
 historia spacerów,
 planer spacerów.
 
+## Historia Rossy
+mini encyklopedia Rossy,
+historia cmentarza,
+symbole nagrobków,
+architektura,
+ważne wydarzenia,
+interaktywne punkty historii,
+ciekawostka dnia,
+spacer dnia.
+
 ## Architektura
 
 Frontend:
