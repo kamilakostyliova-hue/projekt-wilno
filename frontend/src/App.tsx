@@ -31,7 +31,7 @@ type StoredUser = UserProfile & {
   password?: string;
 };
 
-const viewIds = [
+const viewIds: ViewId[] = [
   "home",
   "map",
   "walk",
@@ -40,7 +40,7 @@ const viewIds = [
   "categories",
   "profile",
   "project",
-] satisfies ViewId[];
+];
 
 const getInitialTheme = (): ThemeMode => {
   if (typeof window === "undefined") {

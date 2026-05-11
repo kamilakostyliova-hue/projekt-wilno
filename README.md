@@ -40,6 +40,28 @@ przybliżona trasa offline,
 animowana linia trasy,
 komunikaty o błędach GPS i internetu.
 
+## Audio przewodnik
+odczytywanie historii postaci,
+SpeechSynthesis API,
+spokojny głos przewodnika,
+instrukcje spacerowe:
+„idź prosto”,
+„skręć w lewo”,
+„dotarłeś do punktu”,
+audio zgodne z językiem aplikacji,
+play / pause / stop.
+
+## Profil użytkownika
+lokalny profil użytkownika,
+avatar i inicjały,
+ulubione miejsca,
+historia spacerów,
+zapisane trasy,
+ustawienia aplikacji,
+tryb nocny,
+wielkość tekstu,
+zapis danych w localStorage.
+
 ## Architektura
 
 Frontend:
