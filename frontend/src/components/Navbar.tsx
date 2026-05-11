@@ -77,6 +77,8 @@ function Navbar({
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const effectiveOnline = onlineMode && networkOnline;
+  const projectMenuLabel =
+    language === "en" ? "Project description" : "Opis projektu";
   const shareText =
     language === "en"
       ? {
@@ -269,6 +271,9 @@ function Navbar({
 
               {profileOpen && (
                 <div className="profile-dropdown">
+                  <button onClick={() => goToView("project")} type="button">
+                    <FaExternalLinkAlt /> {projectMenuLabel}
+                  </button>
                   <button onClick={() => goToView("profile")} type="button">
                     <FaUserCircle /> {t("nav.dropdownProfile")}
                   </button>
