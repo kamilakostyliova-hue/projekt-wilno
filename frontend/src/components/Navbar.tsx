@@ -77,6 +77,36 @@ function Navbar({
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const effectiveOnline = onlineMode && networkOnline;
+  const shareText =
+    language === "en"
+      ? {
+          button: "Share",
+          close: "Close",
+          eyebrow: "QR code",
+          title: "Project description",
+          description:
+            "Scan the code to open the project description page on your phone.",
+          qrAlt: "QR code linking to the project description",
+          copy: "Copy link",
+          copied: "Copied",
+          openProject: "Open description",
+          localHint:
+            "For university presentation use the public Vercel link, so everyone can open it from their own phone.",
+        }
+      : {
+          button: "Udostępnij",
+          close: "Zamknij",
+          eyebrow: "QR kod",
+          title: "Opis projektu",
+          description:
+            "Zeskanuj kod, żeby otworzyć stronę z opisem projektu na telefonie.",
+          qrAlt: "QR kod prowadzący do opisu projektu",
+          copy: "Kopiuj link",
+          copied: "Skopiowano",
+          openProject: "Otwórz opis",
+          localHint:
+            "Na prezentacji użyj publicznego linku Vercel, wtedy każdy otworzy projekt na swoim telefonie.",
+        };
   const projectShareUrl = (() => {
     if (typeof window === "undefined") return "";
 
@@ -207,12 +237,14 @@ function Navbar({
             <span>{theme === "day" ? t("nav.night") : t("nav.day")}</span>
           </button>
           <button
+            aria-label={shareText.button}
             className="mode-pill share-nav-button"
             onClick={openShare}
+            title={shareText.button}
             type="button"
           >
             <FaQrcode />
-            <span>{t("nav.share")}</span>
+            <span>{shareText.button}</span>
           </button>
 
           {currentUser ? (
@@ -256,40 +288,40 @@ function Navbar({
       {shareOpen && (
         <div className="share-shell" role="dialog" aria-modal="true">
           <button
-            aria-label={t("share.close")}
+            aria-label={shareText.close}
             className="share-backdrop"
             onClick={() => setShareOpen(false)}
             type="button"
           />
           <section className="share-card">
             <button
-              aria-label={t("share.close")}
+              aria-label={shareText.close}
               className="share-close"
               onClick={() => setShareOpen(false)}
               type="button"
             >
               <FaTimes />
             </button>
-            <span className="share-eyebrow">{t("share.eyebrow")}</span>
-            <h2>{t("share.title")}</h2>
-            <p>{t("share.description")}</p>
+            <span className="share-eyebrow">{shareText.eyebrow}</span>
+            <h2>{shareText.title}</h2>
+            <p>{shareText.description}</p>
 
             <div className="qr-frame">
-              <img alt={t("share.qrAlt")} src={qrImageUrl} />
+              <img alt={shareText.qrAlt} src={qrImageUrl} />
             </div>
 
             <code>{projectShareUrl}</code>
 
             <div className="share-actions">
               <button onClick={copyShareLink} type="button">
-                <FaCopy /> {copied ? t("share.copied") : t("share.copy")}
+                <FaCopy /> {copied ? shareText.copied : shareText.copy}
               </button>
               <a href={projectShareUrl} rel="noreferrer" target="_blank">
-                <FaExternalLinkAlt /> {t("share.openProject")}
+                <FaExternalLinkAlt /> {shareText.openProject}
               </a>
             </div>
 
-            <small>{t("share.localHint")}</small>
+            <small>{shareText.localHint}</small>
           </section>
         </div>
       )}
