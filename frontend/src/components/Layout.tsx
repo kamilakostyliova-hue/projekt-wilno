@@ -1800,11 +1800,11 @@ function Layout({
       {activeView !== "walk" && (
         <>
           <button
-            className="drawer-toggle"
+            className={`drawer-toggle ${drawerOpen ? "hidden" : ""}`}
             onClick={() => setDrawerOpen(true)}
             type="button"
           >
-            <FaLayerGroup /> Kategorie
+            <FaLayerGroup /> Katalog kategorii
           </button>
           {drawerOpen && (
             <button
@@ -1883,7 +1883,7 @@ function Layout({
 
         <div className="visit-progress-panel">
           <span className="eyebrow">{copy.statsCompletion}</span>
-          <h4><FaTrophy /> {visitedProgress}% ukoÅ„czenia</h4>
+          <h4><FaTrophy /> {visitedProgress}% ukończenia</h4>
           <div className="progress-track">
             <span style={{ width: `${visitedProgress}%` }} />
           </div>

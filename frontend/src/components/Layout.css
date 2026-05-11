@@ -6095,15 +6095,44 @@ html[data-theme="night"] .walk-route-step.visited {
 /* Mobile categories drawer polish */
 @media (max-width: 760px) {
   .drawer-toggle {
-    right: 16px;
-    bottom: 16px;
-    left: auto;
-    min-height: 46px;
-    padding: 0 16px;
+    right: auto;
+    bottom: 12px;
+    left: 50%;
+    justify-content: center;
+    width: min(360px, calc(100vw - 28px));
+    min-height: 50px;
+    padding: 0 18px;
+    border: 1px solid rgba(142, 197, 255, 0.46);
+    border-radius: 18px;
+    background:
+      linear-gradient(135deg, #0c1730, #1d4ed8);
+    box-shadow:
+      0 18px 40px rgba(10, 31, 68, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    font-size: 0.95rem;
+    transform: translateX(-50%);
+  }
+
+  .drawer-toggle::before {
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    width: 42px;
+    height: 3px;
     border-radius: 999px;
-    background: linear-gradient(135deg, #0c1730, #1d4ed8);
-    box-shadow: 0 18px 40px rgba(10, 31, 68, 0.26);
-    font-size: 0.92rem;
+    background: rgba(255, 255, 255, 0.38);
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .drawer-toggle svg {
+    margin-top: 5px;
+  }
+
+  .drawer-toggle.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 14px);
   }
 
   .drawer-scrim {
@@ -6114,23 +6143,35 @@ html[data-theme="night"] .walk-route-step.visited {
   .sidebar {
     top: auto !important;
     right: 10px;
-    bottom: 10px;
+    bottom: 0;
     left: 10px !important;
     width: auto !important;
-    max-height: min(82vh, 680px);
-    padding: 58px 14px 16px !important;
+    max-height: min(78vh, 650px);
+    padding: 60px 14px 18px !important;
     overflow: auto;
     border: 1px solid rgba(122, 167, 223, 0.34);
-    border-radius: 28px;
+    border-radius: 28px 28px 0 0;
     background:
       radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.16), transparent 40%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(242, 248, 255, 0.97)) !important;
     box-shadow: 0 28px 70px rgba(7, 20, 42, 0.24);
-    transform: translateY(calc(100% + 28px)) !important;
+    transform: translateY(calc(100% + 24px)) !important;
   }
 
   .sidebar.open {
     transform: translateY(0) !important;
+  }
+
+  .sidebar::before {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 54px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(29, 78, 216, 0.2);
+    content: "";
+    transform: translateX(-50%);
   }
 
   .sidebar h3 {
