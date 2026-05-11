@@ -1804,7 +1804,7 @@ function Layout({
             onClick={() => setDrawerOpen(true)}
             type="button"
           >
-            <FaLayerGroup /> Filtry
+            <FaLayerGroup /> Kategorie
           </button>
           {drawerOpen && (
             <button
