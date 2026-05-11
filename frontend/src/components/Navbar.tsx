@@ -206,6 +206,14 @@ function Navbar({
             {theme === "day" ? <FaMoon /> : <FaSun />}
             <span>{theme === "day" ? t("nav.night") : t("nav.day")}</span>
           </button>
+          <button
+            className="mode-pill share-nav-button"
+            onClick={openShare}
+            type="button"
+          >
+            <FaQrcode />
+            <span>{t("nav.share")}</span>
+          </button>
 
           {currentUser ? (
             <div className="profile-menu-wrap">
