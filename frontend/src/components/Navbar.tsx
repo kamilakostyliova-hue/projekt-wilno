@@ -105,7 +105,7 @@ function Navbar({
           copied: "Skopiowano",
           openProject: "Otwórz opis",
           localHint:
-            "Na prezentacji użyj publicznego linku Vercel, wtedy każdy otworzy projekt na swoim telefonie.",
+            "",
         };
   const projectShareUrl = (() => {
     if (typeof window === "undefined") return "";
