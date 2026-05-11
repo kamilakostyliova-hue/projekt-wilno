@@ -62,6 +62,14 @@ tryb nocny,
 wielkość tekstu,
 zapis danych w localStorage.
 
+## Ulubione i odkrywanie
+dodawanie miejsc do ulubionych,
+oznaczanie odwiedzonych miejsc,
+licznik odkrytych punktów,
+progress ring,
+historia spacerów,
+planer spacerów.
+
 ## Architektura
 
 Frontend:
