@@ -24,9 +24,21 @@
     "dropdownProfile": "Strona użytkownika",
     "dropdownFavorites": "Ulubione miejsca",
     "language": "Język",
+    "share": "Udostępnij",
     "project": "Projekt",
     "brandSubtitle": "Cmentarz w Wilnie",
     "dropdownProject": "Strona projektu"
+  },
+  "share": {
+    "eyebrow": "QR kod",
+    "title": "Udostępnij opis projektu",
+    "description": "Zeskanuj kod, aby otworzyć stronę z opisem projektu aplikacji Na Rossie.",
+    "qrAlt": "QR kod prowadzący do opisu projektu",
+    "copy": "Kopiuj link",
+    "copied": "Skopiowano",
+    "openProject": "Otwórz opis",
+    "localHint": "Jeśli pokazujesz projekt lokalnie, telefon musi być w tej samej sieci albo użyj publicznego linku z Vercel/Netlify.",
+    "close": "Zamknij"
   },
   "auth": {
     "eyebrow": "Profil użytkownika",

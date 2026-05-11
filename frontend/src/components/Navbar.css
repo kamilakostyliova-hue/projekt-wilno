@@ -811,3 +811,214 @@ html[data-theme="night"] .profile-dropdown button,
 html[data-theme="night"] .right .language-pill button {
   color: #f8fbff;
 }
+
+/* QR share modal */
+.share-nav-button {
+  border-color: rgba(37, 99, 235, 0.22) !important;
+  background: linear-gradient(135deg, #eef5ff, #ffffff) !important;
+  color: #1d4ed8 !important;
+}
+
+.share-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.share-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(7, 20, 42, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.share-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(440px, 100%);
+  gap: 14px;
+  padding: clamp(22px, 4vw, 30px);
+  border: 1px solid rgba(122, 167, 223, 0.34);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.16), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(242, 248, 255, 0.96));
+  box-shadow:
+    0 28px 70px rgba(7, 20, 42, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  animation: shareModalIn 0.24s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.share-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(122, 167, 223, 0.34);
+  border-radius: 50%;
+  background: #ffffff;
+  color: #0c1730;
+  cursor: pointer;
+}
+
+.share-eyebrow {
+  color: #2563eb;
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.share-card h2 {
+  margin: 0;
+  padding-right: 30px;
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 2.45rem);
+  line-height: 1;
+}
+
+.share-card p {
+  margin: 0;
+  color: #536179;
+  line-height: 1.62;
+}
+
+.qr-frame {
+  display: grid;
+  width: min(280px, 100%);
+  margin: 4px auto;
+  padding: 14px;
+  place-items: center;
+  border: 1px solid rgba(122, 167, 223, 0.28);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow:
+    0 18px 42px rgba(15, 35, 70, 0.12),
+    0 0 0 8px rgba(238, 245, 255, 0.8);
+}
+
+.qr-frame img {
+  display: block;
+  width: 100%;
+  max-width: 252px;
+  aspect-ratio: 1;
+  border-radius: 14px;
+}
+
+.share-card code {
+  display: block;
+  overflow: hidden;
+  padding: 11px 12px;
+  border: 1px solid rgba(122, 167, 223, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #173b72;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.share-actions button,
+.share-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  gap: 8px;
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.share-actions a {
+  background: linear-gradient(135deg, #1d4ed8, #0f3d76);
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.22);
+}
+
+.share-actions button:hover,
+.share-actions a:hover,
+.share-close:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.16);
+}
+
+.share-card small {
+  color: #6c7890;
+  line-height: 1.45;
+}
+
+html[data-theme="night"] .share-nav-button {
+  border-color: rgba(142, 197, 255, 0.3) !important;
+  background: rgba(142, 197, 255, 0.12) !important;
+  color: #f8fbff !important;
+}
+
+html[data-theme="night"] .share-card {
+  border-color: rgba(142, 197, 255, 0.24);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(37, 99, 235, 0.22), transparent 40%),
+    linear-gradient(180deg, rgba(13, 37, 79, 0.98), rgba(7, 27, 61, 0.97));
+  box-shadow: 0 28px 70px rgba(0, 7, 20, 0.46);
+}
+
+html[data-theme="night"] .share-card h2,
+html[data-theme="night"] .share-close {
+  color: #f8fbff;
+}
+
+html[data-theme="night"] .share-card p,
+html[data-theme="night"] .share-card small {
+  color: #cfe0f5;
+}
+
+html[data-theme="night"] .share-close,
+html[data-theme="night"] .share-card code,
+html[data-theme="night"] .share-actions button {
+  border-color: rgba(142, 197, 255, 0.24);
+  background: rgba(13, 37, 79, 0.88);
+  color: #f8fbff;
+}
+
+@keyframes shareModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 560px) {
+  .share-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .share-card {
+    border-radius: 22px;
+  }
+}

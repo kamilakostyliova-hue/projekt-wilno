@@ -24,9 +24,21 @@
     "dropdownProfile": "User page",
     "dropdownFavorites": "Favorite places",
     "language": "Language",
+    "share": "Share",
     "project": "Project",
     "brandSubtitle": "Cemetery in Vilnius",
     "dropdownProject": "Project page"
+  },
+  "share": {
+    "eyebrow": "QR code",
+    "title": "Share the project description",
+    "description": "Scan the code to open the project description page for the Na Rossie application.",
+    "qrAlt": "QR code linking to the project description",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "openProject": "Open description",
+    "localHint": "If you present the project locally, the phone must be on the same network or you should use a public Vercel/Netlify link.",
+    "close": "Close"
   },
   "auth": {
     "eyebrow": "User profile",
