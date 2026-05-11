@@ -31,6 +31,17 @@ type StoredUser = UserProfile & {
   password?: string;
 };
 
+const viewIds = [
+  "home",
+  "map",
+  "walk",
+  "list",
+  "favorites",
+  "categories",
+  "profile",
+  "project",
+] satisfies ViewId[];
+
 const getInitialTheme = (): ThemeMode => {
   if (typeof window === "undefined") {
     return "day";
@@ -44,6 +55,14 @@ const getPersonSlugFromPath = () => {
   if (typeof window === "undefined") return null;
   const match = window.location.pathname.match(/^\/person\/([^/]+)\/?$/);
   return match ? decodeURIComponent(match[1]) : null;
+};
+
+const getViewFromUrl = (): ViewId => {
+  if (typeof window === "undefined") return "home";
+  if (getPersonSlugFromPath()) return "person";
+
+  const view = new URLSearchParams(window.location.search).get("view");
+  return viewIds.includes(view as ViewId) ? (view as ViewId) : "home";
 };
 
 const detectAppLanguage = (): AppLanguage => {
@@ -126,7 +145,7 @@ const getStoredUsers = (): StoredUser[] => {
 const moveScopedStorage = (previousEmail: string, nextEmail: string) => {
   if (previousEmail === nextEmail) return;
 
-  ["favorites", "visited", "want-visit", "saved-routes", "walk-history", "planned-walks", "time-spent"].forEach((scope) => {
+  ["favorites", "visited", "want-visit", "saved-routes", "walk-history", "planned-walks", "time-spent", "quiz-results"].forEach((scope) => {
     const oldKey = `rossa-${scope}-${previousEmail}`;
     const nextKey = `rossa-${scope}-${nextEmail}`;
     const saved = window.localStorage.getItem(oldKey);
@@ -140,7 +159,7 @@ const moveScopedStorage = (previousEmail: string, nextEmail: string) => {
 function App() {
   const { t } = useTranslation();
   const [activeView, setActiveView] = useState<ViewId>(() =>
-    getPersonSlugFromPath() ? "person" : "home"
+    getViewFromUrl()
   );
   const [personSlug, setPersonSlug] = useState<string | null>(() => getPersonSlugFromPath());
   const [searchQuery, setSearchQuery] = useState("");
@@ -189,8 +208,9 @@ function App() {
   useEffect(() => {
     const syncRoute = () => {
       const nextSlug = getPersonSlugFromPath();
+      const nextView = getViewFromUrl();
       setPersonSlug(nextSlug);
-      setActiveView((current) => (nextSlug ? "person" : current === "person" ? "map" : current));
+      setActiveView(nextSlug ? "person" : nextView);
     };
 
     syncRoute();
@@ -398,8 +418,13 @@ function App() {
   const navigateToView = (view: ViewId) => {
     if (view !== "person") {
       setPersonSlug(null);
-      if (typeof window !== "undefined" && window.location.pathname !== "/") {
-        window.history.pushState({ view }, "", "/");
+      if (typeof window !== "undefined") {
+        const nextUrl = view === "home" ? "/" : `/?view=${view}`;
+        const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+        if (currentUrl !== nextUrl) {
+          window.history.pushState({ view }, "", nextUrl);
+        }
       }
     }
 
