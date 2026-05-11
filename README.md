@@ -161,3 +161,15 @@ Testy obejmują:
 - obecność źródeł historycznych,
 - poprawne liczenie odległości,
 - komunikaty błędów i strukturę paczki offline.
+
+## Wygląd aplikacji
+Styl projektu:
+premium educational UI,
+nowoczesna typografia,
+glassmorphism,
+tryb jasny i nocny,
+animacje hover,
+fade-in,
+smooth transitions,
+glow effects,
+storytelling sections.
