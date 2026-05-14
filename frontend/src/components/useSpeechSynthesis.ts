@@ -9,6 +9,13 @@ type SpeakOptions = {
   pitch?: number;
 };
 
+type LastSpeechRequest = {
+  charIndex: number;
+  language: SpeechLanguage;
+  options: SpeakOptions;
+  text: string;
+};
+
 const languageVoiceHints: Record<SpeechLanguage, string[]> = {
   "pl-PL": ["pl", "polish", "polski"],
   "en-GB": ["en-gb", "english", "uk"],
@@ -86,6 +93,7 @@ export function useSpeechSynthesis() {
   const progressTimerRef = useRef<number | null>(null);
   const estimatedDurationRef = useRef(1);
   const startedAtRef = useRef(0);
+  const lastSpeechRef = useRef<LastSpeechRequest | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [status, setStatus] = useState<SpeechStatus>("idle");
   const [progress, setProgress] = useState(0);
@@ -121,6 +129,8 @@ export function useSpeechSynthesis() {
   useEffect(
     () => () => {
       stopProgressTimer();
+      utteranceRef.current = null;
+      lastSpeechRef.current = null;
       if (hasSpeech()) {
         window.speechSynthesis.cancel();
       }
@@ -155,13 +165,15 @@ export function useSpeechSynthesis() {
       const cleanText = text.replace(/\s+/g, " ").trim();
       if (!hasSpeech() || cleanText.length === 0) return;
 
+      utteranceRef.current = null;
       window.speechSynthesis.cancel();
       stopProgressTimer();
+      lastSpeechRef.current = { charIndex: 0, language, options, text: cleanText };
 
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = language;
       utterance.rate = options.rate ?? 0.9;
-      utterance.pitch = options.pitch ?? 1.02;
+      utterance.pitch = options.pitch ?? 1;
       utterance.volume = 1;
 
       const voice = findVoice(voices, language);
@@ -171,6 +183,7 @@ export function useSpeechSynthesis() {
       setVoiceName(voice?.name ?? "");
 
       utterance.onstart = () => {
+        if (utteranceRef.current !== utterance) return;
         setStatus("playing");
         setProgress(2);
         setActiveLabel(options.label ?? "");
@@ -178,23 +191,38 @@ export function useSpeechSynthesis() {
       };
 
       utterance.onboundary = (event) => {
+        if (utteranceRef.current !== utterance) return;
         if (event.name !== "word" && event.charIndex === 0) return;
         setProgress(
           Math.min(96, Math.round((event.charIndex / cleanText.length) * 100))
         );
       };
 
-      utterance.onpause = () => setStatus("paused");
-      utterance.onresume = () => setStatus("playing");
-      utterance.onerror = () => {
+      utterance.onpause = () => {
+        if (utteranceRef.current !== utterance) return;
         stopProgressTimer();
+        setStatus("paused");
+      };
+      utterance.onresume = () => {
+        if (utteranceRef.current !== utterance) return;
+        setStatus("playing");
+        startProgressTimer(cleanText.length);
+      };
+      utterance.onerror = () => {
+        if (utteranceRef.current !== utterance) return;
+        stopProgressTimer();
+        utteranceRef.current = null;
         setStatus("idle");
         setVoiceName("");
       };
       utterance.onend = () => {
+        if (utteranceRef.current !== utterance) return;
         stopProgressTimer();
+        utteranceRef.current = null;
+        lastSpeechRef.current = null;
         setProgress(100);
         window.setTimeout(() => {
+          if (utteranceRef.current !== null) return;
           setStatus("idle");
           setProgress(0);
           setActiveLabel("");
@@ -203,28 +231,47 @@ export function useSpeechSynthesis() {
       };
 
       utteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+      window.setTimeout(() => {
+        if (utteranceRef.current === utterance && hasSpeech()) {
+          window.speechSynthesis.speak(utterance);
+        }
+      }, 40);
     },
     [startProgressTimer, stopProgressTimer, voices]
   );
 
   const pause = useCallback(() => {
     if (!hasSpeech()) return;
+    stopProgressTimer();
     window.speechSynthesis.pause();
     setStatus("paused");
-  }, []);
+  }, [stopProgressTimer]);
 
   const resume = useCallback(() => {
     if (!hasSpeech()) return;
+
+    const request = lastSpeechRef.current;
+    if (request) {
+      const startAt = Math.max(0, Math.min(request.charIndex, request.text.length - 1));
+      const remainingText = request.text.slice(startAt).trim();
+      speak(
+        remainingText.length > 16 ? remainingText : request.text,
+        request.language,
+        request.options
+      );
+      return;
+    }
+
     window.speechSynthesis.resume();
     setStatus("playing");
-  }, []);
+  }, [speak]);
 
   const stop = useCallback(() => {
     if (!hasSpeech()) return;
     stopProgressTimer();
-    window.speechSynthesis.cancel();
     utteranceRef.current = null;
+    lastSpeechRef.current = null;
+    window.speechSynthesis.cancel();
     setStatus("idle");
     setProgress(0);
     setActiveLabel("");

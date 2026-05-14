@@ -51,7 +51,7 @@ function AudioGuide({ language, place, onLanguageChange, showLanguageSwitch = fa
     speech.speak(getStoryText(place, language), language, {
       label: t("audio.story") + ": " + place.name,
       rate: 0.9,
-      pitch: 1.02,
+      pitch: 1,
     });
   };
 
