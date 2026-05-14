@@ -456,6 +456,11 @@ function UserProfilePage({
         </article>
         <article>
           <FaMapMarkedAlt />
+          <strong>{visitedCount}</strong>
+          <span>{languageKey === "en" ? "visited places" : "odwiedzone miejsca"}</span>
+        </article>
+        <article>
+          <FaMapMarkedAlt />
           <strong>{formatDistance(totalWalkDistance)}</strong>
           <span>{t("profile.totalDistance")}</span>
         </article>

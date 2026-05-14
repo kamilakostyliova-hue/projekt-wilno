@@ -266,7 +266,7 @@ function App() {
     const name = username.trim();
 
     if (!email || !password || (mode === "register" && !name)) {
-      setAuthMessage("Uzupełnij wszystkie pola.");
+      setAuthMessage("Uzupelnij wszystkie pola.");
       return;
     }
 
@@ -283,36 +283,11 @@ function App() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    setAuthMessage("Logowanie Google jest wyłączone w tej wersji.");
-  };
-
-  /*
-    const profile = normalizeUser({
-      name: "Gość Google",
-      email: "google.user@na-rossie.app",
-      provider: "google",
-      avatar: createAvatar("Gość Google"),
-      createdAt: new Date().toISOString(),
-      language,
-      settings: createDefaultSettings(language),
-    });
-
-    if (profile) {
-      setCurrentUser(profile);
-      updateStoredProfile(profile);
-    }
-    closeAuth();
-  };
-
-  */
 
   const openAuth = () => {
     setAuthOpen(true);
     setAuthMessage("");
   };
-
-  void handleGoogleLogin;
 
   const navigateToView = (view: ViewId) => {
     if (view !== "person") {
@@ -397,82 +372,6 @@ function App() {
           onSubmit={handleAuthSubmit}
         />
       )}
-      {/*
-      {authOpen && (
-        <div className="auth-shell" role="dialog" aria-modal="true">
-          <button className="auth-backdrop" onClick={closeAuth} type="button" />
-          <section className="auth-card">
-            <button className="auth-close" onClick={closeAuth} type="button" aria-label={t("auth.close")}>
-              ×
-            </button>
-            <span className="auth-eyebrow">{t("auth.eyebrow")}</span>
-            <h2>{authMode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}</h2>
-            <p>{t("auth.description")}</p>
-
-            <div className="auth-tabs">
-              <button
-                className={authMode === "login" ? "active" : ""}
-                onClick={() => {
-                  setAuthMode("login");
-                  setAuthMessage("");
-                }}
-                type="button"
-              >
-                {t("auth.loginTab")}
-              </button>
-              <button
-                className={authMode === "register" ? "active" : ""}
-                onClick={() => {
-                  setAuthMode("register");
-                  setAuthMessage("");
-                }}
-                type="button"
-              >
-                {t("auth.registerTab")}
-              </button>
-            </div>
-
-            {authMode === "register" && (
-              <label>
-                {t("auth.name")}
-                <input
-                  onChange={(event) => setAuthName(event.target.value)}
-                  placeholder={t("auth.namePlaceholder")}
-                  value={authName}
-                />
-              </label>
-            )}
-            <label>
-              {t("auth.email")}
-              <input
-                onChange={(event) => setAuthEmail(event.target.value)}
-                placeholder={t("auth.emailPlaceholder")}
-                type="email"
-                value={authEmail}
-              />
-            </label>
-            <label>
-              {t("auth.password")}
-              <input
-                onChange={(event) => setAuthPassword(event.target.value)}
-                placeholder={t("auth.passwordPlaceholder")}
-                type="password"
-                value={authPassword}
-              />
-            </label>
-
-            {authMessage && <strong className="auth-message">{authMessage}</strong>}
-
-            <button className="auth-primary" onClick={handleAuthSubmit} type="button">
-              {authMode === "login" ? t("auth.submitLogin") : t("auth.submitRegister")}
-            </button>
-            <button className="auth-google" onClick={handleGoogleLogin} type="button">
-              <FaGoogle /> {t("auth.google")}
-            </button>
-          </section>
-        </div>
-      )}
-      */}
     </>
   );
 }

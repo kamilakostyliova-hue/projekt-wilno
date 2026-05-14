@@ -1,4 +1,25 @@
-# React + TypeScript + Vite
+# Na Rossie frontend
+
+Frontend dziala lokalnie przez proxy Vite do FastAPI oraz publicznie na Vercel.
+
+## Publiczny backend dla Vercel
+
+Na Vercel ustaw zmienna srodowiskowa:
+
+```env
+VITE_API_URL=https://adres-twojego-backendu
+```
+
+Wtedy logowanie i rejestracja beda korzystaly z publicznego FastAPI. Lokalnie, gdy
+`VITE_API_URL` nie jest ustawione, Vite przekazuje `/login`, `/register`, `/users`
+i `/api/*` do `http://127.0.0.1:8000`.
+
+Demo konta tworzone w SQLite:
+
+- `kamila@na-rossie.local` / `kamila123`
+- `demo@na-rossie.local` / `demo123`
+
+## Vite notes
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
