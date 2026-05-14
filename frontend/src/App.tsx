@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { FaGoogle } from "react-icons/fa";
 import i18n from "./i18n";
 import "./App.css";
+import AuthModal from "./components/auth/AuthModal";
 import Layout from "./components/Layout";
 import Navbar from "./components/Navbar";
+import { getSavedAuthUser, useAuth } from "./hooks/useAuth";
 import { syncBackendOfflineBundle } from "./services/offlineBundle";
 
 export type ViewId = "home" | "map" | "walk" | "list" | "favorites" | "categories" | "profile" | "project" | "person";
@@ -18,18 +18,17 @@ export type UserSettings = {
   textSize: TextSize;
 };
 export type UserProfile = {
+  id?: number;
   name: string;
   email: string;
   avatar: string;
-  provider: "local" | "google";
+  provider: "local";
   createdAt: string;
   language: AppLanguage;
   settings: UserSettings;
 };
 
-type StoredUser = UserProfile & {
-  password?: string;
-};
+type AuthMode = "login" | "register";
 
 const viewIds: ViewId[] = [
   "home",
@@ -85,63 +84,6 @@ const createDefaultSettings = (language: AppLanguage = detectAppLanguage()): Use
   textSize: "normal",
 });
 
-const createAvatar = (name: string) => {
-  const initial = name.trim().charAt(0).toUpperCase() || "R";
-  return `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(
-    initial
-  )}&backgroundColor=1d4ed8,0c1730&textColor=ffffff`;
-};
-
-const normalizeUser = (user: Partial<UserProfile> | null): UserProfile | null => {
-  if (!user?.email || !user.name) return null;
-
-  const language = user.language === "en" || user.settings?.language === "en" ? "en" : "pl";
-  const settings: UserSettings = {
-    ...createDefaultSettings(language),
-    ...user.settings,
-    language,
-    darkMode: user.settings?.darkMode ?? getInitialTheme() === "night",
-  };
-
-  return {
-    name: user.name,
-    email: user.email,
-    avatar: user.avatar || createAvatar(user.name),
-    provider: user.provider ?? "local",
-    createdAt: user.createdAt ?? new Date().toISOString(),
-    language,
-    settings,
-  };
-};
-
-const getInitialUser = (): UserProfile | null => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const savedUser = window.localStorage.getItem("rossa-user");
-    return savedUser ? normalizeUser(JSON.parse(savedUser) as Partial<UserProfile>) : null;
-  } catch {
-    return null;
-  }
-};
-
-const getStoredUsers = (): StoredUser[] => {
-  try {
-    const users = window.localStorage.getItem("rossa-users");
-    if (!users) return [];
-    return (JSON.parse(users) as StoredUser[]).reduce<StoredUser[]>((acc, user) => {
-      const normalized = normalizeUser(user);
-      if (!normalized) return acc;
-      acc.push(user.password ? { ...normalized, password: user.password } : normalized);
-      return acc;
-    }, []);
-  } catch {
-    return [];
-  }
-};
-
 const moveScopedStorage = (previousEmail: string, nextEmail: string) => {
   if (previousEmail === nextEmail) return;
 
@@ -157,26 +99,29 @@ const moveScopedStorage = (previousEmail: string, nextEmail: string) => {
 };
 
 function App() {
-  const { t } = useTranslation();
   const [activeView, setActiveView] = useState<ViewId>(() =>
     getViewFromUrl()
   );
   const [personSlug, setPersonSlug] = useState<string | null>(() => getPersonSlugFromPath());
   const [searchQuery, setSearchQuery] = useState("");
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(getInitialUser);
-  const [language, setLanguage] = useState<AppLanguage>(() => currentUser?.settings.language ?? detectAppLanguage());
+  const savedAuthUser = getSavedAuthUser();
+  const [language, setLanguage] = useState<AppLanguage>(() => savedAuthUser?.settings.language ?? detectAppLanguage());
   const [authOpen, setAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
-  const [authName, setAuthName] = useState("");
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [onlineMode, setOnlineMode] = useState(true);
   const [networkOnline, setNetworkOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine
   );
+  const {
+    currentUser,
+    loading: authLoading,
+    login,
+    logout,
+    register,
+    setCurrentUser,
+  } = useAuth(language, theme);
 
   const currentUserId = currentUser?.email ?? null;
   const routedActiveView: ViewId = personSlug ? "person" : activeView;
@@ -196,14 +141,6 @@ function App() {
     window.localStorage.setItem("rossa-language", language);
     void i18n.changeLanguage(language);
   }, [effectiveSettings.textSize, language]);
-
-  useEffect(() => {
-    if (currentUser) {
-      window.localStorage.setItem("rossa-user", JSON.stringify(currentUser));
-    } else {
-      window.localStorage.removeItem("rossa-user");
-    }
-  }, [currentUser]);
 
   useEffect(() => {
     const syncRoute = () => {
@@ -279,23 +216,9 @@ function App() {
     setAuthMessage("");
   };
 
-  const updateStoredProfile = (profile: UserProfile, previousEmail = profile.email) => {
-    const users = getStoredUsers();
-    const nextUsers = users.map((user) =>
-      user.email === previousEmail ? { ...profile, password: user.password } : user
-    );
-
-    if (!nextUsers.some((user) => user.email === profile.email)) {
-      nextUsers.push(profile);
-    }
-
-    window.localStorage.setItem("rossa-users", JSON.stringify(nextUsers));
-  };
-
   const handleUserChange = (profile: UserProfile) => {
     const previousEmail = currentUser?.email ?? profile.email;
     moveScopedStorage(previousEmail, profile.email);
-    updateStoredProfile(profile, previousEmail);
     setCurrentUser(profile);
     setLanguage(profile.settings.language);
     setTheme(profile.settings.darkMode ? "night" : "day");
@@ -314,7 +237,6 @@ function App() {
         },
       };
       setCurrentUser(updatedUser);
-      updateStoredProfile(updatedUser);
     }
   };
 
@@ -330,68 +252,42 @@ function App() {
         },
       };
       setCurrentUser(updatedUser);
-      updateStoredProfile(updatedUser);
     }
   };
 
-  const handleAuthSubmit = () => {
-    const email = authEmail.trim().toLowerCase();
-    const password = authPassword.trim();
-    const name = authName.trim();
+  const handleAuthSubmit = async (
+    mode: AuthMode,
+    username: string,
+    emailValue: string,
+    passwordValue: string
+  ) => {
+    const email = emailValue.trim().toLowerCase();
+    const password = passwordValue.trim();
+    const name = username.trim();
 
-    if (!email || !password || (authMode === "register" && !name)) {
-      setAuthMessage(t("auth.fillAll"));
+    if (!email || !password || (mode === "register" && !name)) {
+      setAuthMessage("Uzupełnij wszystkie pola.");
       return;
     }
 
-    const users = getStoredUsers();
-    const existingUser = users.find((user) => user.email === email);
+    const result =
+      mode === "register"
+        ? await register(name, email, password)
+        : await login(email, password);
 
-    if (authMode === "register") {
-      if (existingUser) {
-        setAuthMessage(t("auth.exists"));
-        return;
-      }
-
-      const newProfile = normalizeUser({
-        name,
-        email,
-        provider: "local",
-        avatar: createAvatar(name),
-        createdAt: new Date().toISOString(),
-        language,
-        settings: createDefaultSettings(language),
-      });
-
-      if (!newProfile) return;
-
-      const newUser: StoredUser = {
-        ...newProfile,
-        password,
-      };
-      const { password: _newPassword, ...profile } = newUser;
-
-      window.localStorage.setItem("rossa-users", JSON.stringify([...users, newUser]));
-      void _newPassword;
-      setCurrentUser(profile);
+    setAuthMessage(result.message);
+    if (result.ok && result.user) {
+      setLanguage(result.user.settings.language);
+      setTheme(result.user.settings.darkMode ? "night" : "day");
       closeAuth();
-      return;
     }
-
-    if (!existingUser || existingUser.password !== password) {
-      setAuthMessage(t("auth.invalid"));
-      return;
-    }
-
-    const { password: _existingPassword, ...existingProfile } = existingUser;
-    void _existingPassword;
-    setCurrentUser(existingProfile);
-    setLanguage(existingProfile.settings.language);
-    setTheme(existingProfile.settings.darkMode ? "night" : "day");
-    closeAuth();
   };
 
   const handleGoogleLogin = () => {
+    setAuthMessage("Logowanie Google jest wyłączone w tej wersji.");
+  };
+
+  /*
     const profile = normalizeUser({
       name: "Gość Google",
       email: "google.user@na-rossie.app",
@@ -409,11 +305,14 @@ function App() {
     closeAuth();
   };
 
+  */
+
   const openAuth = () => {
     setAuthOpen(true);
-    setAuthMode("login");
     setAuthMessage("");
   };
+
+  void handleGoogleLogin;
 
   const navigateToView = (view: ViewId) => {
     if (view !== "person") {
@@ -451,7 +350,7 @@ function App() {
         networkOnline={networkOnline}
         onLanguageChange={handleLanguageChange}
         onLoginClick={openAuth}
-        onLogout={() => setCurrentUser(null)}
+        onLogout={logout}
         onOnlineModeToggle={() => setOnlineMode((current) => !current)}
         onSearchChange={(query) => {
           setSearchQuery(query);
@@ -489,6 +388,16 @@ function App() {
         userSettings={effectiveSettings}
       />
       </div>
+      {authOpen && (
+        <AuthModal
+          loading={authLoading}
+          message={authMessage}
+          onClearMessage={() => setAuthMessage("")}
+          onClose={closeAuth}
+          onSubmit={handleAuthSubmit}
+        />
+      )}
+      {/*
       {authOpen && (
         <div className="auth-shell" role="dialog" aria-modal="true">
           <button className="auth-backdrop" onClick={closeAuth} type="button" />
@@ -563,6 +472,7 @@ function App() {
           </section>
         </div>
       )}
+      */}
     </>
   );
 }

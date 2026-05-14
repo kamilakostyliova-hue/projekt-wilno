@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 try:
+    from .auth import router as auth_router
     from .database import (
         ERROR_MESSAGES,
         build_offline_bundle,
@@ -17,7 +18,9 @@ try:
         list_persons,
         navigation_to_person,
     )
+    from .users import initialize_users
 except ImportError:  # pragma: no cover - supports: python backend/main.py
+    from auth import router as auth_router
     from database import (
         ERROR_MESSAGES,
         build_offline_bundle,
@@ -28,6 +31,7 @@ except ImportError:  # pragma: no cover - supports: python backend/main.py
         list_persons,
         navigation_to_person,
     )
+    from users import initialize_users
 
 
 class GraveCreate(BaseModel):
@@ -51,6 +55,8 @@ app = FastAPI(
     description="Backend udostępnia dane osób historycznych, grobów, walidację oraz paczkę offline.",
 )
 
+app.include_router(auth_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -63,6 +69,7 @@ app.add_middleware(
 @app.on_event("startup")
 def startup() -> None:
     initialize_database()
+    initialize_users()
 
 
 @app.get("/health")

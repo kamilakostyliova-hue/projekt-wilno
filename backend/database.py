@@ -75,6 +75,14 @@ def initialize_database(database_path: Path | str = DATABASE_PATH, force: bool =
                 longitude REAL NOT NULL,
                 type TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                password TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
             """
         )
 

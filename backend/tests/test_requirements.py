@@ -9,6 +9,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
 import database
+import users
 
 
 class RequirementTests(unittest.TestCase):
@@ -61,6 +62,22 @@ class RequirementTests(unittest.TestCase):
         self.assertGreaterEqual(len(bundle["persons"]), 10)
         self.assertGreaterEqual(len(bundle["graves"]), 10)
         self.assertEqual(bundle["map"]["provider"], "OpenStreetMap")
+
+    def test_users_table_is_created_and_seeded(self) -> None:
+        users.initialize_users(self.db_path)
+        seeded_users = users.list_users(self.db_path)
+
+        self.assertGreaterEqual(len(seeded_users), 2)
+        self.assertTrue(any(user["email"] == "demo@na-rossie.local" for user in seeded_users))
+
+    def test_user_can_register_and_login(self) -> None:
+        created = users.create_user("Test User", "test@example.com", "secret123", self.db_path)
+        logged_in = users.authenticate_user("test@example.com", "secret123", self.db_path)
+        wrong_password = users.authenticate_user("test@example.com", "bad-password", self.db_path)
+
+        self.assertEqual(created["email"], "test@example.com")
+        self.assertIsNotNone(logged_in)
+        self.assertIsNone(wrong_password)
 
 
 if __name__ == "__main__":
