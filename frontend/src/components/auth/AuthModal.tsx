@@ -46,8 +46,8 @@ function AuthModal({
         <span className="auth-eyebrow">Profil uzytkownika</span>
         <h2>{mode === "login" ? "Zaloguj sie" : "Utworz konto"}</h2>
         <p>
-          Konto jest zapisywane w backendzie FastAPI oraz w bazie SQLite
-          rossa.sqlite3.
+          Konto dziala na Vercel i telefonie z QR. Gdy publiczny backend nie jest
+          ustawiony, profil zapisuje sie lokalnie w tej przegladarce.
         </p>
 
         <div className="auth-tabs">
@@ -114,7 +114,7 @@ function AuthModal({
           type="button"
         >
           {loading
-            ? "Laczenie z backendem..."
+            ? "Logowanie..."
             : mode === "login"
               ? "Zaloguj"
               : "Zarejestruj"}
@@ -125,3 +125,5 @@ function AuthModal({
 }
 
 export default AuthModal;
+
+
