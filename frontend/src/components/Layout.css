@@ -6727,3 +6727,63 @@ html[data-theme="night"] .sidebar > button:not(.drawer-close) svg {
     color: #dcecff;
   }
 }
+/* Mobile drawer close and spacing fix */
+@media (max-width: 760px) {
+  .drawer-toggle {
+    position: fixed !important;
+    right: auto !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    left: 50% !important;
+    z-index: 70;
+    width: min(330px, calc(100vw - 30px));
+    min-height: 44px;
+    margin: 0 !important;
+    border-radius: 15px;
+    transform: translateX(-50%);
+  }
+
+  .drawer-toggle.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .sidebar {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(calc(100% + 26px)) !important;
+  }
+
+  .sidebar.open {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) !important;
+  }
+
+  .sidebar > .drawer-close {
+    display: grid;
+    place-items: center;
+    font-size: 0;
+  }
+
+  .sidebar > .drawer-close svg {
+    width: 15px;
+    height: 15px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #0c1730;
+  }
+
+  .sidebar > button:not(.drawer-close) {
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-theme="night"] .sidebar > .drawer-close svg {
+    color: #f8fbff;
+  }
+}

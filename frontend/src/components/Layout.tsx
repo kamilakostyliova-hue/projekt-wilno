@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaBookOpen,
   FaCheckCircle,
@@ -20,6 +20,7 @@ import {
   FaSave,
   FaStar,
   FaTrophy,
+  FaTimes,
 } from "react-icons/fa";
 import AudioGuide from "./AudioGuide";
 import MapView from "./MapView";
@@ -1819,11 +1820,12 @@ function Layout({
       {activeView !== "walk" && (
       <div className={`sidebar ${drawerOpen ? "open" : ""}`}>
         <button
+          aria-label={copy.closeFilters}
           className="drawer-close"
           onClick={() => setDrawerOpen(false)}
           type="button"
         >
-          Ã—
+          <FaTimes aria-hidden="true" />
         </button>
         <h3>Kategorie</h3>
 
