@@ -97,7 +97,7 @@ type SavedRouteRecord = {
   savedAt: string;
   mode: TransportModeId | string;
   routeKind?: "category" | "single";
-  categoryId?: CategoryId;
+  categoryId?: string;
   categoryLabel?: string;
   start?: {
     label: string;
@@ -112,7 +112,7 @@ type SavedRouteRecord = {
     id: number;
     name: string;
     years: string;
-    category: Exclude<CategoryId, "all">;
+    category: string;
     categoryLabel: string;
     position: LatLngTuple;
     image: string;
@@ -120,7 +120,7 @@ type SavedRouteRecord = {
   }>;
   waypoints?: LatLngTuple[];
   summarySource?: "online" | "offline";
-  savedOnDevice?: true;
+  savedOnDevice?: boolean;
 };
 
 type WalkHistoryRecord = {
