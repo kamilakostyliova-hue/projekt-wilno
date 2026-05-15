@@ -1790,7 +1790,8 @@ function Layout({
               src={assetImage("godlo_uwb_konturowe_png.png")}
               alt="Znak Uniwersytetu w Bialymstoku"
             />
-            <figcaption>Uniwersytet w Białymstoku</figcaption>
+            <figcaption>Filia Uniwersytetu w Białymstoku
+Wydział Ekonomiczno-Informatyczny</figcaption>
           </figure>
         </section>
 
