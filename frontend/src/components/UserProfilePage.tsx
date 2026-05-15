@@ -63,6 +63,31 @@ type SavedRouteRecord = {
   time: number;
   savedAt: string;
   mode: string;
+  routeKind?: "category" | "single";
+  categoryId?: string;
+  categoryLabel?: string;
+  start?: {
+    label: string;
+    position: [number, number];
+    source: "gate" | "user";
+  };
+  end?: {
+    label: string;
+    position: [number, number] | null;
+  };
+  places?: Array<{
+    id: number;
+    name: string;
+    years: string;
+    category: string;
+    categoryLabel: string;
+    position: [number, number];
+    image: string;
+    shortDescription: string;
+  }>;
+  waypoints?: [number, number][];
+  summarySource?: "online" | "offline";
+  savedOnDevice?: boolean;
 };
 
 type WalkHistoryRecord = {
@@ -96,6 +121,7 @@ type UserProfilePageProps = {
   visitedCount: number;
   walkHistoryKey: string;
   onLanguageChange: (language: AppLanguage) => void;
+  onOpenSavedRoute: (route: SavedRouteRecord) => void;
   onResetUserData: () => void;
   onSaveCurrentRoute: () => boolean;
   onShowPlace: (placeId: number) => void;
@@ -132,6 +158,18 @@ const formatDuration = (seconds: number) => {
   return rest ? hours + " h " + rest + " min" : hours + " h";
 };
 
+const routeModeLabel = (mode: string, language: "pl" | "en") => {
+  const labels = {
+    pl: { walk: "Pieszo", bike: "Rower", car: "Samochod" },
+    en: { walk: "Walking", bike: "Bike", car: "Car" },
+  };
+
+  return labels[language][mode as "walk" | "bike" | "car"] ?? mode;
+};
+
+const formatCoordinates = (position?: [number, number] | null) =>
+  position ? `${position[0].toFixed(5)}, ${position[1].toFixed(5)}` : "";
+
 const initialsFor = (name: string) =>
   name
     .split(" ")
@@ -155,6 +193,7 @@ function UserProfilePage({
   visitedCount,
   walkHistoryKey,
   onLanguageChange,
+  onOpenSavedRoute,
   onResetUserData,
   onSaveCurrentRoute,
   onShowPlace,
@@ -362,6 +401,18 @@ function UserProfilePage({
   const saveCurrentRoute = () => {
     const saved = onSaveCurrentRoute();
     setNotice(saved ? t("profile.routeSaved") : t("profile.routeMissing"));
+  };
+
+  const openSavedRoute = (route: SavedRouteRecord) => {
+    onOpenSavedRoute(route);
+    setNotice(languageKey === "en" ? "Saved route opened from this device." : "Otworzono trase zapisana na tym urzadzeniu.");
+  };
+
+  const removeSavedRoute = (routeId: string) => {
+    const nextRoutes = savedRoutes.filter((route) => route.id !== routeId);
+    setSavedRoutes(nextRoutes);
+    window.localStorage.setItem(savedRoutesKey, JSON.stringify(nextRoutes));
+    window.dispatchEvent(new Event("rossa-profile-data-changed"));
   };
 
   const savePlannedWalk = () => {
@@ -676,9 +727,67 @@ function UserProfilePage({
             <div className="route-list-profile">
               {savedRoutes.map((route) => (
                 <article key={route.id}>
-                  <strong>{route.name}</strong>
-                  <span>{t("profile.points", { count: route.pointCount })} • {formatDistance(route.distance)} • {formatDuration(route.time)}</span>
-                  <small>{t("profile.savedAt")}: {formatDate(route.savedAt)}</small>
+                  <div className="saved-route-head">
+                    <span>
+                      <strong>{route.name}</strong>
+                      <small>{t("profile.savedAt")}: {formatDate(route.savedAt)}</small>
+                    </span>
+                    <b className="route-device-badge">
+                      {route.savedOnDevice
+                        ? languageKey === "en"
+                          ? "On this device"
+                          : "Na tym urzadzeniu"
+                        : languageKey === "en"
+                          ? "Old save"
+                          : "Stary zapis"}
+                    </b>
+                  </div>
+
+                  <div className="saved-route-meta">
+                    <span>{t("profile.points", { count: route.pointCount })}</span>
+                    <span>{formatDistance(route.distance)}</span>
+                    <span>{formatDuration(route.time)}</span>
+                    <span>{routeModeLabel(route.mode, languageKey)}</span>
+                  </div>
+
+                  {(route.start || route.end) && (
+                    <div className="saved-route-endpoints">
+                      <p>
+                        <b>{languageKey === "en" ? "Start" : "Start"}:</b>{" "}
+                        {route.start?.label ?? "Brama cmentarza"}
+                        {route.start?.position && <small>{formatCoordinates(route.start.position)}</small>}
+                      </p>
+                      <p>
+                        <b>{languageKey === "en" ? "Destination" : "Cel"}:</b>{" "}
+                        {route.end?.label ?? route.name}
+                        {route.end?.position && <small>{formatCoordinates(route.end.position)}</small>}
+                      </p>
+                    </div>
+                  )}
+
+                  {route.places && route.places.length > 0 && (
+                    <ol className="saved-route-points">
+                      {route.places.map((place, index) => (
+                        <li key={`${route.id}-${place.id}`}>
+                          <span>{index + 1}</span>
+                          <div>
+                            <strong>{place.name}</strong>
+                            <small>{place.categoryLabel} - {place.years}</small>
+                            <p>{place.shortDescription}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+
+                  <div className="route-card-actions">
+                    <button onClick={() => openSavedRoute(route)} type="button">
+                      <FaRoute /> {languageKey === "en" ? "Show route" : "Pokaz trase"}
+                    </button>
+                    <button onClick={() => removeSavedRoute(route.id)} type="button">
+                      <FaTrash /> {languageKey === "en" ? "Remove" : "Usun"}
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>

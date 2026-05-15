@@ -5449,6 +5449,10 @@ html[data-theme="night"] .home-timeline .timeline-period button {
 }
 
 .project-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 240px);
+  gap: clamp(18px, 4vw, 44px);
+  align-items: center;
   padding: clamp(28px, 5vw, 58px);
 }
 
@@ -5465,6 +5469,36 @@ html[data-theme="night"] .home-timeline .timeline-period button {
   color: #46566f;
   font-size: 1.05rem;
   line-height: 1.75;
+}
+
+.project-university-seal {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 22px;
+  border: 1px solid rgba(149, 34, 54, 0.22);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(149, 34, 54, 0.08), transparent 62%),
+    rgba(255, 255, 255, 0.78);
+  box-shadow: 0 18px 38px rgba(15, 35, 70, 0.08);
+}
+
+.project-university-seal img {
+  width: min(190px, 100%);
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 22px rgba(68, 12, 24, 0.12));
+}
+
+.project-university-seal figcaption {
+  color: #952236;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .project-grid {
@@ -5490,7 +5524,8 @@ html[data-theme="night"] .home-timeline .timeline-period button {
 }
 
 html[data-theme="night"] .project-hero,
-html[data-theme="night"] .project-grid article {
+html[data-theme="night"] .project-grid article,
+html[data-theme="night"] .project-university-seal {
   border-color: rgba(142, 197, 255, 0.24);
   background: linear-gradient(180deg, rgba(15, 32, 61, 0.96), rgba(8, 24, 51, 0.94));
 }
@@ -5505,7 +5540,19 @@ html[data-theme="night"] .project-grid p {
   color: #cfe0f5;
 }
 
+html[data-theme="night"] .project-university-seal figcaption {
+  color: #f1d49a;
+}
+
 @media (max-width: 860px) {
+  .project-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .project-university-seal {
+    max-width: 280px;
+  }
+
   .project-grid {
     grid-template-columns: 1fr;
   }

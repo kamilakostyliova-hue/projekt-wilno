@@ -95,7 +95,32 @@ type SavedRouteRecord = {
   distance: number;
   time: number;
   savedAt: string;
-  mode: string;
+  mode: TransportModeId | string;
+  routeKind?: "category" | "single";
+  categoryId?: CategoryId;
+  categoryLabel?: string;
+  start?: {
+    label: string;
+    position: LatLngTuple;
+    source: "gate" | "user";
+  };
+  end?: {
+    label: string;
+    position: LatLngTuple | null;
+  };
+  places?: Array<{
+    id: number;
+    name: string;
+    years: string;
+    category: Exclude<CategoryId, "all">;
+    categoryLabel: string;
+    position: LatLngTuple;
+    image: string;
+    shortDescription: string;
+  }>;
+  waypoints?: LatLngTuple[];
+  summarySource?: "online" | "offline";
+  savedOnDevice?: true;
 };
 
 type WalkHistoryRecord = {
@@ -913,6 +938,16 @@ function Layout({
     ? favoriteIds.includes(selectedPlace.id)
     : false;
   const routeTarget = places.find((place) => place.id === routeTargetId);
+  const routeStartSource =
+    userLocation && distanceMeters(routeStart, userLocation) < 25
+      ? "user"
+      : "gate";
+  const routeStartLabel =
+    routeStartSource === "user"
+      ? languageKey === "en"
+        ? "Your location"
+        : "Twoja lokalizacja"
+      : copy.gate;
   const categoryRoutePlaces = useMemo(
     () => getCurrentCategoryRoutePlaces(activeCategory),
     [activeCategory]
@@ -1223,24 +1258,93 @@ function Layout({
     if (!hasActiveRoute && !selectedPlace) return false;
 
     const routePlaces = hasCategoryRoute ? categoryRoutePlaces : routeTarget ? [routeTarget] : selectedPlace ? [selectedPlace] : [];
+    if (routePlaces.length === 0) return false;
+
     const name = hasCategoryRoute
       ? `${copy.trailPrefix}${activeCategoryInfo.label}`
       : routePlaces[0]
         ? `${copy.routeTo}${routePlaces[0].name}`
         : copy.routeDefaultName;
+    const savedWaypoints =
+      routeWaypoints.length > 1
+        ? routeWaypoints
+        : [routeStart, ...routePlaces.map((place) => place.position)];
+    const savedDistance =
+      routeSummary?.distance ??
+      savedWaypoints.slice(1).reduce(
+        (total, point, index) => total + distanceMeters(savedWaypoints[index], point),
+        0
+      );
+    const savedTime =
+      routeSummary?.time ??
+      Math.max(60, Math.round(savedDistance / transportModes[transportMode].speedMps));
+    const destination = routePlaces[routePlaces.length - 1];
     const route: SavedRouteRecord = {
       id: `route-${Date.now()}`,
       name,
-      pointCount: Math.max(1, routePlaces.length),
-      distance: routeSummary?.distance ?? fallbackRouteDistance,
-      time: routeSummary?.time ?? fallbackRouteTime,
+      pointCount: routePlaces.length,
+      distance: Math.round(savedDistance),
+      time: Math.round(savedTime),
       savedAt: new Date().toISOString(),
       mode: transportMode,
+      routeKind: hasCategoryRoute ? "category" : "single",
+      categoryId: hasCategoryRoute ? activeCategory : routePlaces[0]?.category,
+      categoryLabel: hasCategoryRoute ? activeCategoryInfo.label : routePlaces[0]?.categoryLabel,
+      start: {
+        label: routeStartLabel,
+        position: routeStart,
+        source: routeStartSource,
+      },
+      end: {
+        label: destination?.name ?? copy.routeDefaultName,
+        position: destination?.position ?? null,
+      },
+      places: routePlaces.map((place) => ({
+        id: place.id,
+        name: place.name,
+        years: place.years,
+        category: place.category,
+        categoryLabel: place.categoryLabel,
+        position: place.position,
+        image: place.image,
+        shortDescription: place.shortDescription,
+      })),
+      waypoints: savedWaypoints,
+      summarySource: routeSummary ? "online" : "offline",
+      savedOnDevice: true,
     };
     const routes = readStorageArray<SavedRouteRecord>(savedRoutesKey);
     window.localStorage.setItem(savedRoutesKey, JSON.stringify([route, ...routes].slice(0, 24)));
     window.dispatchEvent(new Event("rossa-profile-data-changed"));
     return true;
+  };
+
+  const openSavedRoute = (route: SavedRouteRecord) => {
+    const savedMode =
+      route.mode in transportModes ? (route.mode as TransportModeId) : "walk";
+    const savedCategory =
+      categories.find((category) => category.id === route.categoryId)?.id ?? null;
+    const firstPlaceId = route.places?.[0]?.id ?? null;
+
+    setTransportMode(savedMode);
+    setRouteStart(route.start?.position ?? cemeteryGate);
+    setRouteSummary({
+      distance: route.distance,
+      time: route.time,
+    });
+
+    if (route.routeKind === "category" && savedCategory && savedCategory !== "all") {
+      setActiveCategory(savedCategory);
+      setRouteTargetId(null);
+      setSelectedId(firstPlaceId);
+    } else if (firstPlaceId) {
+      setActiveCategory("all");
+      setSelectedId(firstPlaceId);
+      setRouteTargetId(firstPlaceId);
+    }
+
+    setRouteStatus(`Otworzono trase zapisana na tym urzadzeniu: ${route.name}.`);
+    onViewChange("map");
   };
 
   const resetUserData = () => {
@@ -1438,7 +1542,7 @@ function Layout({
       routeSummary={routeSummary}
       routeWaypoints={routeWaypoints}
       selectedPlaceId={selectedPlace?.id ?? null}
-      startLabel={userLocation ? copy.transport.walk === "Walking" ? "Your location" : "Twoja lokalizacja" : copy.gate}
+      startLabel={routeStartLabel}
       transportMode={transportMode}
       userLocation={userLocation}
     />
@@ -1491,6 +1595,7 @@ function Layout({
         favoriteIds={favoriteIds}
         language={appLanguage}
         onLanguageChange={onLanguageChange}
+        onOpenSavedRoute={openSavedRoute}
         onResetUserData={resetUserData}
         onSaveCurrentRoute={saveCurrentRoute}
         onShowPlace={showPlaceOnMap}
@@ -1675,9 +1780,15 @@ function Layout({
     return (
       <main className="project-page">
         <section className="project-hero">
-          <span className="eyebrow">{copy.projectEyebrow}</span>
-          <h1>{copy.projectTitle}</h1>
-          <p>{copy.projectLead}</p>
+          <div>
+            <span className="eyebrow">{copy.projectEyebrow}</span>
+            <h1>{copy.projectTitle}</h1>
+            <p>{copy.projectLead}</p>
+          </div>
+          <figure className="project-university-seal">
+            <img src={assetImage("herb")} alt="Znak Uniwersytetu w Bialymstoku" />
+            <figcaption>Uniwersytet w Bialymstoku</figcaption>
+          </figure>
         </section>
 
         <section className="project-photo-gallery" aria-label={copy.projectGalleryAria}>

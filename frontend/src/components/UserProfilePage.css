@@ -438,6 +438,139 @@
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
+.saved-route-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.saved-route-head > span {
+  display: grid;
+  gap: 4px;
+}
+
+.route-device-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.saved-route-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.saved-route-meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(238, 245, 255, 0.92);
+  color: #173b72;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.saved-route-endpoints {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.saved-route-endpoints p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid rgba(37, 99, 235, 0.11);
+  border-radius: 12px;
+  background: #f8fbff;
+  color: #10213f;
+}
+
+.saved-route-endpoints small {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.saved-route-points {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saved-route-points li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff, #f8fbff);
+}
+
+.saved-route-points li > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.saved-route-points div {
+  display: grid;
+  gap: 3px;
+}
+
+.saved-route-points p {
+  margin: 0;
+}
+
+.route-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.route-card-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #173b72;
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.route-card-actions button:first-child {
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #fff;
+}
+
 .profile-timeline article {
   grid-template-columns: 18px minmax(0, 1fr);
   align-items: start;
@@ -473,6 +606,8 @@ html[data-theme="night"] .profile-place-card,
 html[data-theme="night"] .activity-row,
 html[data-theme="night"] .route-list-profile article,
 html[data-theme="night"] .profile-timeline article,
+html[data-theme="night"] .saved-route-endpoints p,
+html[data-theme="night"] .saved-route-points li,
 html[data-theme="night"] .setting-row,
 html[data-theme="night"] .reset-box,
 html[data-theme="night"] .profile-panel input:not([type="checkbox"]),
@@ -489,6 +624,7 @@ html[data-theme="night"] .profile-stats strong,
 html[data-theme="night"] .profile-place-card h3,
 html[data-theme="night"] .activity-row strong,
 html[data-theme="night"] .route-list-profile strong,
+html[data-theme="night"] .saved-route-points strong,
 html[data-theme="night"] .profile-timeline strong,
 html[data-theme="night"] .profile-panel label:not(.avatar-upload):not(.setting-row),
 html[data-theme="night"] .setting-row {
@@ -499,6 +635,8 @@ html[data-theme="night"] .profile-hero p,
 html[data-theme="night"] .profile-stats span,
 html[data-theme="night"] .profile-place-card p,
 html[data-theme="night"] .route-list-profile span,
+html[data-theme="night"] .saved-route-endpoints p,
+html[data-theme="night"] .saved-route-points p,
 html[data-theme="night"] .profile-timeline p,
 html[data-theme="night"] .profile-timeline small,
 html[data-theme="night"] .route-list-profile small,
@@ -509,6 +647,14 @@ html[data-theme="night"] .profile-empty {
   color: #c9d6ea;
 }
 
+html[data-theme="night"] .route-device-badge,
+html[data-theme="night"] .saved-route-meta span,
+html[data-theme="night"] .route-card-actions button {
+  border-color: rgba(142, 197, 255, 0.24);
+  background: rgba(142, 197, 255, 0.1);
+  color: #dbeafe;
+}
+
 @media (max-width: 1080px) {
   .profile-stats,
   .profile-place-grid {
@@ -517,6 +663,10 @@ html[data-theme="night"] .profile-empty {
 
   .profile-grid,
   .profile-split {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-route-endpoints {
     grid-template-columns: 1fr;
   }
 }
