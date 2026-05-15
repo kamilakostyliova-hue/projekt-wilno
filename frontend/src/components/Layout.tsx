@@ -1786,7 +1786,10 @@ function Layout({
             <p>{copy.projectLead}</p>
           </div>
           <figure className="project-university-seal">
-            <img src={assetImage("herb")} alt="Znak Uniwersytetu w Bialymstoku" />
+            <img
+              src={assetImage("godlo_uwb_konturowe_png.png")}
+              alt="Znak Uniwersytetu w Bialymstoku"
+            />
             <figcaption>Uniwersytet w Bialymstoku</figcaption>
           </figure>
         </section>
