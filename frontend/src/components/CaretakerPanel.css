@@ -13,7 +13,12 @@
 .caretaker-hero,
 .caretaker-stats article,
 .caretaker-panel,
+.place-review-panel,
+.review-checklist,
+.review-side-panel,
+.review-task,
 .report-card,
+.selected-report,
 .status-row {
   border: 1px solid rgba(122, 167, 223, 0.32);
   background: rgba(255, 255, 255, 0.92);
@@ -68,6 +73,10 @@
 
 .caretaker-login-card button,
 .caretaker-user-card button,
+.place-review-actions button,
+.review-back,
+.review-checklist button,
+.review-side-panel button,
 .report-actions button,
 .status-row button {
   display: inline-flex;
@@ -86,6 +95,10 @@
 
 .caretaker-login-card button:hover,
 .caretaker-user-card button:hover,
+.place-review-actions button:hover,
+.review-back:hover,
+.review-checklist button:hover:not(:disabled),
+.review-side-panel button:hover,
 .report-actions button:hover,
 .status-row button:hover {
   transform: translateY(-2px);
@@ -207,6 +220,323 @@
   font-weight: 800;
 }
 
+.place-review-panel {
+  display: grid;
+  gap: 18px;
+  padding: clamp(16px, 3vw, 26px);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(37, 99, 235, 0.14), transparent 36%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.94));
+  animation: screenFade 0.24s ease both;
+}
+
+.place-review-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.review-back {
+  min-height: 38px;
+  padding: 0 14px;
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.review-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #173b72;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.review-status-badge.status-needs_care,
+.review-status-badge.status-missing_photo,
+.review-status-badge.status-missing_data {
+  background: #fff1f2;
+  color: #a61b49;
+  box-shadow: 0 0 24px rgba(220, 38, 38, 0.12);
+}
+
+.review-status-badge.status-check {
+  background: #fff7dd;
+  color: #8a5b00;
+  box-shadow: 0 0 24px rgba(217, 119, 6, 0.12);
+}
+
+.review-status-badge.status-good {
+  background: #e8f7ef;
+  color: #166534;
+}
+
+.place-review-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.44fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.place-review-photo {
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  border-radius: 24px;
+  background: #dbeafe;
+  box-shadow: inset 0 0 0 1px rgba(122, 167, 223, 0.26);
+}
+
+.place-review-photo img {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  object-fit: cover;
+}
+
+.review-alert {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 28px);
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 34px rgba(10, 31, 68, 0.18);
+  backdrop-filter: blur(14px);
+}
+
+.review-alert strong {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 14px;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+}
+
+.review-alert.is-open strong {
+  background: linear-gradient(135deg, #dc2626, #f97316);
+  box-shadow: 0 0 24px rgba(220, 38, 38, 0.24);
+}
+
+.review-alert.is-done strong {
+  background: linear-gradient(135deg, #16a34a, #2563eb);
+}
+
+.review-alert span {
+  color: #0c1730;
+  font-weight: 900;
+}
+
+.place-review-content {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: clamp(6px, 1vw, 12px);
+}
+
+.place-review-content h2 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.98;
+}
+
+.place-review-content p {
+  color: #53647f;
+  line-height: 1.68;
+}
+
+.place-review-content small,
+.place-review-meta {
+  color: #64748b;
+  font-weight: 850;
+}
+
+.place-review-actions,
+.review-status-picker div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.place-review-actions button:first-child,
+.review-side-panel button,
+.review-checklist button {
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.review-workgrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 16px;
+}
+
+.review-checklist,
+.review-side-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.review-checklist h3,
+.review-side-panel h3,
+.review-status-picker strong,
+.selected-report-list > strong {
+  color: #0c1730;
+  font-size: 1.12rem;
+}
+
+.review-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+  border-radius: 18px;
+  border-left-width: 5px;
+}
+
+.review-task span {
+  display: grid;
+  gap: 3px;
+}
+
+.review-task strong {
+  color: #0c1730;
+}
+
+.review-task small {
+  color: #53647f;
+  line-height: 1.45;
+}
+
+.review-task button:disabled {
+  cursor: default;
+  opacity: 0.72;
+  transform: none;
+}
+
+.task-danger {
+  border-left-color: #dc2626;
+  background:
+    radial-gradient(circle at 96% 20%, rgba(220, 38, 38, 0.13), transparent 36%),
+    #fff7f7;
+  box-shadow: 0 14px 34px rgba(220, 38, 38, 0.1);
+}
+
+.task-warning {
+  border-left-color: #d97706;
+  background:
+    radial-gradient(circle at 96% 20%, rgba(217, 119, 6, 0.14), transparent 36%),
+    #fffaf0;
+  box-shadow: 0 14px 34px rgba(217, 119, 6, 0.09);
+}
+
+.task-info {
+  border-left-color: #2563eb;
+  background:
+    radial-gradient(circle at 96% 20%, rgba(37, 99, 235, 0.14), transparent 36%),
+    #f3f8ff;
+}
+
+.task-done {
+  border-left-color: #16a34a;
+  background: #f0fbf5;
+}
+
+.review-side-panel label {
+  display: grid;
+  gap: 7px;
+  color: #0c1730;
+  font-weight: 900;
+}
+
+.review-side-panel textarea {
+  min-height: 116px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #d7e4f5;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0c1730;
+  font: inherit;
+  outline: none;
+}
+
+.review-side-panel textarea:focus {
+  border-color: #7aa7df;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.review-status-picker {
+  display: grid;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.review-status-picker button {
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #173b72;
+  font-size: 0.82rem;
+}
+
+.review-status-picker button.active {
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+}
+
+.selected-report-list {
+  display: grid;
+  gap: 9px;
+  padding-top: 8px;
+}
+
+.selected-report-list p {
+  color: #53647f;
+}
+
+.selected-report {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.selected-report span {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #fff7dd;
+  color: #8a5b00;
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.selected-report button {
+  justify-self: start;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
 .caretaker-grid {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
@@ -297,6 +627,11 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.status-row.active {
+  border-color: rgba(37, 99, 235, 0.52);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 24px 58px rgba(10, 31, 68, 0.13);
+}
+
 .status-row img {
   width: 64px;
   height: 64px;
@@ -348,10 +683,16 @@ html[data-theme="night"] .caretaker-login-card,
 html[data-theme="night"] .caretaker-hero,
 html[data-theme="night"] .caretaker-stats article,
 html[data-theme="night"] .caretaker-panel,
+html[data-theme="night"] .place-review-panel,
+html[data-theme="night"] .review-checklist,
+html[data-theme="night"] .review-side-panel,
+html[data-theme="night"] .review-task,
 html[data-theme="night"] .report-card,
+html[data-theme="night"] .selected-report,
 html[data-theme="night"] .status-row,
 html[data-theme="night"] .caretaker-user-card,
-html[data-theme="night"] .caretaker-login-card input {
+html[data-theme="night"] .caretaker-login-card input,
+html[data-theme="night"] .review-side-panel textarea {
   border-color: rgba(142, 197, 255, 0.22);
   background: rgba(13, 37, 79, 0.88);
   color: #f8fbff;
@@ -361,6 +702,14 @@ html[data-theme="night"] .caretaker-login-card h1,
 html[data-theme="night"] .caretaker-hero h1,
 html[data-theme="night"] .caretaker-stats strong,
 html[data-theme="night"] .caretaker-panel h2,
+html[data-theme="night"] .place-review-content h2,
+html[data-theme="night"] .review-alert span,
+html[data-theme="night"] .review-checklist h3,
+html[data-theme="night"] .review-side-panel h3,
+html[data-theme="night"] .review-side-panel label,
+html[data-theme="night"] .review-status-picker strong,
+html[data-theme="night"] .selected-report-list > strong,
+html[data-theme="night"] .review-task strong,
 html[data-theme="night"] .report-card h3,
 html[data-theme="night"] .status-row strong,
 html[data-theme="night"] .caretaker-login-card label {
@@ -370,6 +719,11 @@ html[data-theme="night"] .caretaker-login-card label {
 html[data-theme="night"] .caretaker-login-card p,
 html[data-theme="night"] .caretaker-hero p,
 html[data-theme="night"] .caretaker-stats span,
+html[data-theme="night"] .place-review-content p,
+html[data-theme="night"] .place-review-content small,
+html[data-theme="night"] .place-review-meta,
+html[data-theme="night"] .review-task small,
+html[data-theme="night"] .selected-report-list p,
 html[data-theme="night"] .report-card p,
 html[data-theme="night"] .report-card small,
 html[data-theme="night"] .status-row small,
@@ -382,6 +736,13 @@ html[data-theme="night"] .caretaker-demo-box,
 html[data-theme="night"] .caretaker-message,
 html[data-theme="night"] .report-card span,
 html[data-theme="night"] .status-row b,
+html[data-theme="night"] .review-status-badge,
+html[data-theme="night"] .selected-report span,
+html[data-theme="night"] .review-back,
+html[data-theme="night"] .place-review-actions button:first-child,
+html[data-theme="night"] .review-side-panel button,
+html[data-theme="night"] .review-checklist button,
+html[data-theme="night"] .review-status-picker button,
 html[data-theme="night"] .report-actions button,
 html[data-theme="night"] .status-row button,
 html[data-theme="night"] .caretaker-user-card button {
@@ -390,9 +751,69 @@ html[data-theme="night"] .caretaker-user-card button {
   color: #dbeafe;
 }
 
+html[data-theme="night"] .review-alert {
+  border-color: rgba(142, 197, 255, 0.22);
+  background: rgba(13, 37, 79, 0.88);
+}
+
+html[data-theme="night"] .task-danger {
+  border-left-color: #fb7185;
+  background:
+    radial-gradient(circle at 96% 20%, rgba(251, 113, 133, 0.16), transparent 36%),
+    rgba(127, 29, 29, 0.22);
+}
+
+html[data-theme="night"] .task-warning {
+  border-left-color: #fbbf24;
+  background:
+    radial-gradient(circle at 96% 20%, rgba(251, 191, 36, 0.16), transparent 36%),
+    rgba(120, 53, 15, 0.2);
+}
+
+html[data-theme="night"] .task-info {
+  border-left-color: #8ec5ff;
+  background:
+    radial-gradient(circle at 96% 20%, rgba(142, 197, 255, 0.16), transparent 36%),
+    rgba(30, 64, 175, 0.2);
+}
+
+html[data-theme="night"] .task-done {
+  border-left-color: #4ade80;
+  background: rgba(22, 101, 52, 0.18);
+}
+
+html[data-theme="night"] .review-status-picker button.active {
+  background: linear-gradient(135deg, #1d4ed8, #0b2753);
+  color: #ffffff;
+}
+
+html[data-theme="night"] .review-status-badge.status-needs_care,
+html[data-theme="night"] .review-status-badge.status-missing_photo,
+html[data-theme="night"] .review-status-badge.status-missing_data {
+  background: rgba(251, 113, 133, 0.14);
+  color: #fecdd3;
+}
+
+html[data-theme="night"] .review-status-badge.status-check {
+  background: rgba(251, 191, 36, 0.14);
+  color: #fde68a;
+}
+
+html[data-theme="night"] .review-status-badge.status-good {
+  background: rgba(74, 222, 128, 0.14);
+  color: #bbf7d0;
+}
+
+html[data-theme="night"] .status-row.active {
+  border-color: rgba(142, 197, 255, 0.52);
+  box-shadow: 0 0 0 3px rgba(142, 197, 255, 0.12), 0 24px 58px rgba(0, 7, 20, 0.28);
+}
+
 @media (max-width: 1080px) {
   .caretaker-hero,
-  .caretaker-grid {
+  .caretaker-grid,
+  .place-review-layout,
+  .review-workgrid {
     grid-template-columns: 1fr;
   }
 
@@ -407,8 +828,28 @@ html[data-theme="night"] .caretaker-user-card button {
   }
 
   .caretaker-stats,
+  .review-task,
   .status-row {
     grid-template-columns: 1fr;
+  }
+
+  .place-review-panel {
+    border-radius: 22px;
+    padding: 14px;
+  }
+
+  .place-review-top,
+  .place-review-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .review-status-badge,
+  .review-back,
+  .place-review-actions button,
+  .review-checklist button,
+  .review-side-panel button {
+    width: 100%;
   }
 
   .status-row img {
