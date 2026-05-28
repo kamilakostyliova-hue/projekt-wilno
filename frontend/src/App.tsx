@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import i18n from "./i18n";
 import "./App.css";
-import AuthModal from "./components/auth/AuthModal";
+import AuthModal, { type AuthLoginRole } from "./components/auth/AuthModal";
 import Layout from "./components/Layout";
 import Navbar from "./components/Navbar";
 import { getSavedAuthUser, useAuth } from "./hooks/useAuth";
@@ -263,7 +263,8 @@ function App() {
     mode: AuthMode,
     username: string,
     emailValue: string,
-    passwordValue: string
+    passwordValue: string,
+    loginRole: AuthLoginRole
   ) => {
     const email = emailValue.trim().toLowerCase();
     const password = passwordValue.trim();
@@ -277,33 +278,26 @@ function App() {
     const result =
       mode === "register"
         ? await register(name, email, password)
-        : await login(email, password);
+        : loginRole === "user"
+          ? await login(email, password)
+          : await caretakerLogin(email, password);
 
     setAuthMessage(result.message);
     if (result.ok && result.user) {
+      if (mode === "login" && loginRole === "admin" && result.user.role !== "admin") {
+        setAuthMessage("To konto nie ma uprawnien administratora.");
+        logout();
+        return;
+      }
+
       setLanguage(result.user.settings.language);
       setTheme(result.user.settings.darkMode ? "night" : "day");
       closeAuth();
-    }
-  };
 
-  const handleCaretakerLogin = async (emailValue: string, passwordValue: string) => {
-    const email = emailValue.trim().toLowerCase();
-    const password = passwordValue.trim();
-
-    if (!email || !password) {
-      return {
-        ok: false,
-        message: "Uzupelnij email i haslo opiekuna.",
-      };
+      if (mode === "login" && loginRole !== "user") {
+        navigateToView("caretaker");
+      }
     }
-
-    const result = await caretakerLogin(email, password);
-    if (result.ok && result.user) {
-      setLanguage(result.user.settings.language);
-      setTheme(result.user.settings.darkMode ? "night" : "day");
-    }
-    return result;
   };
 
 
@@ -372,10 +366,9 @@ function App() {
         currentUser={currentUser}
         currentUserId={currentUserId}
         networkOnline={networkOnline}
-        authLoading={authLoading}
         onFavoritesCountChange={setFavoritesCount}
-        onCaretakerLogin={handleCaretakerLogin}
         onLanguageChange={handleLanguageChange}
+        onLoginClick={openAuth}
         onLogout={logout}
         onSearchChange={setSearchQuery}
         onThemeChange={handleThemeChange}

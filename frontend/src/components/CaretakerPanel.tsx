@@ -14,12 +14,6 @@ import {
 import type { AppLanguage, UserProfile } from "../App";
 import "./CaretakerPanel.css";
 
-type CaretakerLoginResult = {
-  ok: boolean;
-  message: string;
-  user?: UserProfile;
-};
-
 type CaretakerPlace = {
   id: number;
   name: string;
@@ -46,11 +40,10 @@ export type CareReport = {
 };
 
 type CaretakerPanelProps = {
-  authLoading: boolean;
   currentUser: UserProfile | null;
   language: AppLanguage;
   places: CaretakerPlace[];
-  onCaretakerLogin: (email: string, password: string) => Promise<CaretakerLoginResult>;
+  onLoginClick: () => void;
   onLogout: () => void;
   onShowPlace: (placeId: number) => void;
 };
@@ -104,17 +97,13 @@ const formatDate = (value: string, language: AppLanguage) => {
 };
 
 function CaretakerPanel({
-  authLoading,
   currentUser,
   language,
   places,
-  onCaretakerLogin,
+  onLoginClick,
   onLogout,
   onShowPlace,
 }: CaretakerPanelProps) {
-  const [email, setEmail] = useState("opiekun@na-rossie.local");
-  const [password, setPassword] = useState("opiekun123");
-  const [message, setMessage] = useState("");
   const [reports, setReports] = useState<CareReport[]>(() => readReports());
   const isEnglish = language === "en";
   const hasAccess = currentUser?.role === "caretaker" || currentUser?.role === "admin";
@@ -169,12 +158,6 @@ function CaretakerPanel({
   const missingPhoto = statusRows.filter((row) => row.status === "missing_photo");
   const unresolvedReports = allReports.filter((report) => report.status !== "resolved");
 
-  const login = async () => {
-    setMessage("");
-    const result = await onCaretakerLogin(email, password);
-    setMessage(result.message);
-  };
-
   const updateReportStatus = (reportId: string, status: ReportStatus) => {
     const existingReport = reports.find((report) => report.id === reportId);
     const sourceReport = existingReport ?? allReports.find((report) => report.id === reportId);
@@ -203,23 +186,18 @@ function CaretakerPanel({
           <div className="caretaker-demo-box">
             <FaUserShield />
             <span>
-              <strong>{isEnglish ? "Demo caretaker account" : "Konto demo opiekuna"}</strong>
-              <small>opiekun@na-rossie.local / opiekun123</small>
+              <strong>{isEnglish ? "Use the main login window" : "Uzyj glownego okna logowania"}</strong>
+              <small>
+                {isEnglish
+                  ? "Choose Caretaker or Administrator mode there."
+                  : "Tam wybierz tryb Opiekun albo Administrator."}
+              </small>
             </span>
           </div>
 
-          <label>
-            Email
-            <input onChange={(event) => setEmail(event.target.value)} value={email} />
-          </label>
-          <label>
-            {isEnglish ? "Password" : "Haslo"}
-            <input onChange={(event) => setPassword(event.target.value)} type="password" value={password} />
-          </label>
-          <button disabled={authLoading} onClick={login} type="button">
-            <FaShieldAlt /> {authLoading ? (isEnglish ? "Signing in..." : "Logowanie...") : (isEnglish ? "Open caretaker panel" : "Otworz panel opiekuna")}
+          <button onClick={onLoginClick} type="button">
+            <FaShieldAlt /> {isEnglish ? "Log in with access mode" : "Zaloguj przez tryb dostepu"}
           </button>
-          {message && <p className="caretaker-message">{message}</p>}
         </section>
       </main>
     );

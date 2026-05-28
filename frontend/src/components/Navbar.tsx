@@ -14,6 +14,7 @@ import {
   FaSun,
   FaTimes,
   FaUserCircle,
+  FaUserShield,
   FaWifi,
 } from "react-icons/fa";
 import type { AppLanguage, ThemeMode, UserProfile, ViewId } from "../App";
@@ -43,7 +44,6 @@ const menuItems: Array<{ id: ViewId; labelKey: string; authOnly?: boolean }> = [
   { id: "list", labelKey: "nav.list" },
   { id: "favorites", labelKey: "nav.favorites" },
   { id: "categories", labelKey: "nav.categories" },
-  { id: "caretaker", labelKey: "nav.caretaker" },
 ];
 
 const initialsFor = (name: string) =>
@@ -80,6 +80,10 @@ function Navbar({
   const effectiveOnline = onlineMode && networkOnline;
   const projectMenuLabel =
     language === "en" ? "Project description" : "Opis projektu";
+  const caretakerMenuLabel =
+    language === "en" ? "Caretaker panel" : "Panel opiekuna";
+  const canOpenCaretakerPanel =
+    currentUser?.role === "caretaker" || currentUser?.role === "admin";
   const shareText =
     language === "en"
       ? {
@@ -275,6 +279,11 @@ function Navbar({
                   <button onClick={() => goToView("project")} type="button">
                     <FaExternalLinkAlt /> {projectMenuLabel}
                   </button>
+                  {canOpenCaretakerPanel && (
+                    <button onClick={() => goToView("caretaker")} type="button">
+                      <FaUserShield /> {caretakerMenuLabel}
+                    </button>
+                  )}
                   <button onClick={() => goToView("profile")} type="button">
                     <FaUserCircle /> {t("nav.dropdownProfile")}
                   </button>

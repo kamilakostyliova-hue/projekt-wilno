@@ -73,7 +73,6 @@ type CemeteryPlace = {
 type LayoutProps = {
   activeView: ViewId;
   appLanguage: AppLanguage;
-  authLoading: boolean;
   currentUser: UserProfile | null;
   currentUserId: string | null;
   networkOnline: boolean;
@@ -82,12 +81,8 @@ type LayoutProps = {
   theme: ThemeMode;
   userSettings: UserSettings;
   onFavoritesCountChange: (count: number) => void;
-  onCaretakerLogin: (email: string, password: string) => Promise<{
-    ok: boolean;
-    message: string;
-    user?: UserProfile;
-  }>;
   onLanguageChange: (language: AppLanguage) => void;
+  onLoginClick: () => void;
   onLogout: () => void;
   onSearchChange: (query: string) => void;
   onThemeChange: (theme: ThemeMode) => void;
@@ -629,7 +624,6 @@ const getTimeline = (place: CemeteryPlace, languageKey: "pl" | "en"): TimelineEv
 function Layout({
   activeView,
   appLanguage,
-  authLoading,
   currentUser,
   currentUserId,
   networkOnline,
@@ -638,8 +632,8 @@ function Layout({
   theme,
   userSettings,
   onFavoritesCountChange,
-  onCaretakerLogin,
   onLanguageChange,
+  onLoginClick,
   onLogout,
   onSearchChange,
   onThemeChange,
@@ -1683,10 +1677,9 @@ function Layout({
   if (activeView === "caretaker") {
     return (
       <CaretakerPanel
-        authLoading={authLoading}
         currentUser={currentUser}
         language={appLanguage}
-        onCaretakerLogin={onCaretakerLogin}
+        onLoginClick={onLoginClick}
         onLogout={onLogout}
         onShowPlace={showPlaceOnMap}
         places={places}
