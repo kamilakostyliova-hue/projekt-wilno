@@ -7,7 +7,7 @@ import Navbar from "./components/Navbar";
 import { getSavedAuthUser, useAuth } from "./hooks/useAuth";
 import { syncBackendOfflineBundle } from "./services/offlineBundle";
 
-export type ViewId = "home" | "map" | "walk" | "list" | "favorites" | "categories" | "profile" | "project" | "caretaker" | "person";
+export type ViewId = "home" | "map" | "walk" | "list" | "favorites" | "categories" | "profile" | "project" | "caretaker" | "admin" | "person";
 export type ThemeMode = "day" | "night";
 export type AppLanguage = "pl" | "en";
 export type TextSize = "compact" | "normal" | "large";
@@ -42,6 +42,7 @@ const viewIds: ViewId[] = [
   "profile",
   "project",
   "caretaker",
+  "admin",
 ];
 
 const getInitialTheme = (): ThemeMode => {
@@ -294,8 +295,12 @@ function App() {
       setTheme(result.user.settings.darkMode ? "night" : "day");
       closeAuth();
 
-      if (mode === "login" && loginRole !== "user") {
+      if (mode === "login" && loginRole === "caretaker") {
         navigateToView("caretaker");
+      }
+
+      if (mode === "login" && loginRole === "admin") {
+        navigateToView("admin");
       }
     }
   };

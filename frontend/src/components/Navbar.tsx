@@ -14,6 +14,7 @@ import {
   FaSun,
   FaTimes,
   FaUserCircle,
+  FaUserCog,
   FaUserShield,
   FaWifi,
 } from "react-icons/fa";
@@ -82,8 +83,11 @@ function Navbar({
     language === "en" ? "Project description" : "Opis projektu";
   const caretakerMenuLabel =
     language === "en" ? "Caretaker panel" : "Panel opiekuna";
+  const adminMenuLabel =
+    language === "en" ? "Admin panel" : "Panel administratora";
   const canOpenCaretakerPanel =
     currentUser?.role === "caretaker" || currentUser?.role === "admin";
+  const canOpenAdminPanel = currentUser?.role === "admin";
   const shareText =
     language === "en"
       ? {
@@ -282,6 +286,11 @@ function Navbar({
                   {canOpenCaretakerPanel && (
                     <button onClick={() => goToView("caretaker")} type="button">
                       <FaUserShield /> {caretakerMenuLabel}
+                    </button>
+                  )}
+                  {canOpenAdminPanel && (
+                    <button onClick={() => goToView("admin")} type="button">
+                      <FaUserCog /> {adminMenuLabel}
                     </button>
                   )}
                   <button onClick={() => goToView("profile")} type="button">

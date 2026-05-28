@@ -1,0 +1,537 @@
+.admin-page {
+  display: grid;
+  gap: 20px;
+  min-height: calc(100vh - 70px);
+  padding: clamp(16px, 3vw, 34px);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.14), transparent 35%),
+    radial-gradient(circle at 92% 18%, rgba(142, 197, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, #f8fbff, #edf5ff);
+  animation: screenFade 0.28s ease both;
+}
+
+.admin-access-card,
+.admin-hero,
+.admin-user-card,
+.admin-tabs,
+.admin-overview article,
+.admin-panel,
+.admin-editor,
+.admin-place-row,
+.admin-report-card,
+.admin-users-table article,
+.admin-stats-grid article {
+  border: 1px solid rgba(122, 167, 223, 0.32);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 54px rgba(10, 31, 68, 0.09);
+  backdrop-filter: blur(16px);
+}
+
+.admin-access-card {
+  display: grid;
+  width: min(560px, 100%);
+  gap: 14px;
+  margin: 7vh auto 0;
+  padding: clamp(24px, 4vw, 40px);
+  border-radius: 30px;
+}
+
+.admin-access-card > svg {
+  color: #1d4ed8;
+  font-size: 2.4rem;
+}
+
+.admin-access-card h1,
+.admin-hero h1 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  line-height: 0.95;
+}
+
+.admin-access-card p,
+.admin-hero p {
+  color: #53647f;
+  line-height: 1.65;
+}
+
+.admin-access-card button,
+.admin-user-card button,
+.admin-tabs button,
+.admin-place-row button,
+.admin-editor-actions button,
+.admin-report-card button,
+.admin-users-table button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-weight: 900;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.admin-access-card button,
+.admin-editor-actions button:last-child {
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.18);
+}
+
+.admin-access-card button:hover,
+.admin-user-card button:hover,
+.admin-tabs button:hover,
+.admin-place-row button:hover,
+.admin-editor-actions button:hover,
+.admin-report-card button:hover,
+.admin-users-table button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.16);
+}
+
+.admin-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 18px;
+  align-items: center;
+  padding: clamp(24px, 4vw, 46px);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(37, 99, 235, 0.16), transparent 36%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 245, 255, 0.94));
+}
+
+.admin-user-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.admin-user-card > svg {
+  color: #1d4ed8;
+  font-size: 2rem;
+}
+
+.admin-user-card span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-user-card strong {
+  color: #0c1730;
+}
+
+.admin-user-card small {
+  overflow: hidden;
+  color: #64748b;
+  font-weight: 750;
+  text-overflow: ellipsis;
+}
+
+.admin-user-card button {
+  grid-column: 1 / -1;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 24px;
+}
+
+.admin-tabs button {
+  min-height: 38px;
+  padding: 0 16px;
+}
+
+.admin-tabs button.active {
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+}
+
+.admin-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-overview article {
+  display: grid;
+  gap: 7px;
+  padding: 18px;
+  border-radius: 24px;
+}
+
+.admin-overview svg {
+  color: #1d4ed8;
+  font-size: 1.45rem;
+}
+
+.admin-overview strong {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  line-height: 1;
+}
+
+.admin-overview span {
+  color: #53647f;
+  font-weight: 850;
+}
+
+.admin-split-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-panel,
+.admin-editor {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 28px;
+}
+
+.admin-full-page {
+  min-height: 520px;
+}
+
+.admin-panel header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-panel header svg {
+  color: #1d4ed8;
+}
+
+.admin-panel h2,
+.admin-editor h2 {
+  color: #0c1730;
+  font-size: 1.55rem;
+}
+
+.admin-place-list,
+.admin-report-grid,
+.admin-users-table,
+.admin-stats-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-place-row {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) auto auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px;
+  border-radius: 18px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.admin-place-row:hover,
+.admin-place-row.active {
+  border-color: rgba(37, 99, 235, 0.48);
+  box-shadow: 0 18px 44px rgba(10, 31, 68, 0.12);
+  transform: translateY(-2px);
+}
+
+.admin-place-row img {
+  width: 70px;
+  height: 70px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.admin-place-row span {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-place-row strong,
+.admin-report-card h3,
+.admin-users-table strong,
+.admin-stats-grid strong {
+  color: #0c1730;
+}
+
+.admin-place-row small,
+.admin-place-row em,
+.admin-report-card p,
+.admin-report-card small,
+.admin-users-table small,
+.admin-stats-grid small {
+  color: #53647f;
+}
+
+.admin-place-row em {
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.admin-place-row button,
+.admin-report-card button,
+.admin-users-table button {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 0.82rem;
+}
+
+.admin-editor {
+  position: sticky;
+  top: 88px;
+}
+
+.admin-editor img {
+  width: 100%;
+  height: 240px;
+  border-radius: 22px;
+  object-fit: cover;
+}
+
+.admin-editor label {
+  display: grid;
+  gap: 7px;
+  color: #0c1730;
+  font-weight: 900;
+}
+
+.admin-editor input,
+.admin-editor textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid #d7e4f5;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0c1730;
+  font: inherit;
+  outline: none;
+}
+
+.admin-editor textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.admin-editor input:focus,
+.admin-editor textarea:focus {
+  border-color: #7aa7df;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.admin-editor-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.admin-report-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-report-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.admin-report-card > span,
+.role-chip {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.admin-report-card.status-new > span,
+.role-admin {
+  background: #fff1f2;
+  color: #a61b49;
+}
+
+.admin-report-card.status-review > span,
+.role-caretaker {
+  background: #fff7dd;
+  color: #8a5b00;
+}
+
+.admin-report-card div,
+.admin-users-table article div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-users-table {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-users-table article {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.admin-stats-grid article {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.admin-stats-grid article span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-stats-grid article div {
+  overflow: hidden;
+  height: 12px;
+  border-radius: 999px;
+  background: #e4eefb;
+}
+
+.admin-stats-grid article i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #1d4ed8, #8ec5ff);
+}
+
+html[data-theme="night"] .admin-page {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.22), transparent 35%),
+    linear-gradient(180deg, rgba(7, 27, 61, 0.96), rgba(11, 39, 83, 0.98));
+}
+
+html[data-theme="night"] .admin-access-card,
+html[data-theme="night"] .admin-hero,
+html[data-theme="night"] .admin-user-card,
+html[data-theme="night"] .admin-tabs,
+html[data-theme="night"] .admin-overview article,
+html[data-theme="night"] .admin-panel,
+html[data-theme="night"] .admin-editor,
+html[data-theme="night"] .admin-place-row,
+html[data-theme="night"] .admin-report-card,
+html[data-theme="night"] .admin-users-table article,
+html[data-theme="night"] .admin-stats-grid article,
+html[data-theme="night"] .admin-editor input,
+html[data-theme="night"] .admin-editor textarea {
+  border-color: rgba(142, 197, 255, 0.22);
+  background: rgba(13, 37, 79, 0.88);
+  color: #f8fbff;
+}
+
+html[data-theme="night"] .admin-access-card h1,
+html[data-theme="night"] .admin-hero h1,
+html[data-theme="night"] .admin-user-card strong,
+html[data-theme="night"] .admin-overview strong,
+html[data-theme="night"] .admin-panel h2,
+html[data-theme="night"] .admin-editor h2,
+html[data-theme="night"] .admin-editor label,
+html[data-theme="night"] .admin-place-row strong,
+html[data-theme="night"] .admin-report-card h3,
+html[data-theme="night"] .admin-users-table strong,
+html[data-theme="night"] .admin-stats-grid strong {
+  color: #f8fbff;
+}
+
+html[data-theme="night"] .admin-access-card p,
+html[data-theme="night"] .admin-hero p,
+html[data-theme="night"] .admin-user-card small,
+html[data-theme="night"] .admin-overview span,
+html[data-theme="night"] .admin-place-row small,
+html[data-theme="night"] .admin-place-row em,
+html[data-theme="night"] .admin-report-card p,
+html[data-theme="night"] .admin-report-card small,
+html[data-theme="night"] .admin-users-table small,
+html[data-theme="night"] .admin-stats-grid small {
+  color: #c9d6ea;
+}
+
+html[data-theme="night"] .admin-user-card button,
+html[data-theme="night"] .admin-tabs button,
+html[data-theme="night"] .admin-place-row button,
+html[data-theme="night"] .admin-editor-actions button,
+html[data-theme="night"] .admin-report-card button,
+html[data-theme="night"] .admin-users-table button,
+html[data-theme="night"] .admin-report-card > span,
+html[data-theme="night"] .role-chip {
+  border-color: rgba(142, 197, 255, 0.24);
+  background: rgba(142, 197, 255, 0.1);
+  color: #dbeafe;
+}
+
+html[data-theme="night"] .admin-tabs button.active,
+html[data-theme="night"] .admin-editor-actions button:last-child {
+  background: linear-gradient(135deg, #1d4ed8, #0b2753);
+  color: #ffffff;
+}
+
+html[data-theme="night"] .admin-stats-grid article div {
+  background: rgba(142, 197, 255, 0.13);
+}
+
+@media (max-width: 1120px) {
+  .admin-hero,
+  .admin-split-page {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-editor {
+    position: static;
+  }
+
+  .admin-overview,
+  .admin-users-table,
+  .admin-report-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-page {
+    padding: 12px;
+  }
+
+  .admin-overview,
+  .admin-users-table,
+  .admin-report-grid,
+  .admin-place-row,
+  .admin-editor-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-place-row img {
+    width: 100%;
+    height: 180px;
+  }
+
+  .admin-place-row button,
+  .admin-report-card button,
+  .admin-users-table button {
+    width: 100%;
+  }
+}

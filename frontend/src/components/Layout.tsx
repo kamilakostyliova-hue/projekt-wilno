@@ -23,6 +23,7 @@ import {
   FaTrophy,
   FaTimes,
 } from "react-icons/fa";
+import AdminPanel from "./AdminPanel";
 import AudioGuide from "./AudioGuide";
 import CaretakerPanel, { type CareReport, type ReportType } from "./CaretakerPanel";
 import MapView from "./MapView";
@@ -1681,6 +1682,20 @@ function Layout({
         language={appLanguage}
         onLoginClick={onLoginClick}
         onLogout={onLogout}
+        onShowPlace={showPlaceOnMap}
+        places={places}
+      />
+    );
+  }
+
+  if (activeView === "admin") {
+    return (
+      <AdminPanel
+        currentUser={currentUser}
+        language={appLanguage}
+        onLoginClick={onLoginClick}
+        onLogout={onLogout}
+        onOpenCaretaker={() => onViewChange("caretaker")}
         onShowPlace={showPlaceOnMap}
         places={places}
       />
