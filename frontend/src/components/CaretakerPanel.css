@@ -1,0 +1,423 @@
+.caretaker-page {
+  display: grid;
+  gap: 20px;
+  min-height: calc(100vh - 70px);
+  padding: clamp(16px, 3vw, 32px);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.16), transparent 34%),
+    linear-gradient(180deg, #f8fbff, #eef5ff);
+  animation: screenFade 0.28s ease both;
+}
+
+.caretaker-login-card,
+.caretaker-hero,
+.caretaker-stats article,
+.caretaker-panel,
+.report-card,
+.status-row {
+  border: 1px solid rgba(122, 167, 223, 0.32);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 54px rgba(10, 31, 68, 0.09);
+  backdrop-filter: blur(16px);
+}
+
+.caretaker-login-card {
+  display: grid;
+  width: min(520px, 100%);
+  gap: 14px;
+  margin: 6vh auto 0;
+  padding: clamp(22px, 4vw, 34px);
+  border-radius: 28px;
+}
+
+.caretaker-login-card h1,
+.caretaker-hero h1 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 4.2rem);
+  line-height: 0.96;
+}
+
+.caretaker-login-card p,
+.caretaker-hero p {
+  color: #53647f;
+  line-height: 1.65;
+}
+
+.caretaker-login-card label {
+  display: grid;
+  gap: 7px;
+  color: #0c1730;
+  font-weight: 850;
+}
+
+.caretaker-login-card input {
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid #d7e4f5;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #0c1730;
+  outline: none;
+}
+
+.caretaker-login-card input:focus {
+  border-color: #7aa7df;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.caretaker-login-card button,
+.caretaker-user-card button,
+.report-actions button,
+.status-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.caretaker-login-card button:hover,
+.caretaker-user-card button:hover,
+.report-actions button:hover,
+.status-row button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.18);
+}
+
+.caretaker-login-card button:disabled {
+  cursor: progress;
+  opacity: 0.72;
+}
+
+.caretaker-demo-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 18px;
+  background: #eef5ff;
+  color: #173b72;
+}
+
+.caretaker-demo-box svg {
+  color: #1d4ed8;
+  font-size: 24px;
+}
+
+.caretaker-demo-box span,
+.caretaker-user-card span {
+  display: grid;
+  gap: 2px;
+}
+
+.caretaker-demo-box small,
+.caretaker-user-card small {
+  color: #64748b;
+  font-weight: 750;
+}
+
+.caretaker-message {
+  padding: 11px 12px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 14px;
+  background: #eef5ff;
+  color: #173b72 !important;
+  font-weight: 850;
+}
+
+.caretaker-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(22px, 4vw, 42px);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(96, 165, 250, 0.2), transparent 35%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 245, 255, 0.94));
+}
+
+.caretaker-user-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: min(320px, 100%);
+  padding: 14px;
+  border: 1px solid rgba(122, 167, 223, 0.28);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.caretaker-user-card > svg {
+  color: #1d4ed8;
+  font-size: 30px;
+}
+
+.caretaker-user-card button {
+  grid-column: 1 / -1;
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.caretaker-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.caretaker-stats article {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border-radius: 22px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.caretaker-stats article:hover,
+.report-card:hover,
+.status-row:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 58px rgba(10, 31, 68, 0.13);
+}
+
+.caretaker-stats svg {
+  color: #1d4ed8;
+  font-size: 22px;
+}
+
+.caretaker-stats strong {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.caretaker-stats span {
+  color: #53647f;
+  font-weight: 800;
+}
+
+.caretaker-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  gap: 18px;
+}
+
+.caretaker-panel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 26px;
+}
+
+.caretaker-panel header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.caretaker-panel header svg {
+  color: #1d4ed8;
+}
+
+.caretaker-panel h2 {
+  color: #0c1730;
+  font-size: 1.55rem;
+}
+
+.report-list,
+.status-list {
+  display: grid;
+  gap: 10px;
+}
+
+.report-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-card span {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 6px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.report-card h3,
+.status-row strong {
+  color: #0c1730;
+}
+
+.report-card p,
+.report-card small,
+.status-row small {
+  color: #53647f;
+  line-height: 1.45;
+}
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-actions button,
+.status-row button {
+  min-height: 36px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.status-row img {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.status-row span {
+  display: grid;
+  gap: 3px;
+}
+
+.status-row b {
+  display: inline-flex;
+  justify-content: center;
+  min-width: 120px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #173b72;
+  font-size: 0.78rem;
+}
+
+.status-needs_care b,
+.status-new span {
+  background: #fff1f2;
+  color: #a61b49;
+}
+
+.status-check b,
+.status-review span {
+  background: #fff7dd;
+  color: #8a5b00;
+}
+
+.status-good b,
+.status-resolved span {
+  background: #e8f7ef;
+  color: #166534;
+}
+
+html[data-theme="night"] .caretaker-page {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.2), transparent 34%),
+    linear-gradient(180deg, rgba(7, 27, 61, 0.96), rgba(11, 39, 83, 0.98));
+}
+
+html[data-theme="night"] .caretaker-login-card,
+html[data-theme="night"] .caretaker-hero,
+html[data-theme="night"] .caretaker-stats article,
+html[data-theme="night"] .caretaker-panel,
+html[data-theme="night"] .report-card,
+html[data-theme="night"] .status-row,
+html[data-theme="night"] .caretaker-user-card,
+html[data-theme="night"] .caretaker-login-card input {
+  border-color: rgba(142, 197, 255, 0.22);
+  background: rgba(13, 37, 79, 0.88);
+  color: #f8fbff;
+}
+
+html[data-theme="night"] .caretaker-login-card h1,
+html[data-theme="night"] .caretaker-hero h1,
+html[data-theme="night"] .caretaker-stats strong,
+html[data-theme="night"] .caretaker-panel h2,
+html[data-theme="night"] .report-card h3,
+html[data-theme="night"] .status-row strong,
+html[data-theme="night"] .caretaker-login-card label {
+  color: #f8fbff;
+}
+
+html[data-theme="night"] .caretaker-login-card p,
+html[data-theme="night"] .caretaker-hero p,
+html[data-theme="night"] .caretaker-stats span,
+html[data-theme="night"] .report-card p,
+html[data-theme="night"] .report-card small,
+html[data-theme="night"] .status-row small,
+html[data-theme="night"] .caretaker-demo-box small,
+html[data-theme="night"] .caretaker-user-card small {
+  color: #c9d6ea;
+}
+
+html[data-theme="night"] .caretaker-demo-box,
+html[data-theme="night"] .caretaker-message,
+html[data-theme="night"] .report-card span,
+html[data-theme="night"] .status-row b,
+html[data-theme="night"] .report-actions button,
+html[data-theme="night"] .status-row button,
+html[data-theme="night"] .caretaker-user-card button {
+  border-color: rgba(142, 197, 255, 0.24);
+  background: rgba(142, 197, 255, 0.1);
+  color: #dbeafe;
+}
+
+@media (max-width: 1080px) {
+  .caretaker-hero,
+  .caretaker-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .caretaker-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .caretaker-page {
+    padding: 12px;
+  }
+
+  .caretaker-stats,
+  .status-row {
+    grid-template-columns: 1fr;
+  }
+
+  .status-row img {
+    width: 100%;
+    height: 170px;
+  }
+
+  .report-actions button,
+  .status-row button {
+    width: 100%;
+  }
+}

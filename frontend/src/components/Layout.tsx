@@ -6,8 +6,9 @@ import {
   FaCompass,
   FaCross,
   FaDraftingCompass,
-  FaFlask,
+  FaExclamationTriangle,
   FaExternalLinkAlt,
+  FaFlask,
   FaHeart,
   FaLandmark,
   FaLayerGroup,
@@ -23,6 +24,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import AudioGuide from "./AudioGuide";
+import CaretakerPanel, { type CareReport, type ReportType } from "./CaretakerPanel";
 import MapView from "./MapView";
 import PersonDetailPage from "./PersonDetailPage";
 import UserProfilePage, { type VisitedPlaceRecord, type WantVisitRecord } from "./UserProfilePage";
@@ -71,6 +73,7 @@ type CemeteryPlace = {
 type LayoutProps = {
   activeView: ViewId;
   appLanguage: AppLanguage;
+  authLoading: boolean;
   currentUser: UserProfile | null;
   currentUserId: string | null;
   networkOnline: boolean;
@@ -79,7 +82,13 @@ type LayoutProps = {
   theme: ThemeMode;
   userSettings: UserSettings;
   onFavoritesCountChange: (count: number) => void;
+  onCaretakerLogin: (email: string, password: string) => Promise<{
+    ok: boolean;
+    message: string;
+    user?: UserProfile;
+  }>;
   onLanguageChange: (language: AppLanguage) => void;
+  onLogout: () => void;
   onSearchChange: (query: string) => void;
   onThemeChange: (theme: ThemeMode) => void;
   onUserChange: (profile: UserProfile) => void;
@@ -209,6 +218,8 @@ const localImages = import.meta.glob("../assets/*", {
 
 const assetImage = (fileName: string) =>
   localImages[`../assets/${fileName}`] ?? commonsImage(fileName);
+
+const encodedProjectSignature = "S2FtaWxhIEtvc3R5bGlvdmE=";
 
 const imageFallback = (name: string) => {
   const initials = name
@@ -503,6 +514,17 @@ const getTimeSpentKey = (currentUserId: string | null) =>
 const getQuizResultsKey = (currentUserId: string | null) =>
   `rossa-quiz-results-${currentUserId ?? "guest"}`;
 
+const careReportsKey = "rossa-care-reports";
+
+const issueTypeLabels: Record<ReportType, { pl: string; en: string }> = {
+  missing_photo: { pl: "Brakuje zdjecia", en: "Missing photo" },
+  wrong_description: { pl: "Zly opis", en: "Wrong description" },
+  needs_care: { pl: "Grob wymaga opieki", en: "Grave needs care" },
+  wrong_location: { pl: "Nieprawidlowa lokalizacja", en: "Wrong location" },
+  missing_person: { pl: "Brakujaca postac", en: "Missing person" },
+  other: { pl: "Inna uwaga", en: "Other note" },
+};
+
 const readStorageArray = <T,>(storageKey: string): T[] => {
   if (typeof window === "undefined") return [];
 
@@ -561,12 +583,18 @@ const getInitialFavorites = (storageKey: string) => {
 const getRouteDistanceFor = (
   routePlaces: CemeteryPlace[],
   start: [number, number] = cemeteryGate
-) =>
-  routePlaces.reduce((total, place, index) => {
+) => {
+  const straightDistance = routePlaces.reduce((total, place, index) => {
     const previousPoint =
       index === 0 ? start : routePlaces[index - 1].position;
     return total + distanceMeters(previousPoint, place.position);
   }, 0);
+
+  if (straightDistance === 0) return 0;
+
+  const pathFactor = routePlaces.length > 1 ? 1.32 : 1.16;
+  return Math.round(straightDistance * pathFactor);
+};
 
 
 const getTimeline = (place: CemeteryPlace, languageKey: "pl" | "en"): TimelineEvent[] => {
@@ -601,6 +629,7 @@ const getTimeline = (place: CemeteryPlace, languageKey: "pl" | "en"): TimelineEv
 function Layout({
   activeView,
   appLanguage,
+  authLoading,
   currentUser,
   currentUserId,
   networkOnline,
@@ -609,7 +638,9 @@ function Layout({
   theme,
   userSettings,
   onFavoritesCountChange,
+  onCaretakerLogin,
   onLanguageChange,
+  onLogout,
   onSearchChange,
   onThemeChange,
   onUserChange,
@@ -761,6 +792,9 @@ function Layout({
   const [transportMode, setTransportMode] = useState<TransportModeId>("walk");
   const [routeStatus, setRouteStatus] = useState<string>(copy.startGateStatus);
   const [routeSummary, setRouteSummary] = useState<RouteSummary | null>(null);
+  const [issueReportOpen, setIssueReportOpen] = useState(false);
+  const [issueReportType, setIssueReportType] = useState<ReportType>("needs_care");
+  const [issueReportNote, setIssueReportNote] = useState("");
   const [tourActive, setTourActive] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [quizOpen, setQuizOpen] = useState(false);
@@ -1175,6 +1209,14 @@ function Layout({
     );
   };
 
+  const toggleVisitedPlace = (placeId: number) => {
+    setVisitedItems((items) =>
+      items.some((item) => item.placeId === placeId)
+        ? items.filter((item) => item.placeId !== placeId)
+        : [{ placeId, visitedAt: new Date().toISOString() }, ...items]
+    );
+  };
+
   const goToTourStep = (index: number) => {
     const place = tourPlaces[index];
     if (!place) return;
@@ -1317,6 +1359,28 @@ function Layout({
     window.localStorage.setItem(savedRoutesKey, JSON.stringify([route, ...routes].slice(0, 24)));
     window.dispatchEvent(new Event("rossa-profile-data-changed"));
     return true;
+  };
+
+  const submitIssueReport = () => {
+    if (!selectedPlace) return;
+
+    const reports = readStorageArray<CareReport>(careReportsKey);
+    const languageKeyForIssue = appLanguage === "en" ? "en" : "pl";
+    const report: CareReport = {
+      id: `report-${Date.now()}`,
+      placeId: selectedPlace.id,
+      placeName: selectedPlace.name,
+      type: issueReportType,
+      note: issueReportNote.trim() || issueTypeLabels[issueReportType][languageKeyForIssue],
+      status: "new",
+      createdAt: new Date().toISOString(),
+    };
+
+    window.localStorage.setItem(careReportsKey, JSON.stringify([report, ...reports].slice(0, 80)));
+    window.dispatchEvent(new Event("rossa-care-reports-changed"));
+    setIssueReportOpen(false);
+    setIssueReportNote("");
+    setIssueReportType("needs_care");
   };
 
   const openSavedRoute = (route: SavedRouteRecord) => {
@@ -1600,7 +1664,7 @@ function Layout({
         onSaveCurrentRoute={saveCurrentRoute}
         onShowPlace={showPlaceOnMap}
         onThemeChange={onThemeChange}
-        onToggleFavorite={toggleFavorite}
+        onToggleVisited={toggleVisitedPlace}
         onUserChange={onUserChange}
         places={places}
         plannedWalksKey={plannedWalksKey}
@@ -1610,7 +1674,22 @@ function Layout({
         timeSpentKey={timeSpentKey}
         userSettings={userSettings}
         visitedCount={visitedItems.length}
+        visitedItems={visitedItems}
         walkHistoryKey={walkHistoryKey}
+      />
+    );
+  }
+
+  if (activeView === "caretaker") {
+    return (
+      <CaretakerPanel
+        authLoading={authLoading}
+        currentUser={currentUser}
+        language={appLanguage}
+        onCaretakerLogin={onCaretakerLogin}
+        onLogout={onLogout}
+        onShowPlace={showPlaceOnMap}
+        places={places}
       />
     );
   }
@@ -1778,7 +1857,7 @@ function Layout({
 
   if (activeView === "project") {
     return (
-      <main className="project-page">
+      <main className="project-page" data-project-signature={encodedProjectSignature}>
         <section className="project-hero">
           <div>
             <span className="eyebrow">{copy.projectEyebrow}</span>
@@ -1795,16 +1874,27 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
           </figure>
         </section>
 
-        <section className="project-photo-gallery" aria-label={copy.projectGalleryAria}>
-          <figure>
-            <img src={assetImage("rossa.jpg")} alt={copy.cemeteryName} />
-          </figure>
-          <figure>
-            <img src={assetImage("rossa.1.jpg")} alt="Alejka na Cmentarzu Na Rossie" />
-          </figure>
-          <figure>
-            <img src={assetImage("rossa.2.jpg")} alt="Nagrobki na Cmentarzu Na Rossie" />
-          </figure>
+        <section className="project-slideshow" aria-label={copy.projectGalleryAria}>
+          {[
+            [assetImage("rossa.jpg"), copy.cemeteryName],
+            [assetImage("rossa.1.jpg"), "Alejka na Cmentarzu Na Rossie"],
+            [assetImage("rossa.2.jpg"), "Nagrobki na Cmentarzu Na Rossie"],
+            [assetImage("architektura.jpg"), "Historyczna architektura Rossy"],
+          ].map(([image, alt], index) => (
+            <figure key={image} style={{ animationDelay: `${index * 4}s` }}>
+              <img src={image} alt={alt} />
+            </figure>
+          ))}
+          <div className="project-slide-caption">
+            <span>{copy.projectGalleryAria}</span>
+            <strong>{copy.cemeteryName}</strong>
+          </div>
+          <div className="project-slide-dots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
         </section>
 
         <section className="project-grid">
@@ -2623,7 +2713,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                 className={`visited-action ${
                   visitedIds.includes(selectedPlace.id) ? "active" : ""
                 }`}
-                onClick={() => markPlaceVisited(selectedPlace.id)}
+                onClick={() => toggleVisitedPlace(selectedPlace.id)}
                 type="button"
               >
                 <FaCheckCircle />{" "}
@@ -2650,6 +2740,47 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
               <button className="visited-action" onClick={saveCurrentRoute} type="button">
                 <FaSave /> {copy.saveRoute}
               </button>
+              <button
+                className="visited-action report-action"
+                onClick={() => setIssueReportOpen((current) => !current)}
+                type="button"
+              >
+                <FaExclamationTriangle /> {appLanguage === "en" ? "Report issue" : "Zglos problem"}
+              </button>
+              {issueReportOpen && (
+                <div className="issue-report-box">
+                  <span className="section-label">
+                    {appLanguage === "en" ? "Report for caretaker" : "Zgloszenie dla opiekuna"}
+                  </span>
+                  <select
+                    onChange={(event) => setIssueReportType(event.target.value as ReportType)}
+                    value={issueReportType}
+                  >
+                    {Object.entries(issueTypeLabels).map(([type, label]) => (
+                      <option key={type} value={type}>
+                        {label[appLanguage === "en" ? "en" : "pl"]}
+                      </option>
+                    ))}
+                  </select>
+                  <textarea
+                    onChange={(event) => setIssueReportNote(event.target.value)}
+                    placeholder={
+                      appLanguage === "en"
+                        ? "Add a short note for the caretaker..."
+                        : "Dodaj krotka uwage dla opiekuna..."
+                    }
+                    value={issueReportNote}
+                  />
+                  <div className="issue-report-actions">
+                    <button onClick={submitIssueReport} type="button">
+                      <FaCheckCircle /> {appLanguage === "en" ? "Send report" : "Wyslij zgloszenie"}
+                    </button>
+                    <button onClick={() => setIssueReportOpen(false)} type="button">
+                      <FaTimes /> {appLanguage === "en" ? "Cancel" : "Anuluj"}
+                    </button>
+                  </div>
+                </div>
+              )}
               {routeTargetId === selectedPlace.id && (
                 <div className="route-summary-card">
                   <FaRoute />

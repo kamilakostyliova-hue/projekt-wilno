@@ -57,6 +57,22 @@ def login(payload: LoginPayload) -> dict:
     }
 
 
+@router.post("/caretaker/login")
+def caretaker_login(payload: LoginPayload) -> dict:
+    email = validate_email(payload.email)
+    user = authenticate_user(email, payload.password)
+    if user is None:
+        raise HTTPException(status_code=401, detail="Nieprawidlowy email albo haslo.")
+
+    if user.get("role") not in {"caretaker", "admin"}:
+        raise HTTPException(status_code=403, detail="To konto nie ma dostepu do Panelu Opiekuna Rossy.")
+
+    return {
+        "message": "Dostep opiekuna zostal przyznany.",
+        "user": user,
+    }
+
+
 @router.get("/users")
 def users() -> list[dict]:
     return list_users()

@@ -43,6 +43,7 @@ const menuItems: Array<{ id: ViewId; labelKey: string; authOnly?: boolean }> = [
   { id: "list", labelKey: "nav.list" },
   { id: "favorites", labelKey: "nav.favorites" },
   { id: "categories", labelKey: "nav.categories" },
+  { id: "caretaker", labelKey: "nav.caretaker" },
 ];
 
 const initialsFor = (name: string) =>

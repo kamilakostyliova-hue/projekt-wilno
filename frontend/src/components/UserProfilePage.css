@@ -59,6 +59,63 @@
   font-size: 22px;
 }
 
+.profile-avatar-frame {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 5px;
+  border-radius: 26px;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #8ec5ff, #1d4ed8, #0c1730) border-box;
+  border: 2px solid transparent;
+  box-shadow: 0 18px 40px rgba(29, 78, 216, 0.18);
+}
+
+.profile-avatar-frame.rank-collector {
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #67e8f9, #1d4ed8, #0c1730) border-box;
+}
+
+.profile-avatar-frame.rank-guardian {
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #f8d47a, #1d4ed8, #0c1730) border-box;
+}
+
+.profile-rank-medal {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(29, 78, 216, 0.24);
+}
+
+.profile-rank-chip {
+  background: linear-gradient(135deg, #0c1730, #2563eb) !important;
+  color: #ffffff !important;
+}
+
+.profile-rank-chip.rank-guardian {
+  background: linear-gradient(135deg, #5c3b03, #1d4ed8) !important;
+}
+
+.profile-rank-hint {
+  display: block;
+  margin-top: 8px;
+  color: #53647f;
+  font-weight: 750;
+}
+
 .profile-avatar-xl img,
 .profile-avatar-md img,
 .profile-place-card img,
@@ -337,6 +394,61 @@
   height: 150px;
 }
 
+.visited-place-list {
+  display: grid;
+  gap: 12px;
+}
+
+.visited-place-card {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(215, 228, 245, 0.96);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff, #f8fbff);
+  box-shadow: 0 12px 30px rgba(10, 31, 68, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.visited-place-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: 0 20px 44px rgba(10, 31, 68, 0.11);
+}
+
+.visited-place-card img {
+  width: 118px;
+  height: 92px;
+  border-radius: 15px;
+  object-fit: cover;
+}
+
+.visited-place-card div:not(.profile-card-actions) {
+  display: grid;
+  gap: 5px;
+}
+
+.visited-place-card span {
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.visited-place-card h3 {
+  color: #0c1730;
+  font-size: 1.16rem;
+  line-height: 1.1;
+}
+
+.visited-place-card p,
+.visited-place-card small {
+  color: #55647d;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
 .profile-place-card div:not(.profile-card-actions) {
   display: grid;
   gap: 6px;
@@ -571,6 +683,13 @@
   color: #fff;
 }
 
+.route-card-actions button:nth-child(2),
+.timeline-download {
+  border-color: rgba(29, 78, 216, 0.22);
+  background: linear-gradient(135deg, #ffffff, #eef5ff);
+  color: #1d4ed8;
+}
+
 .profile-timeline article {
   grid-template-columns: 18px minmax(0, 1fr);
   align-items: start;
@@ -584,6 +703,21 @@
   border-radius: 50%;
   background: #1d4ed8;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.timeline-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  min-height: 32px;
+  margin-top: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 850;
 }
 
 html[data-text-size="compact"] body {
@@ -603,6 +737,7 @@ html[data-theme="night"] .profile-panel,
 html[data-theme="night"] .profile-stats article,
 html[data-theme="night"] .profile-notice,
 html[data-theme="night"] .profile-place-card,
+html[data-theme="night"] .visited-place-card,
 html[data-theme="night"] .activity-row,
 html[data-theme="night"] .route-list-profile article,
 html[data-theme="night"] .profile-timeline article,
@@ -622,6 +757,7 @@ html[data-theme="night"] .profile-hero h1,
 html[data-theme="night"] .profile-panel h2,
 html[data-theme="night"] .profile-stats strong,
 html[data-theme="night"] .profile-place-card h3,
+html[data-theme="night"] .visited-place-card h3,
 html[data-theme="night"] .activity-row strong,
 html[data-theme="night"] .route-list-profile strong,
 html[data-theme="night"] .saved-route-points strong,
@@ -634,6 +770,9 @@ html[data-theme="night"] .setting-row {
 html[data-theme="night"] .profile-hero p,
 html[data-theme="night"] .profile-stats span,
 html[data-theme="night"] .profile-place-card p,
+html[data-theme="night"] .visited-place-card p,
+html[data-theme="night"] .visited-place-card small,
+html[data-theme="night"] .profile-rank-hint,
 html[data-theme="night"] .route-list-profile span,
 html[data-theme="night"] .saved-route-endpoints p,
 html[data-theme="night"] .saved-route-points p,
@@ -649,10 +788,17 @@ html[data-theme="night"] .profile-empty {
 
 html[data-theme="night"] .route-device-badge,
 html[data-theme="night"] .saved-route-meta span,
-html[data-theme="night"] .route-card-actions button {
+html[data-theme="night"] .route-card-actions button,
+html[data-theme="night"] .timeline-download {
   border-color: rgba(142, 197, 255, 0.24);
   background: rgba(142, 197, 255, 0.1);
   color: #dbeafe;
+}
+
+html[data-theme="night"] .profile-avatar-frame {
+  background:
+    linear-gradient(rgba(13, 37, 79, 0.96), rgba(13, 37, 79, 0.96)) padding-box,
+    linear-gradient(135deg, #8ec5ff, #1d4ed8, #f8fbff) border-box;
 }
 
 @media (max-width: 1080px) {
@@ -694,8 +840,21 @@ html[data-theme="night"] .route-card-actions button {
 
   .profile-stats,
   .profile-place-grid,
-  .profile-card-actions {
+  .profile-card-actions,
+  .visited-place-card {
     grid-template-columns: 1fr;
+  }
+
+  .visited-place-card img {
+    width: 100%;
+    height: 170px;
+  }
+
+  .profile-save-route,
+  .profile-primary,
+  .route-card-actions button,
+  .timeline-download {
+    width: 100%;
   }
 }
 

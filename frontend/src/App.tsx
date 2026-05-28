@@ -7,10 +7,11 @@ import Navbar from "./components/Navbar";
 import { getSavedAuthUser, useAuth } from "./hooks/useAuth";
 import { syncBackendOfflineBundle } from "./services/offlineBundle";
 
-export type ViewId = "home" | "map" | "walk" | "list" | "favorites" | "categories" | "profile" | "project" | "person";
+export type ViewId = "home" | "map" | "walk" | "list" | "favorites" | "categories" | "profile" | "project" | "caretaker" | "person";
 export type ThemeMode = "day" | "night";
 export type AppLanguage = "pl" | "en";
 export type TextSize = "compact" | "normal" | "large";
+export type UserRole = "user" | "caretaker" | "admin";
 export type UserSettings = {
   audioEnabled: boolean;
   darkMode: boolean;
@@ -23,6 +24,7 @@ export type UserProfile = {
   email: string;
   avatar: string;
   provider: "local";
+  role: UserRole;
   createdAt: string;
   language: AppLanguage;
   settings: UserSettings;
@@ -39,6 +41,7 @@ const viewIds: ViewId[] = [
   "categories",
   "profile",
   "project",
+  "caretaker",
 ];
 
 const getInitialTheme = (): ThemeMode => {
@@ -117,6 +120,7 @@ function App() {
   const {
     currentUser,
     loading: authLoading,
+    caretakerLogin,
     login,
     logout,
     register,
@@ -283,6 +287,25 @@ function App() {
     }
   };
 
+  const handleCaretakerLogin = async (emailValue: string, passwordValue: string) => {
+    const email = emailValue.trim().toLowerCase();
+    const password = passwordValue.trim();
+
+    if (!email || !password) {
+      return {
+        ok: false,
+        message: "Uzupelnij email i haslo opiekuna.",
+      };
+    }
+
+    const result = await caretakerLogin(email, password);
+    if (result.ok && result.user) {
+      setLanguage(result.user.settings.language);
+      setTheme(result.user.settings.darkMode ? "night" : "day");
+    }
+    return result;
+  };
+
 
   const openAuth = () => {
     setAuthOpen(true);
@@ -349,8 +372,11 @@ function App() {
         currentUser={currentUser}
         currentUserId={currentUserId}
         networkOnline={networkOnline}
+        authLoading={authLoading}
         onFavoritesCountChange={setFavoritesCount}
+        onCaretakerLogin={handleCaretakerLogin}
         onLanguageChange={handleLanguageChange}
+        onLogout={logout}
         onSearchChange={setSearchQuery}
         onThemeChange={handleThemeChange}
         onUserChange={handleUserChange}

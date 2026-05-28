@@ -1,10 +1,11 @@
 ﻿import { useCallback, useEffect, useState } from "react";
-import type { AppLanguage, ThemeMode, UserProfile, UserSettings } from "../App";
+import type { AppLanguage, ThemeMode, UserProfile, UserRole, UserSettings } from "../App";
 
 type ApiUser = {
   id: number;
   username: string;
   email: string;
+  role?: UserRole;
   created_at: string;
 };
 
@@ -12,7 +13,7 @@ type LocalAuthUser = ApiUser & {
   passwordHash: string;
 };
 
-type AuthEndpoint = "/login" | "/register";
+type AuthEndpoint = "/login" | "/register" | "/caretaker/login";
 
 type AuthPayload = {
   username?: string;
@@ -75,6 +76,7 @@ const apiUserToProfile = (
   email: user.email,
   avatar: createAvatar(user.username),
   provider: "local",
+  role: user.role ?? "user",
   createdAt: user.created_at,
   language,
   settings: createDefaultSettings(language, theme),
@@ -123,6 +125,53 @@ const requestLocalAuth = async (
   const users = getLocalAuthUsers();
   const existingUser = users.find((user) => user.email === email);
 
+  if (endpoint === "/caretaker/login") {
+    const demoCaretakers: Array<Pick<LocalAuthUser, "id" | "username" | "email" | "role" | "created_at"> & { password: string }> = [
+      {
+        id: 9001,
+        username: "Opiekun Rossy",
+        email: "opiekun@na-rossie.local",
+        password: "opiekun123",
+        role: "caretaker",
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: 9002,
+        username: "Administrator Rossy",
+        email: "admin@na-rossie.local",
+        password: "admin123",
+        role: "admin",
+        created_at: new Date().toISOString(),
+      },
+    ];
+    const demoUser = demoCaretakers.find((user) => user.email === email && user.password === password);
+
+    if (demoUser) {
+      const user: LocalAuthUser = {
+        id: demoUser.id,
+        username: demoUser.username,
+        email: demoUser.email,
+        role: demoUser.role,
+        created_at: demoUser.created_at,
+        passwordHash: await hashPassword(email, password),
+      };
+      saveLocalAuthUsers([user, ...users.filter((item) => item.email !== user.email)]);
+
+      return {
+        ok: true,
+        message: `${prefix}Zalogowano do Panelu Opiekuna Rossy.`,
+        user: apiUserToProfile(user, language, theme),
+      };
+    }
+
+    if (!existingUser) {
+      return {
+        ok: false,
+        message: `${prefix}Nie znaleziono konta opiekuna. Konto demo: opiekun@na-rossie.local / opiekun123.`,
+      };
+    }
+  }
+
   if (endpoint === "/register") {
     const username = payload.username?.trim() || email.split("@")[0] || "Gosc";
 
@@ -137,6 +186,7 @@ const requestLocalAuth = async (
       id: Date.now(),
       username,
       email,
+      role: "user",
       created_at: new Date().toISOString(),
       passwordHash: await hashPassword(email, password),
     };
@@ -165,6 +215,13 @@ const requestLocalAuth = async (
     };
   }
 
+  if (endpoint === "/caretaker/login" && !["caretaker", "admin"].includes(existingUser.role ?? "user")) {
+    return {
+      ok: false,
+      message: `${prefix}To konto nie ma dostepu do Panelu Opiekuna Rossy.`,
+    };
+  }
+
   return {
     ok: true,
     message: `${prefix}Zalogowano lokalnie na tym urzadzeniu.`,
@@ -183,6 +240,7 @@ export const getSavedAuthUser = (): UserProfile | null => {
     return {
       ...user,
       provider: "local",
+      role: user.role ?? "user",
     };
   } catch {
     return null;
@@ -282,6 +340,22 @@ export const useAuth = (language: AppLanguage, theme: ThemeMode) => {
     [language, theme]
   );
 
+  const caretakerLogin = useCallback(
+    async (email: string, password: string) => {
+      setLoading(true);
+      const result = await requestAuth(
+        "/caretaker/login",
+        { email, password },
+        language,
+        theme
+      );
+      if (result.ok && result.user) setCurrentUser(result.user);
+      setLoading(false);
+      return result;
+    },
+    [language, theme]
+  );
+
   const register = useCallback(
     async (username: string, email: string, password: string) => {
       setLoading(true);
@@ -304,6 +378,7 @@ export const useAuth = (language: AppLanguage, theme: ThemeMode) => {
 
   return {
     currentUser,
+    caretakerLogin,
     loading,
     login,
     logout,

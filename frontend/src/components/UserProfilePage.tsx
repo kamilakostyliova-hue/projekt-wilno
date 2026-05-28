@@ -2,18 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FaBell,
-  FaBookmark,
   FaCalendarAlt,
   FaCamera,
   FaClock,
   FaCog,
+  FaDownload,
   FaHeart,
   FaHistory,
   FaMapMarkedAlt,
+  FaMedal,
   FaQuoteLeft,
   FaRoute,
   FaSave,
-  FaSearch,
   FaShieldAlt,
   FaTimes,
   FaTrash,
@@ -119,6 +119,7 @@ type UserProfilePageProps = {
   timeSpentKey: string;
   userSettings: UserSettings;
   visitedCount: number;
+  visitedItems: VisitedPlaceRecord[];
   walkHistoryKey: string;
   onLanguageChange: (language: AppLanguage) => void;
   onOpenSavedRoute: (route: SavedRouteRecord) => void;
@@ -126,7 +127,7 @@ type UserProfilePageProps = {
   onSaveCurrentRoute: () => boolean;
   onShowPlace: (placeId: number) => void;
   onThemeChange: (theme: ThemeMode) => void;
-  onToggleFavorite: (placeId: number) => void;
+  onToggleVisited: (placeId: number) => void;
   onUserChange: (profile: UserProfile) => void;
 };
 
@@ -179,6 +180,79 @@ const initialsFor = (name: string) =>
     .join("")
     .toUpperCase() || "R";
 
+const safeFileName = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 70) || "spacer-na-rossie";
+
+const loadCanvasImage = (src?: string) =>
+  new Promise<HTMLImageElement | null>((resolve) => {
+    if (!src) {
+      resolve(null);
+      return;
+    }
+
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = () => resolve(null);
+    image.src = src;
+  });
+
+const drawRoundedRect = (
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) => {
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.arcTo(x + width, y, x + width, y + height, radius);
+  context.arcTo(x + width, y + height, x, y + height, radius);
+  context.arcTo(x, y + height, x, y, radius);
+  context.arcTo(x, y, x + width, y, radius);
+  context.closePath();
+};
+
+const drawWrappedText = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines = 4
+) => {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let line = "";
+
+  words.forEach((word) => {
+    const nextLine = line ? `${line} ${word}` : word;
+    if (context.measureText(nextLine).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+      return;
+    }
+    line = nextLine;
+  });
+
+  if (line) lines.push(line);
+
+  lines.slice(0, maxLines).forEach((currentLine, index) => {
+    const suffix = index === maxLines - 1 && lines.length > maxLines ? "..." : "";
+    context.fillText(currentLine + suffix, x, y + index * lineHeight);
+  });
+
+  return y + Math.min(lines.length, maxLines) * lineHeight;
+};
+
 function UserProfilePage({
   currentUser,
   favoriteIds,
@@ -191,6 +265,7 @@ function UserProfilePage({
   timeSpentKey,
   userSettings,
   visitedCount,
+  visitedItems,
   walkHistoryKey,
   onLanguageChange,
   onOpenSavedRoute,
@@ -198,15 +273,12 @@ function UserProfilePage({
   onSaveCurrentRoute,
   onShowPlace,
   onThemeChange,
-  onToggleFavorite,
+  onToggleVisited,
   onUserChange,
 }: UserProfilePageProps) {
   const { i18n, t } = useTranslation();
   const languageKey = getLanguageKey(language);
   const copy = profileText[languageKey];
-  const [favoriteSearch, setFavoriteSearch] = useState("");
-  const [favoriteFilter, setFavoriteFilter] = useState("all");
-  const [myPlacesFilter, setMyPlacesFilter] = useState<"all" | "favorites">("all");
   const [plannerDate, setPlannerDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [plannerTime, setPlannerTime] = useState("10:00");
   const [plannerType, setPlannerType] = useState("historyczny");
@@ -225,6 +297,7 @@ function UserProfilePage({
     email: "guest@na-rossie.local",
     avatar: fallbackAvatar(copy.guestName),
     provider: "local" as const,
+    role: "user" as const,
     createdAt: new Date().toISOString(),
     language,
     settings: userSettings,
@@ -262,38 +335,16 @@ function UserProfilePage({
     };
   }, [plannedWalksKey, quizResultsKey, savedRoutesKey, timeSpentKey, walkHistoryKey]);
 
-  const favoritePlaces = useMemo(
-    () => places.filter((place) => favoriteIds.includes(place.id)),
-    [favoriteIds, places]
+  const visitedPlaces = useMemo(
+    () =>
+      visitedItems
+        .map((record) => {
+          const place = places.find((item) => item.id === record.placeId);
+          return place ? { place, record } : null;
+        })
+        .filter((item): item is { place: ProfilePlace; record: VisitedPlaceRecord } => item !== null),
+    [places, visitedItems]
   );
-  const myPlaces = useMemo(() => {
-    const rows = places
-      .map((place) => ({
-        place,
-        isFavorite: favoriteIds.includes(place.id),
-      }))
-      .filter((row) => row.isFavorite);
-
-    return rows.filter((row) =>
-      myPlacesFilter === "all" ||
-      (myPlacesFilter === "favorites" && row.isFavorite)
-    );
-  }, [favoriteIds, myPlacesFilter, places]);
-  const categories = useMemo(
-    () => Array.from(new Set(favoritePlaces.map((place) => place.categoryLabel))),
-    [favoritePlaces]
-  );
-  const filteredFavorites = useMemo(() => {
-    const query = favoriteSearch.trim().toLowerCase();
-
-    return favoritePlaces.filter((place) => {
-      const matchesQuery =
-        query.length === 0 ||
-        `${place.name} ${place.categoryLabel} ${place.shortDescription}`.toLowerCase().includes(query);
-      const matchesFilter = favoriteFilter === "all" || place.categoryLabel === favoriteFilter;
-      return matchesQuery && matchesFilter;
-    });
-  }, [favoriteFilter, favoritePlaces, favoriteSearch]);
   const totalWalkDistance = walkHistory.reduce((total, walk) => total + walk.distance, 0);
   const totalWalkTime = walkHistory.reduce((total, walk) => total + walk.duration, 0);
   const quote = useMemo(() => {
@@ -312,6 +363,44 @@ function UserProfilePage({
       unlocked: quizResults.some((result) => result.total > 0 && result.score === result.total),
     },
   ];
+  const profileRank = useMemo(() => {
+    const score =
+      visitedCount * 2 +
+      savedRoutes.length * 3 +
+      walkHistory.length * 2 +
+      favoriteIds.length +
+      quizResults.length * 2;
+
+    if (score >= 28) {
+      return {
+        tier: "guardian",
+        label: languageKey === "en" ? "Guardian of Memory" : "Strażniczka pamięci",
+        hint: languageKey === "en" ? "Many walks, visits and saved routes." : "Dużo spacerów, wizyt i zapisanych tras.",
+      };
+    }
+
+    if (savedRoutes.length >= 3 || walkHistory.length >= 4) {
+      return {
+        tier: "collector",
+        label: languageKey === "en" ? "Walk Collector" : "Kolekcjonerka spacerów",
+        hint: languageKey === "en" ? "Routes are becoming a personal archive." : "Trasy tworzą już osobiste archiwum.",
+      };
+    }
+
+    if (visitedCount >= 4) {
+      return {
+        tier: "explorer",
+        label: languageKey === "en" ? "Rasos Explorer" : "Odkrywczyni Rossy",
+        hint: languageKey === "en" ? "Visited places start building a route." : "Odwiedzone miejsca zaczynają tworzyć szlak.",
+      };
+    }
+
+    return {
+      tier: "starter",
+      label: languageKey === "en" ? "First Walk" : "Pierwszy spacer",
+      hint: languageKey === "en" ? "Start collecting walks and places." : "Zacznij zbierać spacery i miejsca.",
+    };
+  }, [favoriteIds.length, languageKey, quizResults.length, savedRoutes.length, visitedCount, walkHistory.length]);
 
   const formatDate = (value: string) => {
     const date = new Date(value);
@@ -415,6 +504,153 @@ function UserProfilePage({
     window.dispatchEvent(new Event("rossa-profile-data-changed"));
   };
 
+  const downloadRouteCard = async (route: SavedRouteRecord) => {
+    const canvas = document.createElement("canvas");
+    const width = 1080;
+    const height = 1350;
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    const firstPlace = route.places?.[0];
+    const previewImage = await loadCanvasImage(firstPlace?.image);
+    const gradient = context.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, "#f8fbff");
+    gradient.addColorStop(0.52, "#eaf3ff");
+    gradient.addColorStop(1, "#ffffff");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+
+    context.fillStyle = "rgba(29, 78, 216, 0.10)";
+    context.beginPath();
+    context.arc(910, 120, 260, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = "rgba(12, 23, 48, 0.08)";
+    context.beginPath();
+    context.arc(120, 1180, 240, 0, Math.PI * 2);
+    context.fill();
+
+    drawRoundedRect(context, 62, 62, 956, 1226, 46);
+    context.fillStyle = "rgba(255, 255, 255, 0.90)";
+    context.fill();
+    context.strokeStyle = "rgba(122, 167, 223, 0.45)";
+    context.lineWidth = 2;
+    context.stroke();
+
+    context.fillStyle = "#1d4ed8";
+    context.font = "800 28px Georgia, serif";
+    context.fillText(languageKey === "en" ? "RASOS WALK CARD" : "KARTA SPACERU NA ROSSIE", 104, 130);
+
+    context.fillStyle = "#0c1730";
+    context.font = "900 74px Georgia, serif";
+    drawWrappedText(context, route.name, 104, 218, 620, 82, 2);
+
+    context.font = "700 30px Inter, Arial, sans-serif";
+    context.fillStyle = "#53647f";
+    context.fillText(
+      `${formatDistance(route.distance)}  •  ${formatDuration(route.time)}  •  ${routeModeLabel(route.mode, languageKey)}`,
+      104,
+      390
+    );
+
+    if (previewImage) {
+      drawRoundedRect(context, 704, 116, 238, 238, 32);
+      context.save();
+      context.clip();
+      context.drawImage(previewImage, 704, 116, 238, 238);
+      context.restore();
+    } else {
+      drawRoundedRect(context, 704, 116, 238, 238, 32);
+      context.fillStyle = "#dcecff";
+      context.fill();
+    }
+
+    const statCards = [
+      [languageKey === "en" ? "START" : "START", route.start?.label ?? "Brama cmentarza"],
+      [languageKey === "en" ? "DESTINATION" : "CEL", route.end?.label ?? route.name],
+      [languageKey === "en" ? "POINTS" : "PUNKTY", String(route.pointCount)],
+    ];
+
+    statCards.forEach(([label, value], index) => {
+      const x = 104 + index * 292;
+      drawRoundedRect(context, x, 450, 260, 116, 24);
+      context.fillStyle = index === 1 ? "rgba(29, 78, 216, 0.10)" : "#ffffff";
+      context.fill();
+      context.strokeStyle = "rgba(122, 167, 223, 0.36)";
+      context.stroke();
+      context.fillStyle = "#1d4ed8";
+      context.font = "800 20px Inter, Arial, sans-serif";
+      context.fillText(label, x + 24, 494);
+      context.fillStyle = "#0c1730";
+      context.font = "900 28px Inter, Arial, sans-serif";
+      drawWrappedText(context, value, x + 24, 532, 210, 30, 1);
+    });
+
+    context.fillStyle = "#0c1730";
+    context.font = "900 34px Georgia, serif";
+    context.fillText(languageKey === "en" ? "Route points" : "Punkty trasy", 104, 650);
+
+    let y = 710;
+    (route.places ?? []).slice(0, 5).forEach((place, index) => {
+      context.fillStyle = "#1d4ed8";
+      context.beginPath();
+      context.arc(124, y - 10, 18, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = "#ffffff";
+      context.font = "900 18px Inter, Arial, sans-serif";
+      context.textAlign = "center";
+      context.fillText(String(index + 1), 124, y - 3);
+      context.textAlign = "left";
+
+      context.fillStyle = "#0c1730";
+      context.font = "900 28px Inter, Arial, sans-serif";
+      drawWrappedText(context, place.name, 164, y, 730, 32, 1);
+      context.fillStyle = "#53647f";
+      context.font = "700 22px Inter, Arial, sans-serif";
+      context.fillText(`${place.categoryLabel}  •  ${place.years}`, 164, y + 42);
+      context.font = "500 20px Inter, Arial, sans-serif";
+      y = drawWrappedText(context, place.shortDescription, 164, y + 78, 720, 28, 2) + 22;
+    });
+
+    context.strokeStyle = "rgba(29, 78, 216, 0.18)";
+    context.beginPath();
+    context.moveTo(104, 1160);
+    context.lineTo(942, 1160);
+    context.stroke();
+
+    context.fillStyle = "#53647f";
+    context.font = "700 24px Inter, Arial, sans-serif";
+    context.fillText(`${languageKey === "en" ? "Saved" : "Zapisano"}: ${formatDate(route.savedAt)}`, 104, 1216);
+    context.fillStyle = "#1d4ed8";
+    context.font = "900 24px Inter, Arial, sans-serif";
+    context.fillText("Na Rossie • projekt-wilno.vercel.app", 104, 1254);
+
+    const link = document.createElement("a");
+    link.download = `${safeFileName(route.name)}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    setNotice(languageKey === "en" ? "Walk card downloaded as PNG." : "Karta spaceru pobrana jako PNG.");
+  };
+
+  const downloadWalkCard = async (walk: WalkHistoryRecord) => {
+    const routeLike: SavedRouteRecord = {
+      id: walk.id,
+      name: walk.routeName,
+      pointCount: walk.pointCount,
+      distance: walk.distance,
+      time: walk.duration,
+      savedAt: walk.startedAt,
+      mode: "walk",
+      start: { label: "Brama cmentarza", position: [54.66842, 25.30236], source: "gate" },
+      end: { label: walk.routeName, position: null },
+      places: [],
+      savedOnDevice: true,
+    };
+
+    await downloadRouteCard(routeLike);
+  };
+
   const savePlannedWalk = () => {
     const planned: PlannedWalkRecord = {
       id: `planned-${Date.now()}`,
@@ -455,17 +691,22 @@ function UserProfilePage({
     <main className="profile-page">
       <section className="profile-hero">
         <div className="profile-identity">
-          <div className="profile-avatar-xl">
-            {draftAvatar ? <img alt={profile.name} src={draftAvatar} /> : <span>{initialsFor(profile.name)}</span>}
+          <div className={`profile-avatar-frame rank-${profileRank.tier}`}>
+            <div className="profile-avatar-xl">
+              {draftAvatar ? <img alt={profile.name} src={draftAvatar} /> : <span>{initialsFor(profile.name)}</span>}
+            </div>
+            <span className="profile-rank-medal"><FaMedal /></span>
           </div>
           <div>
             <span className="eyebrow">{currentUser ? t("profile.title") : t("profile.guestTitle")}</span>
             <h1>{profile.name}</h1>
             <p>{currentUser ? t("profile.subtitle") : t("profile.guestSubtitle")}</p>
             <div className="profile-badges">
+              <span className={`profile-rank-chip rank-${profileRank.tier}`}><FaMedal /> {profileRank.label}</span>
               <span><FaShieldAlt /> {profile.provider}</span>
               <span><FaClock /> {t("profile.created")}: {formatDate(profile.createdAt)}</span>
             </div>
+            <small className="profile-rank-hint">{profileRank.hint}</small>
           </div>
         </div>
         <button className="profile-save-route" onClick={saveCurrentRoute} type="button">
@@ -599,82 +840,31 @@ function UserProfilePage({
         </article>
       </section>
 
-      <section className="profile-panel wide-panel my-places-panel">
+      <section className="profile-panel wide-panel visited-panel">
         <header>
-          <FaBookmark />
-          <h2>{copy.myPlaces}</h2>
+          <FaMapMarkedAlt />
+          <h2>{languageKey === "en" ? "Visited places" : "Odwiedzone miejsca"}</h2>
         </header>
-        <div className="my-places-filters">
-          {([
-            ["all", copy.all],
-            ["favorites", copy.favorites],
-          ] as Array<["all" | "favorites", string]>).map(([filter, label]) => (
-            <button
-              className={myPlacesFilter === filter ? "active" : ""}
-              key={filter}
-              onClick={() => setMyPlacesFilter(filter)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        {myPlaces.length === 0 ? (
-          <div className="profile-empty">{copy.emptyMyPlaces}</div>
-        ) : (
-          <div className="profile-place-grid">
-            {myPlaces.map(({ place, isFavorite }) => (
-              <article className="profile-place-card" key={place.id}>
-                <img alt={place.name} src={place.image} />
-                <div>
-                  <span>{place.categoryLabel}</span>
-                  <h3>{place.name}</h3>
-                  <p>{place.shortDescription}</p>
-                  {isFavorite && (
-                    <div className="profile-status-row">
-                      <b><FaHeart /> {copy.favoriteBadge}</b>
-                    </div>
-                  )}
-                </div>
-                <div className="profile-card-actions">
-                  <button onClick={() => onShowPlace(place.id)} type="button">{t("profile.viewPlace")}</button>
-                </div>
-              </article>
-            ))}
+        {visitedPlaces.length === 0 ? (
+          <div className="profile-empty">
+            {languageKey === "en" ? "No visited places yet." : "Nie ma jeszcze odwiedzonych miejsc."}
           </div>
-        )}
-      </section>
-
-      <section className="profile-panel wide-panel">
-        <header>
-          <FaHeart />
-          <h2>{t("profile.favorites")}</h2>
-        </header>
-        <div className="profile-toolbar">
-          <label className="profile-search">
-            <FaSearch />
-            <input onChange={(event) => setFavoriteSearch(event.target.value)} placeholder={t("profile.searchFavorites")} value={favoriteSearch} />
-          </label>
-          <select onChange={(event) => setFavoriteFilter(event.target.value)} value={favoriteFilter}>
-            <option value="all">{t("profile.allCategories")}</option>
-            {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-          </select>
-        </div>
-        {filteredFavorites.length === 0 ? (
-          <div className="profile-empty">{t("profile.noFavorites")}</div>
         ) : (
-          <div className="profile-place-grid">
-            {filteredFavorites.map((place) => (
-              <article className="profile-place-card" key={place.id}>
+          <div className="visited-place-list">
+            {visitedPlaces.map(({ place, record }) => (
+              <article className="visited-place-card" key={place.id}>
                 <img alt={place.name} src={place.image} />
                 <div>
                   <span>{place.categoryLabel}</span>
                   <h3>{place.name}</h3>
                   <p>{place.shortDescription}</p>
+                  <small>{languageKey === "en" ? "Visited" : "Odwiedzono"}: {formatDate(record.visitedAt)}</small>
                 </div>
                 <div className="profile-card-actions">
                   <button onClick={() => onShowPlace(place.id)} type="button">{t("profile.viewPlace")}</button>
-                  <button onClick={() => onToggleFavorite(place.id)} type="button">{t("profile.removeFavorite")}</button>
+                  <button onClick={() => onToggleVisited(place.id)} type="button">
+                    <FaTimes /> {languageKey === "en" ? "Remove visit" : "Wykreśl"}
+                  </button>
                 </div>
               </article>
             ))}
@@ -719,7 +909,7 @@ function UserProfilePage({
         <article className="profile-panel">
           <header>
             <FaRoute />
-            <h2>{t("profile.savedRoutes")}</h2>
+            <h2>{languageKey === "en" ? "Walk history cards" : "Historia spacerow"}</h2>
           </header>
           {savedRoutes.length === 0 ? (
             <div className="profile-empty">{t("profile.noRoutes")}</div>
@@ -784,6 +974,9 @@ function UserProfilePage({
                     <button onClick={() => openSavedRoute(route)} type="button">
                       <FaRoute /> {languageKey === "en" ? "Show route" : "Pokaz trase"}
                     </button>
+                    <button onClick={() => void downloadRouteCard(route)} type="button">
+                      <FaDownload /> PNG
+                    </button>
                     <button onClick={() => removeSavedRoute(route.id)} type="button">
                       <FaTrash /> {languageKey === "en" ? "Remove" : "Usun"}
                     </button>
@@ -798,7 +991,7 @@ function UserProfilePage({
       <section className="profile-panel wide-panel">
         <header>
           <FaHistory />
-          <h2>{t("profile.walkHistory")}</h2>
+          <h2>{languageKey === "en" ? "Recent walk activity" : "Ostatnia aktywnosc spacerow"}</h2>
         </header>
         {walkHistory.length === 0 ? (
           <div className="profile-empty">{t("profile.noHistory")}</div>
@@ -809,8 +1002,11 @@ function UserProfilePage({
                 <span />
                 <div>
                   <strong>{walk.routeName}</strong>
-                  <p>{formatDistance(walk.distance)} • {formatDuration(walk.duration)} • {t("profile.points", { count: walk.pointCount })}</p>
+                  <p>{formatDistance(walk.distance)} - {formatDuration(walk.duration)} - {t("profile.points", { count: walk.pointCount })}</p>
                   <small>{t("profile.startedAt")}: {formatDate(walk.startedAt)}</small>
+                  <button className="timeline-download" onClick={() => void downloadWalkCard(walk)} type="button">
+                    <FaDownload /> PNG
+                  </button>
                 </div>
               </article>
             ))}

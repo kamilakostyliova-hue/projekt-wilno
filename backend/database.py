@@ -81,6 +81,7 @@ def initialize_database(database_path: Path | str = DATABASE_PATH, force: bool =
                 username TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE,
                 password TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
                 created_at TEXT NOT NULL
             );
             """
