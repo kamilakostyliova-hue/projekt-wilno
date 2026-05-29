@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FaChartLine,
   FaCheckCircle,
@@ -11,6 +11,7 @@ import {
   FaSave,
   FaShieldAlt,
   FaSignOutAlt,
+  FaTasks,
   FaUserCog,
   FaUsers,
 } from "react-icons/fa";
@@ -59,10 +60,24 @@ type AdminPlaceDraft = {
   updatedAt?: string;
 };
 
+type CaretakerStatus = "active" | "needs_contact" | "new";
+
+type AdminCaretakerRecord = {
+  id: string;
+  user: LocalAuthUser;
+  status: CaretakerStatus;
+  specialization: string;
+  assignedPlaceIds: number[];
+  completedActions: number;
+  lastActive: string;
+  activity: string[];
+};
+
 const reportsStorageKey = "rossa-care-reports";
 const localUsersKey = "rossa-local-auth-users";
 const adminDraftsKey = "rossa-admin-place-drafts";
 const reviewStorageKey = "rossa-care-place-review";
+const adminCaretakerNotesKey = "rossa-admin-caretaker-notes";
 
 const reportLabels: Record<ReportType, { pl: string; en: string }> = {
   missing_photo: { pl: "Brakuje zdjecia", en: "Missing photo" },
@@ -107,6 +122,20 @@ const readStorageRecord = <T,>(key: string): Record<number, T> => {
   }
 };
 
+const readStringStorageRecord = (key: string): Record<string, string> => {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const saved = window.localStorage.getItem(key);
+    const parsed = saved ? JSON.parse(saved) : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, string>)
+      : {};
+  } catch {
+    return {};
+  }
+};
+
 const writeReports = (reports: CareReport[]) => {
   window.localStorage.setItem(reportsStorageKey, JSON.stringify(reports));
   window.dispatchEvent(new Event("rossa-care-reports-changed"));
@@ -118,6 +147,10 @@ const writeUsers = (users: LocalAuthUser[]) => {
 
 const writeDrafts = (drafts: Record<number, AdminPlaceDraft>) => {
   window.localStorage.setItem(adminDraftsKey, JSON.stringify(drafts));
+};
+
+const writeCaretakerNotes = (notes: Record<string, string>) => {
+  window.localStorage.setItem(adminCaretakerNotesKey, JSON.stringify(notes));
 };
 
 const formatDate = (value: string, language: AppLanguage) => {
@@ -146,6 +179,9 @@ function AdminPanel({
   const [editDescription, setEditDescription] = useState("");
   const [editNote, setEditNote] = useState("");
   const [editCategory, setEditCategory] = useState("");
+  const [selectedCaretakerEmail, setSelectedCaretakerEmail] = useState("opiekun@na-rossie.local");
+  const [caretakerNotes, setCaretakerNotes] = useState<Record<string, string>>(() => readStringStorageRecord(adminCaretakerNotesKey));
+  const [caretakerNoteDraft, setCaretakerNoteDraft] = useState("");
   const hasAccess = currentUser?.role === "admin";
 
   const demoUsers = useMemo<LocalAuthUser[]>(
@@ -173,6 +209,49 @@ function AdminPanel({
     return [...users, ...demoUsers.filter((user) => !seen.has(user.email))];
   }, [demoUsers, users]);
 
+  const caretakerUsers = useMemo(() => {
+    const roleUsers = allUsers.filter((user) => user.role === "caretaker");
+    if (roleUsers.length > 0) return roleUsers;
+    return allUsers.filter((user) => user.email === "opiekun@na-rossie.local");
+  }, [allUsers]);
+
+  const caretakerRecords = useMemo<AdminCaretakerRecord[]>(
+    () =>
+      caretakerUsers.map((user, index) => {
+        const knownMainCaretaker = user.email === "opiekun@na-rossie.local";
+        const assignedPlaceIds = knownMainCaretaker
+          ? [1, 4, 10]
+          : places
+              .filter((_, placeIndex) => placeIndex % Math.max(1, caretakerUsers.length) === index)
+              .slice(0, 4)
+              .map((place) => place.id);
+
+        return {
+          id: user.email,
+          user,
+          status: knownMainCaretaker ? "active" : index % 2 === 0 ? "active" : "needs_contact",
+          specialization: knownMainCaretaker
+            ? isEnglish
+              ? "Historical graves, reports and field verification"
+              : "Groby historyczne, zgloszenia i kontrola terenowa"
+            : isEnglish
+              ? "Assigned sector and photo verification"
+              : "Przypisany sektor i weryfikacja zdjec",
+          assignedPlaceIds,
+          completedActions: knownMainCaretaker ? 18 : 6 + index * 3,
+          lastActive: new Date(Date.now() - 1000 * 60 * (knownMainCaretaker ? 35 : 240 + index * 80)).toISOString(),
+          activity: knownMainCaretaker
+            ? isEnglish
+              ? ["Closed two reports", "Approved grave photo", "Checked condition after winter"]
+              : ["Zamknieto dwa zgloszenia", "Zatwierdzono zdjecie grobu", "Sprawdzono stan po zimie"]
+            : isEnglish
+              ? ["Updated assigned sector", "Added internal note", "Needs next field check"]
+              : ["Zaktualizowano przypisany sektor", "Dodano notatke wewnetrzna", "Wymaga kolejnej kontroli"],
+        };
+      }),
+    [caretakerUsers, isEnglish, places]
+  );
+
   const managedPlaces = useMemo(
     () =>
       places.map((place) => ({
@@ -192,6 +271,15 @@ function AdminPanel({
   const needsCareCount = Object.values(reviewStates).filter((item) =>
     ["check", "needs_care", "missing_photo", "missing_data"].includes(item.status ?? "")
   ).length;
+  const selectedCaretaker = caretakerRecords.find((caretaker) => caretaker.id === selectedCaretakerEmail) ?? caretakerRecords[0] ?? null;
+  const selectedCaretakerPlaceIds = new Set(selectedCaretaker?.assignedPlaceIds ?? []);
+  const selectedCaretakerPlaces = managedPlaces.filter((place) => selectedCaretakerPlaceIds.has(place.id));
+  const selectedCaretakerReports = unresolvedReports.filter(
+    (report) => report.placeId !== null && selectedCaretakerPlaceIds.has(report.placeId)
+  );
+  const selectedCaretakerAttention = selectedCaretakerPlaces.filter((place) =>
+    ["check", "needs_care", "missing_photo", "missing_data"].includes(reviewStates[place.id]?.status ?? "")
+  );
   const categoryCounts = managedPlaces.reduce<Record<string, number>>((acc, place) => {
     acc[place.categoryLabel] = (acc[place.categoryLabel] ?? 0) + 1;
     return acc;
@@ -225,6 +313,17 @@ function AdminPanel({
         created: "Created",
         promote: "Make caretaker",
         makeAdmin: "Make admin",
+        caretakersTitle: "Caretakers and responsibilities",
+        caretakersLead: "Admin can see who cares for each place, open reports and recent activity.",
+        assignedPlaces: "assigned places",
+        openReports: "open reports",
+        attention: "need attention",
+        completed: "completed actions",
+        lastActive: "Last active",
+        adminCaretakerNote: "Admin note about this caretaker",
+        saveCaretakerNote: "Save caretaker note",
+        recentActivity: "Recent activity",
+        reviewPlace: "Review",
       }
     : {
         accessTitle: "Dostep administratora",
@@ -253,6 +352,17 @@ function AdminPanel({
         created: "Utworzono",
         promote: "Nadaj opiekuna",
         makeAdmin: "Nadaj admina",
+        caretakersTitle: "Opiekunowie i odpowiedzialnosc",
+        caretakersLead: "Administrator widzi, kto opiekuje sie miejscami, jakie sa zgloszenia i ostatnie dzialania.",
+        assignedPlaces: "przypisane miejsca",
+        openReports: "otwarte zgloszenia",
+        attention: "wymaga uwagi",
+        completed: "wykonane dzialania",
+        lastActive: "Ostatnia aktywnosc",
+        adminCaretakerNote: "Notatka administratora o opiekunie",
+        saveCaretakerNote: "Zapisz notatke opiekuna",
+        recentActivity: "Ostatnia aktywnosc",
+        reviewPlace: "Kontrola",
       };
 
   const openEditor = (placeId: number) => {
@@ -265,6 +375,11 @@ function AdminPanel({
     setEditNote(place.adminDraft?.note ?? "");
     setActiveTab("people");
   };
+
+  useEffect(() => {
+    if (!selectedCaretaker) return;
+    setCaretakerNoteDraft(caretakerNotes[selectedCaretaker.id] ?? "");
+  }, [caretakerNotes, selectedCaretaker]);
 
   const savePlaceDraft = () => {
     if (!selectedPlace) return;
@@ -334,6 +449,17 @@ function AdminPanel({
     ];
     setUsers(nextUsers);
     writeUsers(nextUsers);
+  };
+
+  const saveCaretakerNote = () => {
+    if (!selectedCaretaker) return;
+
+    const nextNotes = {
+      ...caretakerNotes,
+      [selectedCaretaker.id]: caretakerNoteDraft,
+    };
+    setCaretakerNotes(nextNotes);
+    writeCaretakerNotes(nextNotes);
   };
 
   if (!hasAccess) {
@@ -533,6 +659,121 @@ function AdminPanel({
               </article>
             ))}
           </div>
+
+          {selectedCaretaker && (
+            <div className="admin-caretaker-section">
+              <header>
+                <FaUserCog />
+                <span>
+                  <h2>{copy.caretakersTitle}</h2>
+                  <p>{copy.caretakersLead}</p>
+                </span>
+              </header>
+
+              <div className="admin-caretaker-layout">
+                <div className="admin-caretaker-list">
+                  {caretakerRecords.map((caretaker) => {
+                    const assignedIds = new Set(caretaker.assignedPlaceIds);
+                    const reportCount = unresolvedReports.filter(
+                      (report) => report.placeId !== null && assignedIds.has(report.placeId)
+                    ).length;
+                    const attentionCount = managedPlaces.filter((place) =>
+                      assignedIds.has(place.id) &&
+                      ["check", "needs_care", "missing_photo", "missing_data"].includes(reviewStates[place.id]?.status ?? "")
+                    ).length;
+
+                    return (
+                      <button
+                        className={`admin-caretaker-card ${selectedCaretaker.id === caretaker.id ? "active" : ""}`}
+                        key={caretaker.id}
+                        onClick={() => setSelectedCaretakerEmail(caretaker.id)}
+                        type="button"
+                      >
+                        <span className={`caretaker-status-dot status-${caretaker.status}`} />
+                        <strong>{caretaker.user.username}</strong>
+                        <small>{caretaker.specialization}</small>
+                        <b>{caretaker.assignedPlaceIds.length} {copy.assignedPlaces}</b>
+                        <em>{reportCount} {copy.openReports} - {attentionCount} {copy.attention}</em>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <article className="admin-caretaker-detail">
+                  <div className="admin-caretaker-head">
+                    <div>
+                      <span className={`caretaker-status-pill status-${selectedCaretaker.status}`}>
+                        {selectedCaretaker.status === "active"
+                          ? isEnglish ? "Active" : "Aktywny"
+                          : selectedCaretaker.status === "needs_contact"
+                            ? isEnglish ? "Needs contact" : "Do kontaktu"
+                            : isEnglish ? "New caretaker" : "Nowy opiekun"}
+                      </span>
+                      <h3>{selectedCaretaker.user.username}</h3>
+                      <p>{selectedCaretaker.specialization}</p>
+                    </div>
+                    <div className="admin-caretaker-contact">
+                      <span>{selectedCaretaker.user.email}</span>
+                      <small>{copy.lastActive}: {formatDate(selectedCaretaker.lastActive, language)}</small>
+                    </div>
+                  </div>
+
+                  <div className="admin-caretaker-stats">
+                    <span><strong>{selectedCaretakerPlaces.length}</strong>{copy.assignedPlaces}</span>
+                    <span><strong>{selectedCaretakerReports.length}</strong>{copy.openReports}</span>
+                    <span><strong>{selectedCaretakerAttention.length}</strong>{copy.attention}</span>
+                    <span><strong>{selectedCaretaker.completedActions}</strong>{copy.completed}</span>
+                  </div>
+
+                  <div className="admin-assigned-list">
+                    {selectedCaretakerPlaces.map((place) => {
+                      const state = reviewStates[place.id]?.status ?? "good";
+
+                      return (
+                        <article className={`admin-assigned-place state-${state}`} key={place.id}>
+                          <img alt={place.name} src={place.image} />
+                          <span>
+                            <strong>{place.name}</strong>
+                            <small>{place.categoryLabel} - {place.years}</small>
+                            <em>{state === "good" ? (isEnglish ? "Good" : "Zadbany") : state}</em>
+                          </span>
+                          <button onClick={() => openEditor(place.id)} type="button">
+                            <FaTasks /> {copy.reviewPlace}
+                          </button>
+                          <button onClick={() => onShowPlace(place.id)} type="button">
+                            <FaMapMarkerAlt /> {copy.map}
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+
+                  <div className="admin-caretaker-bottom">
+                    <label>
+                      {copy.adminCaretakerNote}
+                      <textarea
+                        onChange={(event) => setCaretakerNoteDraft(event.target.value)}
+                        placeholder={isEnglish ? "Example: reliable, checks winter reports first..." : "Np. aktywny, sprawdza najpierw zgloszenia po zimie..."}
+                        value={caretakerNoteDraft}
+                      />
+                      <button onClick={saveCaretakerNote} type="button">
+                        <FaSave /> {copy.saveCaretakerNote}
+                      </button>
+                    </label>
+
+                    <div className="admin-caretaker-activity">
+                      <strong>{copy.recentActivity}</strong>
+                      {selectedCaretaker.activity.map((activity) => (
+                        <span key={activity}>
+                          <FaCheckCircle /> {activity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          )}
         </section>
       )}
 

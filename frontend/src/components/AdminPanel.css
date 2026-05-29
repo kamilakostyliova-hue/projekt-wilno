@@ -20,6 +20,12 @@
 .admin-place-row,
 .admin-report-card,
 .admin-users-table article,
+.admin-caretaker-section,
+.admin-caretaker-card,
+.admin-caretaker-detail,
+.admin-caretaker-contact,
+.admin-assigned-place,
+.admin-caretaker-activity,
 .admin-stats-grid article {
   border: 1px solid rgba(122, 167, 223, 0.32);
   background: rgba(255, 255, 255, 0.92);
@@ -61,7 +67,9 @@
 .admin-place-row button,
 .admin-editor-actions button,
 .admin-report-card button,
-.admin-users-table button {
+.admin-users-table button,
+.admin-assigned-place button,
+.admin-caretaker-bottom button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -89,7 +97,9 @@
 .admin-place-row button:hover,
 .admin-editor-actions button:hover,
 .admin-report-card button:hover,
-.admin-users-table button:hover {
+.admin-users-table button:hover,
+.admin-assigned-place button:hover,
+.admin-caretaker-bottom button:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 34px rgba(37, 99, 235, 0.16);
 }
@@ -393,6 +403,286 @@
   border-radius: 20px;
 }
 
+.admin-caretaker-section {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(37, 99, 235, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.92);
+}
+
+.admin-caretaker-section > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-caretaker-section > header > svg {
+  color: #1d4ed8;
+  font-size: 1.35rem;
+}
+
+.admin-caretaker-section header span {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-caretaker-section header p {
+  color: #53647f;
+  line-height: 1.5;
+}
+
+.admin-caretaker-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.38fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.admin-caretaker-list,
+.admin-assigned-list,
+.admin-caretaker-activity {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-caretaker-card {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  padding: 15px 15px 15px 40px;
+  border-radius: 20px;
+  color: #0c1730;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.admin-caretaker-card:hover,
+.admin-caretaker-card.active {
+  border-color: rgba(37, 99, 235, 0.52);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 18px 44px rgba(10, 31, 68, 0.12);
+  transform: translateY(-2px);
+}
+
+.admin-caretaker-card strong,
+.admin-caretaker-detail h3,
+.admin-assigned-place strong,
+.admin-caretaker-activity strong {
+  color: #0c1730;
+}
+
+.admin-caretaker-card small,
+.admin-caretaker-card em,
+.admin-caretaker-detail p,
+.admin-caretaker-contact,
+.admin-assigned-place small,
+.admin-assigned-place em,
+.admin-caretaker-activity span {
+  color: #53647f;
+  line-height: 1.4;
+}
+
+.admin-caretaker-card em {
+  font-style: normal;
+  font-weight: 750;
+}
+
+.admin-caretaker-card b {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 0.76rem;
+}
+
+.caretaker-status-dot {
+  position: absolute;
+  top: 18px;
+  left: 15px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.12);
+}
+
+.caretaker-status-dot.status-needs_contact {
+  background: #f59e0b;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.14);
+}
+
+.caretaker-status-dot.status-new {
+  background: #2563eb;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.14);
+}
+
+.admin-caretaker-detail {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.admin-caretaker-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, auto);
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-caretaker-detail h3 {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  line-height: 1;
+}
+
+.caretaker-status-pill {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f7ef;
+  color: #166534;
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.caretaker-status-pill.status-needs_contact {
+  background: #fff7dd;
+  color: #8a5b00;
+}
+
+.caretaker-status-pill.status-new {
+  background: #eef5ff;
+  color: #1d4ed8;
+}
+
+.admin-caretaker-contact {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border-radius: 18px;
+}
+
+.admin-caretaker-contact span,
+.admin-caretaker-contact small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-caretaker-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-caretaker-stats span {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(122, 167, 223, 0.24);
+  border-radius: 18px;
+  background: #f8fbff;
+  color: #53647f;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.admin-caretaker-stats strong {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.admin-assigned-place {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 18px;
+}
+
+.admin-assigned-place img {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.admin-assigned-place span {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-assigned-place em {
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.admin-assigned-place button,
+.admin-caretaker-bottom button {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 0.82rem;
+}
+
+.admin-caretaker-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 0.75fr);
+  gap: 14px;
+}
+
+.admin-caretaker-bottom label {
+  display: grid;
+  gap: 8px;
+  color: #0c1730;
+  font-weight: 900;
+}
+
+.admin-caretaker-bottom textarea {
+  min-height: 110px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #d7e4f5;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0c1730;
+  font: inherit;
+  outline: none;
+}
+
+.admin-caretaker-bottom textarea:focus {
+  border-color: #7aa7df;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.admin-caretaker-activity {
+  align-content: start;
+  padding: 14px;
+  border-radius: 20px;
+}
+
+.admin-caretaker-activity span {
+  display: flex;
+  gap: 8px;
+  font-weight: 750;
+}
+
+.admin-caretaker-activity svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #16a34a;
+}
+
 .admin-stats-grid article {
   display: grid;
   gap: 8px;
@@ -436,9 +726,16 @@ html[data-theme="night"] .admin-editor,
 html[data-theme="night"] .admin-place-row,
 html[data-theme="night"] .admin-report-card,
 html[data-theme="night"] .admin-users-table article,
+html[data-theme="night"] .admin-caretaker-section,
+html[data-theme="night"] .admin-caretaker-card,
+html[data-theme="night"] .admin-caretaker-detail,
+html[data-theme="night"] .admin-caretaker-contact,
+html[data-theme="night"] .admin-assigned-place,
+html[data-theme="night"] .admin-caretaker-activity,
 html[data-theme="night"] .admin-stats-grid article,
 html[data-theme="night"] .admin-editor input,
-html[data-theme="night"] .admin-editor textarea {
+html[data-theme="night"] .admin-editor textarea,
+html[data-theme="night"] .admin-caretaker-bottom textarea {
   border-color: rgba(142, 197, 255, 0.22);
   background: rgba(13, 37, 79, 0.88);
   color: #f8fbff;
@@ -454,6 +751,12 @@ html[data-theme="night"] .admin-editor label,
 html[data-theme="night"] .admin-place-row strong,
 html[data-theme="night"] .admin-report-card h3,
 html[data-theme="night"] .admin-users-table strong,
+html[data-theme="night"] .admin-caretaker-card strong,
+html[data-theme="night"] .admin-caretaker-detail h3,
+html[data-theme="night"] .admin-caretaker-stats strong,
+html[data-theme="night"] .admin-assigned-place strong,
+html[data-theme="night"] .admin-caretaker-bottom label,
+html[data-theme="night"] .admin-caretaker-activity strong,
 html[data-theme="night"] .admin-stats-grid strong {
   color: #f8fbff;
 }
@@ -467,6 +770,15 @@ html[data-theme="night"] .admin-place-row em,
 html[data-theme="night"] .admin-report-card p,
 html[data-theme="night"] .admin-report-card small,
 html[data-theme="night"] .admin-users-table small,
+html[data-theme="night"] .admin-caretaker-section header p,
+html[data-theme="night"] .admin-caretaker-card small,
+html[data-theme="night"] .admin-caretaker-card em,
+html[data-theme="night"] .admin-caretaker-detail p,
+html[data-theme="night"] .admin-caretaker-contact,
+html[data-theme="night"] .admin-caretaker-stats span,
+html[data-theme="night"] .admin-assigned-place small,
+html[data-theme="night"] .admin-assigned-place em,
+html[data-theme="night"] .admin-caretaker-activity span,
 html[data-theme="night"] .admin-stats-grid small {
   color: #c9d6ea;
 }
@@ -477,6 +789,10 @@ html[data-theme="night"] .admin-place-row button,
 html[data-theme="night"] .admin-editor-actions button,
 html[data-theme="night"] .admin-report-card button,
 html[data-theme="night"] .admin-users-table button,
+html[data-theme="night"] .admin-caretaker-card b,
+html[data-theme="night"] .caretaker-status-pill,
+html[data-theme="night"] .admin-assigned-place button,
+html[data-theme="night"] .admin-caretaker-bottom button,
 html[data-theme="night"] .admin-report-card > span,
 html[data-theme="night"] .role-chip {
   border-color: rgba(142, 197, 255, 0.24);
@@ -496,7 +812,10 @@ html[data-theme="night"] .admin-stats-grid article div {
 
 @media (max-width: 1120px) {
   .admin-hero,
-  .admin-split-page {
+  .admin-split-page,
+  .admin-caretaker-layout,
+  .admin-caretaker-head,
+  .admin-caretaker-bottom {
     grid-template-columns: 1fr;
   }
 
@@ -506,7 +825,8 @@ html[data-theme="night"] .admin-stats-grid article div {
 
   .admin-overview,
   .admin-users-table,
-  .admin-report-grid {
+  .admin-report-grid,
+  .admin-caretaker-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -520,18 +840,23 @@ html[data-theme="night"] .admin-stats-grid article div {
   .admin-users-table,
   .admin-report-grid,
   .admin-place-row,
+  .admin-caretaker-stats,
+  .admin-assigned-place,
   .admin-editor-actions {
     grid-template-columns: 1fr;
   }
 
-  .admin-place-row img {
+  .admin-place-row img,
+  .admin-assigned-place img {
     width: 100%;
     height: 180px;
   }
 
   .admin-place-row button,
   .admin-report-card button,
-  .admin-users-table button {
+  .admin-users-table button,
+  .admin-assigned-place button,
+  .admin-caretaker-bottom button {
     width: 100%;
   }
 }
