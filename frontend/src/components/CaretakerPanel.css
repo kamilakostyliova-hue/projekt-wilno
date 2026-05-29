@@ -13,6 +13,11 @@
 .caretaker-hero,
 .caretaker-stats article,
 .caretaker-panel,
+.admin-overview-panel,
+.admin-caretaker-card,
+.admin-caretaker-detail,
+.admin-contact-card,
+.assigned-place-row,
 .place-review-panel,
 .review-checklist,
 .review-side-panel,
@@ -73,6 +78,8 @@
 
 .caretaker-login-card button,
 .caretaker-user-card button,
+.admin-note-box button,
+.assigned-place-row button,
 .place-review-actions button,
 .review-back,
 .review-checklist button,
@@ -95,6 +102,8 @@
 
 .caretaker-login-card button:hover,
 .caretaker-user-card button:hover,
+.admin-note-box button:hover,
+.assigned-place-row button:hover,
 .place-review-actions button:hover,
 .review-back:hover,
 .review-checklist button:hover:not(:disabled),
@@ -197,6 +206,8 @@
 }
 
 .caretaker-stats article:hover,
+.admin-caretaker-card:hover,
+.assigned-place-row:hover,
 .report-card:hover,
 .status-row:hover {
   transform: translateY(-3px);
@@ -218,6 +229,301 @@
 .caretaker-stats span {
   color: #53647f;
   font-weight: 800;
+}
+
+.admin-overview-panel {
+  display: grid;
+  gap: 18px;
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(37, 99, 235, 0.13), transparent 32%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.94));
+}
+
+.admin-overview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-overview-head h2,
+.admin-caretaker-detail h3 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+
+.admin-overview-head h2 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.admin-overview-head p,
+.admin-caretaker-detail p {
+  color: #53647f;
+  line-height: 1.6;
+}
+
+.admin-overview-head > strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 0 18px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 1.3rem;
+}
+
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.admin-caretaker-list,
+.assigned-place-list,
+.admin-activity-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-caretaker-card {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  padding: 16px 16px 16px 42px;
+  border-radius: 22px;
+  color: #0c1730;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-caretaker-card.active {
+  border-color: rgba(37, 99, 235, 0.58);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 24px 58px rgba(10, 31, 68, 0.13);
+}
+
+.admin-caretaker-card strong {
+  color: #0c1730;
+  font-size: 1.05rem;
+}
+
+.admin-caretaker-card small,
+.admin-caretaker-card em {
+  color: #53647f;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.admin-caretaker-card b {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+}
+
+.caretaker-status-dot {
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.12);
+}
+
+.caretaker-status-dot.status-needs_contact {
+  background: #f59e0b;
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.14);
+}
+
+.caretaker-status-dot.status-new {
+  background: #2563eb;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.14);
+}
+
+.admin-caretaker-detail {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 26px;
+}
+
+.admin-detail-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, auto);
+  gap: 14px;
+  align-items: start;
+}
+
+.admin-caretaker-detail h3 {
+  margin-top: 8px;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+.caretaker-status-pill {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f7ef;
+  color: #166534;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.caretaker-status-pill.status-needs_contact {
+  background: #fff7dd;
+  color: #8a5b00;
+}
+
+.caretaker-status-pill.status-new {
+  background: #eef5ff;
+  color: #1d4ed8;
+}
+
+.admin-contact-card {
+  display: grid;
+  gap: 5px;
+  padding: 13px;
+  border-radius: 18px;
+  color: #173b72;
+}
+
+.admin-contact-card span,
+.admin-contact-card small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-mini-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-mini-stats span {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(122, 167, 223, 0.24);
+  border-radius: 18px;
+  background: #f8fbff;
+  color: #53647f;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.admin-mini-stats strong {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.assigned-place-list > strong,
+.admin-activity-list > strong {
+  color: #0c1730;
+  font-size: 1.05rem;
+}
+
+.assigned-place-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.assigned-place-row img {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.assigned-place-row span {
+  display: grid;
+  gap: 3px;
+}
+
+.assigned-place-row b {
+  color: #0c1730;
+}
+
+.assigned-place-row small {
+  color: #53647f;
+}
+
+.assigned-place-row button,
+.admin-note-box button {
+  min-height: 34px;
+  padding: 0 11px;
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.admin-detail-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.75fr);
+  gap: 14px;
+}
+
+.admin-note-box {
+  display: grid;
+  gap: 8px;
+  color: #0c1730;
+  font-weight: 900;
+}
+
+.admin-note-box textarea {
+  min-height: 118px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #d7e4f5;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0c1730;
+  font: inherit;
+  outline: none;
+}
+
+.admin-note-box textarea:focus {
+  border-color: #7aa7df;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.admin-activity-list {
+  align-content: start;
+  padding: 14px;
+  border: 1px solid rgba(122, 167, 223, 0.24);
+  border-radius: 20px;
+  background: #f8fbff;
+}
+
+.admin-activity-list span {
+  display: flex;
+  gap: 8px;
+  color: #53647f;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.admin-activity-list svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #16a34a;
 }
 
 .place-review-panel {
@@ -683,6 +989,12 @@ html[data-theme="night"] .caretaker-login-card,
 html[data-theme="night"] .caretaker-hero,
 html[data-theme="night"] .caretaker-stats article,
 html[data-theme="night"] .caretaker-panel,
+html[data-theme="night"] .admin-overview-panel,
+html[data-theme="night"] .admin-caretaker-card,
+html[data-theme="night"] .admin-caretaker-detail,
+html[data-theme="night"] .admin-contact-card,
+html[data-theme="night"] .assigned-place-row,
+html[data-theme="night"] .admin-activity-list,
 html[data-theme="night"] .place-review-panel,
 html[data-theme="night"] .review-checklist,
 html[data-theme="night"] .review-side-panel,
@@ -702,6 +1014,14 @@ html[data-theme="night"] .caretaker-login-card h1,
 html[data-theme="night"] .caretaker-hero h1,
 html[data-theme="night"] .caretaker-stats strong,
 html[data-theme="night"] .caretaker-panel h2,
+html[data-theme="night"] .admin-overview-head h2,
+html[data-theme="night"] .admin-caretaker-detail h3,
+html[data-theme="night"] .admin-caretaker-card strong,
+html[data-theme="night"] .admin-mini-stats strong,
+html[data-theme="night"] .assigned-place-list > strong,
+html[data-theme="night"] .assigned-place-row b,
+html[data-theme="night"] .admin-note-box,
+html[data-theme="night"] .admin-activity-list > strong,
 html[data-theme="night"] .place-review-content h2,
 html[data-theme="night"] .review-alert span,
 html[data-theme="night"] .review-checklist h3,
@@ -719,6 +1039,14 @@ html[data-theme="night"] .caretaker-login-card label {
 html[data-theme="night"] .caretaker-login-card p,
 html[data-theme="night"] .caretaker-hero p,
 html[data-theme="night"] .caretaker-stats span,
+html[data-theme="night"] .admin-overview-head p,
+html[data-theme="night"] .admin-caretaker-detail p,
+html[data-theme="night"] .admin-caretaker-card small,
+html[data-theme="night"] .admin-caretaker-card em,
+html[data-theme="night"] .admin-contact-card,
+html[data-theme="night"] .admin-mini-stats span,
+html[data-theme="night"] .assigned-place-row small,
+html[data-theme="night"] .admin-activity-list span,
 html[data-theme="night"] .place-review-content p,
 html[data-theme="night"] .place-review-content small,
 html[data-theme="night"] .place-review-meta,
@@ -734,6 +1062,12 @@ html[data-theme="night"] .caretaker-user-card small {
 
 html[data-theme="night"] .caretaker-demo-box,
 html[data-theme="night"] .caretaker-message,
+html[data-theme="night"] .admin-overview-head > strong,
+html[data-theme="night"] .admin-caretaker-card b,
+html[data-theme="night"] .caretaker-status-pill,
+html[data-theme="night"] .admin-note-box textarea,
+html[data-theme="night"] .admin-note-box button,
+html[data-theme="night"] .assigned-place-row button,
 html[data-theme="night"] .report-card span,
 html[data-theme="night"] .status-row b,
 html[data-theme="night"] .review-status-badge,
@@ -809,15 +1143,27 @@ html[data-theme="night"] .status-row.active {
   box-shadow: 0 0 0 3px rgba(142, 197, 255, 0.12), 0 24px 58px rgba(0, 7, 20, 0.28);
 }
 
+html[data-theme="night"] .admin-caretaker-card.active {
+  border-color: rgba(142, 197, 255, 0.52);
+  box-shadow: 0 0 0 3px rgba(142, 197, 255, 0.12), 0 24px 58px rgba(0, 7, 20, 0.28);
+}
+
 @media (max-width: 1080px) {
   .caretaker-hero,
   .caretaker-grid,
+  .admin-overview-grid,
+  .admin-detail-head,
+  .admin-detail-bottom,
   .place-review-layout,
   .review-workgrid {
     grid-template-columns: 1fr;
   }
 
   .caretaker-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-mini-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -828,9 +1174,27 @@ html[data-theme="night"] .status-row.active {
   }
 
   .caretaker-stats,
+  .admin-mini-stats,
+  .assigned-place-row,
   .review-task,
   .status-row {
     grid-template-columns: 1fr;
+  }
+
+  .admin-overview-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-overview-head > strong,
+  .assigned-place-row button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .assigned-place-row img {
+    width: 100%;
+    height: 160px;
   }
 
   .place-review-panel {

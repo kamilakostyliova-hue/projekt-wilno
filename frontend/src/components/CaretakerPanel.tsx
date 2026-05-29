@@ -10,6 +10,7 @@ import {
   FaShieldAlt,
   FaSignOutAlt,
   FaTools,
+  FaUsers,
   FaUserShield,
 } from "react-icons/fa";
 import type { AppLanguage, UserProfile } from "../App";
@@ -33,6 +34,21 @@ type ReportStatus = "new" | "review" | "resolved";
 type ReviewTaskKind = "danger" | "warning" | "info" | "done";
 export type ReportType = "missing_photo" | "wrong_description" | "needs_care" | "wrong_location" | "missing_person" | "other";
 
+type CaretakerStatus = "active" | "needs_contact" | "new";
+
+type CaretakerRecord = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: CaretakerStatus;
+  specialization: string;
+  assignedPlaceIds: number[];
+  completedActions: number;
+  lastActive: string;
+  activity: string[];
+};
+
 export type CareReport = {
   id: string;
   placeId: number | null;
@@ -54,6 +70,7 @@ type CaretakerPanelProps = {
 
 const reportsStorageKey = "rossa-care-reports";
 const reviewStorageKey = "rossa-care-place-review";
+const adminNotesStorageKey = "rossa-admin-caretaker-notes";
 
 type PlaceReviewState = {
   status?: GraveStatus;
@@ -97,6 +114,12 @@ const demoStatusByPlaceId: Record<number, GraveStatus> = {
   10: "missing_photo",
 };
 
+const caretakerStatusLabels: Record<CaretakerStatus, { pl: string; en: string }> = {
+  active: { pl: "Aktywny", en: "Active" },
+  needs_contact: { pl: "Do kontaktu", en: "Needs contact" },
+  new: { pl: "Nowy opiekun", en: "New caretaker" },
+};
+
 const readReports = (): CareReport[] => {
   if (typeof window === "undefined") return [];
 
@@ -117,6 +140,20 @@ const readReviewStates = (): Record<number, PlaceReviewState> => {
     const parsed = saved ? JSON.parse(saved) : {};
     return parsed && typeof parsed === "object" && !Array.isArray(parsed)
       ? (parsed as Record<number, PlaceReviewState>)
+      : {};
+  } catch {
+    return {};
+  }
+};
+
+const readAdminNotes = (): Record<string, string> => {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const saved = window.localStorage.getItem(adminNotesStorageKey);
+    const parsed = saved ? JSON.parse(saved) : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, string>)
       : {};
   } catch {
     return {};
@@ -144,21 +181,28 @@ function CaretakerPanel({
   const [reviewStates, setReviewStates] = useState<Record<number, PlaceReviewState>>(() => readReviewStates());
   const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
   const [reviewNote, setReviewNote] = useState("");
+  const [adminNotes, setAdminNotes] = useState<Record<string, string>>(() => readAdminNotes());
+  const [selectedCaretakerId, setSelectedCaretakerId] = useState("rossa-main");
+  const [adminNoteDraft, setAdminNoteDraft] = useState("");
   const isEnglish = language === "en";
-  const hasAccess = currentUser?.role === "caretaker";
+  const isAdmin = currentUser?.role === "admin";
+  const hasAccess = currentUser?.role === "caretaker" || isAdmin;
 
   useEffect(() => {
     const refresh = () => {
       setReports(readReports());
       setReviewStates(readReviewStates());
+      setAdminNotes(readAdminNotes());
     };
     window.addEventListener("storage", refresh);
     window.addEventListener("rossa-care-reports-changed", refresh);
     window.addEventListener("rossa-care-review-changed", refresh);
+    window.addEventListener("rossa-admin-notes-changed", refresh);
     return () => {
       window.removeEventListener("storage", refresh);
       window.removeEventListener("rossa-care-reports-changed", refresh);
       window.removeEventListener("rossa-care-review-changed", refresh);
+      window.removeEventListener("rossa-admin-notes-changed", refresh);
     };
   }, []);
 
@@ -170,6 +214,10 @@ function CaretakerPanel({
 
     setReviewNote(reviewStates[selectedPlaceId]?.note ?? "");
   }, [reviewStates, selectedPlaceId]);
+
+  useEffect(() => {
+    setAdminNoteDraft(adminNotes[selectedCaretakerId] ?? "");
+  }, [adminNotes, selectedCaretakerId]);
 
   const demoReports = useMemo<CareReport[]>(
     () => [
@@ -199,6 +247,89 @@ function CaretakerPanel({
     const reportIds = new Set(reports.map((report) => report.id));
     return [...reports, ...demoReports.filter((report) => !reportIds.has(report.id))];
   }, [demoReports, reports]);
+
+  const caretakers = useMemo<CaretakerRecord[]>(
+    () =>
+      isEnglish
+        ? [
+            {
+              id: "rossa-main",
+              name: "Rasos caretaker",
+              email: "opiekun@na-rossie.local",
+              phone: "+370 600 10 204",
+              status: "active",
+              specialization: "Historical graves and visitor reports",
+              assignedPlaceIds: [1, 4, 10],
+              completedActions: 18,
+              lastActive: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+              activity: ["Closed 2 user reports", "Approved a grave photo", "Updated condition after inspection"],
+            },
+            {
+              id: "poets-care",
+              name: "Maria Nowicka",
+              email: "maria.opiekun@rossa.local",
+              phone: "+48 510 420 119",
+              status: "active",
+              specialization: "Poets and artists",
+              assignedPlaceIds: [2, 3, 7],
+              completedActions: 11,
+              lastActive: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+              activity: ["Added note about inscriptions", "Checked artist route", "Marked one grave as cared for"],
+            },
+            {
+              id: "field-check",
+              name: "Tomasz Wysocki",
+              email: "tomasz.check@rossa.local",
+              phone: "+48 604 777 321",
+              status: "needs_contact",
+              specialization: "Location checks and field photos",
+              assignedPlaceIds: [5, 6, 8, 9],
+              completedActions: 7,
+              lastActive: new Date(Date.now() - 1000 * 60 * 60 * 52).toISOString(),
+              activity: ["Uploaded field notes", "Needs confirmation for two markers", "No activity today"],
+            },
+          ]
+        : [
+            {
+              id: "rossa-main",
+              name: "Opiekun Rossy",
+              email: "opiekun@na-rossie.local",
+              phone: "+370 600 10 204",
+              status: "active",
+              specialization: "Groby historyczne i zgloszenia zwiedzajacych",
+              assignedPlaceIds: [1, 4, 10],
+              completedActions: 18,
+              lastActive: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+              activity: ["Zamknieto 2 zgloszenia", "Zatwierdzono zdjecie grobu", "Zmieniono status po kontroli"],
+            },
+            {
+              id: "poets-care",
+              name: "Maria Nowicka",
+              email: "maria.opiekun@rossa.local",
+              phone: "+48 510 420 119",
+              status: "active",
+              specialization: "Poeci i artysci",
+              assignedPlaceIds: [2, 3, 7],
+              completedActions: 11,
+              lastActive: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
+              activity: ["Dodano notatke o inskrypcjach", "Sprawdzono trase artystow", "Oznaczono jeden grob jako zadbany"],
+            },
+            {
+              id: "field-check",
+              name: "Tomasz Wysocki",
+              email: "tomasz.check@rossa.local",
+              phone: "+48 604 777 321",
+              status: "needs_contact",
+              specialization: "Lokalizacje i zdjecia terenowe",
+              assignedPlaceIds: [5, 6, 8, 9],
+              completedActions: 7,
+              lastActive: new Date(Date.now() - 1000 * 60 * 60 * 52).toISOString(),
+              activity: ["Wgrano notatki terenowe", "Dwa markery wymagaja potwierdzenia", "Brak aktywnosci dzisiaj"],
+            },
+          ],
+    [isEnglish]
+  );
+
   const statusRows = useMemo(
     () =>
       places.map((place) => ({
@@ -210,6 +341,16 @@ function CaretakerPanel({
   const needsCare = statusRows.filter((row) => row.status === "needs_care" || row.status === "check");
   const missingPhoto = statusRows.filter((row) => row.status === "missing_photo");
   const unresolvedReports = allReports.filter((report) => report.status !== "resolved");
+  const selectedCaretaker = caretakers.find((caretaker) => caretaker.id === selectedCaretakerId) ?? caretakers[0];
+  const selectedCaretakerPlaceIds = new Set(selectedCaretaker?.assignedPlaceIds ?? []);
+  const selectedCaretakerPlaces = places.filter((place) => selectedCaretakerPlaceIds.has(place.id));
+  const selectedCaretakerReports = allReports.filter(
+    (report) => report.placeId !== null && selectedCaretakerPlaceIds.has(report.placeId) && report.status !== "resolved"
+  );
+  const selectedCaretakerAttention = statusRows.filter(
+    (row) => selectedCaretakerPlaceIds.has(row.place.id) && row.status !== "good"
+  );
+  const activeCaretakersCount = caretakers.filter((caretaker) => caretaker.status === "active").length;
   const selectedRow = statusRows.find((row) => row.place.id === selectedPlaceId) ?? null;
   const selectedPlace = selectedRow?.place ?? null;
   const selectedStatus = selectedRow?.status ?? "good";
@@ -330,6 +471,16 @@ function CaretakerPanel({
     });
   };
 
+  const saveAdminNote = () => {
+    const nextNotes = {
+      ...adminNotes,
+      [selectedCaretakerId]: adminNoteDraft,
+    };
+    setAdminNotes(nextNotes);
+    window.localStorage.setItem(adminNotesStorageKey, JSON.stringify(nextNotes));
+    window.dispatchEvent(new Event("rossa-admin-notes-changed"));
+  };
+
   const updateReportStatus = (reportId: string, status: ReportStatus) => {
     const existingReport = reports.find((report) => report.id === reportId);
     const sourceReport = existingReport ?? allReports.find((report) => report.id === reportId);
@@ -410,10 +561,14 @@ function CaretakerPanel({
     <main className="caretaker-page">
       <section className="caretaker-hero">
         <div>
-          <span className="eyebrow">{isEnglish ? "Caretaker workspace" : "Przestrzen opiekuna"}</span>
-          <h1>{isEnglish ? "Rasos care dashboard" : "Panel Opiekuna Rossy"}</h1>
+          <span className="eyebrow">{isAdmin ? (isEnglish ? "Administrator workspace" : "Przestrzen administratora") : (isEnglish ? "Caretaker workspace" : "Przestrzen opiekuna")}</span>
+          <h1>{isAdmin ? (isEnglish ? "Rasos admin dashboard" : "Panel Administratora Rossy") : (isEnglish ? "Rasos care dashboard" : "Panel Opiekuna Rossy")}</h1>
           <p>
-            {isEnglish
+            {isAdmin
+              ? isEnglish
+                ? "Overview of caretakers, responsibilities, reports and graves that still need attention."
+                : "Widok dla zarzadzania opiekunami, odpowiedzialnoscia, zgloszeniami i grobami wymagajacymi uwagi."
+              : isEnglish
               ? "Separate operational view for reports, grave condition, missing photos and content moderation."
               : "Osobny widok roboczy dla zgloszen, stanu grobow, brakujacych zdjec i moderacji tresci."}
           </p>
@@ -432,14 +587,14 @@ function CaretakerPanel({
 
       <section className="caretaker-stats">
         <article>
-          <FaMapMarkerAlt />
-          <strong>{places.length}</strong>
-          <span>{isEnglish ? "places in catalog" : "miejsc w katalogu"}</span>
+          {isAdmin ? <FaUsers /> : <FaMapMarkerAlt />}
+          <strong>{isAdmin ? caretakers.length : places.length}</strong>
+          <span>{isAdmin ? (isEnglish ? "caretakers" : "opiekunow") : (isEnglish ? "places in catalog" : "miejsc w katalogu")}</span>
         </article>
         <article>
-          <FaExclamationTriangle />
-          <strong>{unresolvedReports.length}</strong>
-          <span>{isEnglish ? "open reports" : "otwartych zgloszen"}</span>
+          {isAdmin ? <FaUserShield /> : <FaExclamationTriangle />}
+          <strong>{isAdmin ? activeCaretakersCount : unresolvedReports.length}</strong>
+          <span>{isAdmin ? (isEnglish ? "active caretakers" : "aktywnych opiekunow") : (isEnglish ? "open reports" : "otwartych zgloszen")}</span>
         </article>
         <article>
           <FaTools />
@@ -452,6 +607,137 @@ function CaretakerPanel({
           <span>{isEnglish ? "missing photos" : "brak zdjec"}</span>
         </article>
       </section>
+
+      {isAdmin && selectedCaretaker && (
+        <section className="admin-overview-panel">
+          <header className="admin-overview-head">
+            <div>
+              <span className="eyebrow">{isEnglish ? "Admin control" : "Kontrola administratora"}</span>
+              <h2>{isEnglish ? "Caretakers and assigned graves" : "Opiekunowie i przypisane groby"}</h2>
+              <p>
+                {isEnglish
+                  ? "Admin can see who is responsible for each place, what still needs care and when a caretaker was last active."
+                  : "Administrator widzi, kto odpowiada za miejsca, co wymaga opieki i kiedy opiekun byl ostatnio aktywny."}
+              </p>
+            </div>
+            <strong>
+              <FaUsers /> {caretakers.length}
+            </strong>
+          </header>
+
+          <div className="admin-overview-grid">
+            <div className="admin-caretaker-list">
+              {caretakers.map((caretaker) => {
+                const assignedIds = new Set(caretaker.assignedPlaceIds);
+                const openReportCount = allReports.filter(
+                  (report) => report.placeId !== null && assignedIds.has(report.placeId) && report.status !== "resolved"
+                ).length;
+                const attentionCount = statusRows.filter(
+                  (row) => assignedIds.has(row.place.id) && row.status !== "good"
+                ).length;
+
+                return (
+                  <button
+                    className={`admin-caretaker-card ${selectedCaretakerId === caretaker.id ? "active" : ""}`}
+                    key={caretaker.id}
+                    onClick={() => setSelectedCaretakerId(caretaker.id)}
+                    type="button"
+                  >
+                    <span className={`caretaker-status-dot status-${caretaker.status}`} />
+                    <strong>{caretaker.name}</strong>
+                    <small>{caretaker.specialization}</small>
+                    <b>{caretaker.assignedPlaceIds.length} {isEnglish ? "places" : "miejsc"}</b>
+                    <em>{openReportCount} {isEnglish ? "reports" : "zgloszen"} - {attentionCount} {isEnglish ? "alerts" : "uwag"}</em>
+                  </button>
+                );
+              })}
+            </div>
+
+            <article className="admin-caretaker-detail">
+              <div className="admin-detail-head">
+                <div>
+                  <span className={`caretaker-status-pill status-${selectedCaretaker.status}`}>
+                    {caretakerStatusLabels[selectedCaretaker.status][language]}
+                  </span>
+                  <h3>{selectedCaretaker.name}</h3>
+                  <p>{selectedCaretaker.specialization}</p>
+                </div>
+                <div className="admin-contact-card">
+                  <span>{selectedCaretaker.email}</span>
+                  <span>{selectedCaretaker.phone}</span>
+                  <small>{isEnglish ? "Last active" : "Ostatnia aktywnosc"}: {formatDate(selectedCaretaker.lastActive, language)}</small>
+                </div>
+              </div>
+
+              <div className="admin-mini-stats">
+                <span>
+                  <strong>{selectedCaretakerPlaces.length}</strong>
+                  {isEnglish ? "assigned places" : "przypisane miejsca"}
+                </span>
+                <span>
+                  <strong>{selectedCaretakerReports.length}</strong>
+                  {isEnglish ? "open reports" : "otwarte zgloszenia"}
+                </span>
+                <span>
+                  <strong>{selectedCaretakerAttention.length}</strong>
+                  {isEnglish ? "need attention" : "wymaga uwagi"}
+                </span>
+                <span>
+                  <strong>{selectedCaretaker.completedActions}</strong>
+                  {isEnglish ? "completed actions" : "wykonane dzialania"}
+                </span>
+              </div>
+
+              <div className="assigned-place-list">
+                <strong>{isEnglish ? "Places under care" : "Miejsca pod opieka"}</strong>
+                {selectedCaretakerPlaces.map((place) => {
+                  const row = statusRows.find((item) => item.place.id === place.id);
+                  const status = row?.status ?? "good";
+
+                  return (
+                    <div className={`assigned-place-row status-${status}`} key={place.id}>
+                      <img alt={place.name} src={place.image} />
+                      <span>
+                        <b>{place.name}</b>
+                        <small>{statusLabels[status][language]} - {place.categoryLabel}</small>
+                      </span>
+                      <button onClick={() => openPlaceReview(place.id)} type="button">
+                        <FaEdit /> {isEnglish ? "Review" : "Kontrola"}
+                      </button>
+                      <button onClick={() => onShowPlace(place.id)} type="button">
+                        <FaMapMarkerAlt /> {isEnglish ? "Map" : "Mapa"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="admin-detail-bottom">
+                <label className="admin-note-box">
+                  {isEnglish ? "Admin note about this caretaker" : "Notatka administratora o opiekunie"}
+                  <textarea
+                    onChange={(event) => setAdminNoteDraft(event.target.value)}
+                    placeholder={isEnglish ? "Example: reliable, check winter reports first..." : "Np. aktywny, najpierw sprawdzic zgloszenia po zimie..."}
+                    value={adminNoteDraft}
+                  />
+                  <button onClick={saveAdminNote} type="button">
+                    <FaEdit /> {isEnglish ? "Save admin note" : "Zapisz notatke"}
+                  </button>
+                </label>
+
+                <div className="admin-activity-list">
+                  <strong>{isEnglish ? "Recent activity" : "Ostatnia aktywnosc"}</strong>
+                  {selectedCaretaker.activity.map((activity) => (
+                    <span key={activity}>
+                      <FaCheckCircle /> {activity}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      )}
 
       {selectedPlace && (
         <section className={`place-review-panel review-${selectedStatus}`}>
