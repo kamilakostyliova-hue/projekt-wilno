@@ -145,7 +145,7 @@ function CaretakerPanel({
   const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(null);
   const [reviewNote, setReviewNote] = useState("");
   const isEnglish = language === "en";
-  const hasAccess = currentUser?.role === "caretaker" || currentUser?.role === "admin";
+  const hasAccess = currentUser?.role === "caretaker";
 
   useEffect(() => {
     const refresh = () => {

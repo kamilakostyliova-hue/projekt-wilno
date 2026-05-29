@@ -11,7 +11,6 @@ import {
   FaSave,
   FaShieldAlt,
   FaSignOutAlt,
-  FaTools,
   FaUserCog,
   FaUsers,
 } from "react-icons/fa";
@@ -38,7 +37,6 @@ type AdminPanelProps = {
   places: AdminPlace[];
   onLoginClick: () => void;
   onLogout: () => void;
-  onOpenCaretaker: () => void;
   onShowPlace: (placeId: number) => void;
 };
 
@@ -137,7 +135,6 @@ function AdminPanel({
   places,
   onLoginClick,
   onLogout,
-  onOpenCaretaker,
   onShowPlace,
 }: AdminPanelProps) {
   const isEnglish = language === "en";
@@ -209,7 +206,6 @@ function AdminPanel({
         heroTitle: "Administration center",
         heroLead: "Full control view for catalog entries, reports, users, moderation and project statistics.",
         logout: "Log out",
-        caretaker: "Caretaker panel",
         places: "catalog entries",
         reports: "open reports",
         drafts: "draft changes",
@@ -238,7 +234,6 @@ function AdminPanel({
         heroTitle: "Centrum administracji",
         heroLead: "Pelny widok kontroli katalogu, zgloszen, uzytkownikow, moderacji i statystyk projektu.",
         logout: "Wyloguj",
-        caretaker: "Panel opiekuna",
         places: "wpisow w katalogu",
         reports: "otwartych zgloszen",
         drafts: "zmian roboczych",
@@ -371,9 +366,6 @@ function AdminPanel({
             <strong>{currentUser?.name}</strong>
             <small>{currentUser?.email}</small>
           </span>
-          <button onClick={onOpenCaretaker} type="button">
-            <FaTools /> {copy.caretaker}
-          </button>
           <button onClick={onLogout} type="button">
             <FaSignOutAlt /> {copy.logout}
           </button>
@@ -579,7 +571,7 @@ function AdminPanel({
 }
 
 function FaExclamationIcon() {
-  return <FaTools />;
+  return <FaShieldAlt />;
 }
 
 export default AdminPanel;

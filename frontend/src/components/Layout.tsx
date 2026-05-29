@@ -1647,6 +1647,19 @@ function Layout({
     );
   }
 
+  if (activeView === "profile" && currentUser?.role === "admin") {
+    return (
+      <AdminPanel
+        currentUser={currentUser}
+        language={appLanguage}
+        onLoginClick={onLoginClick}
+        onLogout={onLogout}
+        onShowPlace={showPlaceOnMap}
+        places={places}
+      />
+    );
+  }
+
   if (activeView === "profile") {
     return (
       <UserProfilePage
@@ -1695,7 +1708,6 @@ function Layout({
         language={appLanguage}
         onLoginClick={onLoginClick}
         onLogout={onLogout}
-        onOpenCaretaker={() => onViewChange("caretaker")}
         onShowPlace={showPlaceOnMap}
         places={places}
       />

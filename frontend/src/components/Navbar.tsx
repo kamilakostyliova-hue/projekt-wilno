@@ -85,9 +85,18 @@ function Navbar({
     language === "en" ? "Caretaker panel" : "Panel opiekuna";
   const adminMenuLabel =
     language === "en" ? "Admin panel" : "Panel administratora";
-  const canOpenCaretakerPanel =
-    currentUser?.role === "caretaker" || currentUser?.role === "admin";
+  const canOpenCaretakerPanel = currentUser?.role === "caretaker";
   const canOpenAdminPanel = currentUser?.role === "admin";
+  const profileCaption =
+    currentUser?.role === "admin"
+      ? language === "en"
+        ? "Administrator"
+        : "Administrator"
+      : currentUser?.role === "caretaker"
+        ? language === "en"
+          ? "Caretaker"
+          : "Opiekun"
+        : t("nav.favorite_many", { count: favoriteCount });
   const shareText =
     language === "en"
       ? {
@@ -273,7 +282,7 @@ function Navbar({
                 )}
                 <span>
                   <strong>{currentUser.name}</strong>
-                  <small>{t("nav.favorite_many", { count: favoriteCount })}</small>
+                  <small>{profileCaption}</small>
                 </span>
                 <FaChevronDown className="profile-caret" />
               </button>
@@ -293,9 +302,11 @@ function Navbar({
                       <FaUserCog /> {adminMenuLabel}
                     </button>
                   )}
-                  <button onClick={() => goToView("profile")} type="button">
-                    <FaUserCircle /> {t("nav.dropdownProfile")}
-                  </button>
+                  {!canOpenAdminPanel && (
+                    <button onClick={() => goToView("profile")} type="button">
+                      <FaUserCircle /> {t("nav.dropdownProfile")}
+                    </button>
+                  )}
                   <button onClick={onLogout} type="button">
                     <FaSignOutAlt /> {t("nav.logout")}
                   </button>
