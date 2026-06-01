@@ -8,6 +8,8 @@ import {
   FaEye,
   FaEyeSlash,
   FaMapMarkerAlt,
+  FaMinus,
+  FaPlus,
   FaSave,
   FaShieldAlt,
   FaSignOutAlt,
@@ -78,6 +80,7 @@ const localUsersKey = "rossa-local-auth-users";
 const adminDraftsKey = "rossa-admin-place-drafts";
 const reviewStorageKey = "rossa-care-place-review";
 const adminCaretakerNotesKey = "rossa-admin-caretaker-notes";
+const adminCaretakerAssignmentsKey = "rossa-admin-caretaker-assignments";
 
 const reportLabels: Record<ReportType, { pl: string; en: string }> = {
   missing_photo: { pl: "Brakuje zdjecia", en: "Missing photo" },
@@ -136,6 +139,20 @@ const readStringStorageRecord = (key: string): Record<string, string> => {
   }
 };
 
+const readNumberArrayStorageRecord = (key: string): Record<string, number[]> => {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const saved = window.localStorage.getItem(key);
+    const parsed = saved ? JSON.parse(saved) : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<string, number[]>)
+      : {};
+  } catch {
+    return {};
+  }
+};
+
 const writeReports = (reports: CareReport[]) => {
   window.localStorage.setItem(reportsStorageKey, JSON.stringify(reports));
   window.dispatchEvent(new Event("rossa-care-reports-changed"));
@@ -151,6 +168,10 @@ const writeDrafts = (drafts: Record<number, AdminPlaceDraft>) => {
 
 const writeCaretakerNotes = (notes: Record<string, string>) => {
   window.localStorage.setItem(adminCaretakerNotesKey, JSON.stringify(notes));
+};
+
+const writeCaretakerAssignments = (assignments: Record<string, number[]>) => {
+  window.localStorage.setItem(adminCaretakerAssignmentsKey, JSON.stringify(assignments));
 };
 
 const formatDate = (value: string, language: AppLanguage) => {
@@ -181,6 +202,9 @@ function AdminPanel({
   const [editCategory, setEditCategory] = useState("");
   const [selectedCaretakerEmail, setSelectedCaretakerEmail] = useState("opiekun@na-rossie.local");
   const [caretakerNotes, setCaretakerNotes] = useState<Record<string, string>>(() => readStringStorageRecord(adminCaretakerNotesKey));
+  const [caretakerAssignments, setCaretakerAssignments] = useState<Record<string, number[]>>(() =>
+    readNumberArrayStorageRecord(adminCaretakerAssignmentsKey)
+  );
   const [caretakerNoteDraft, setCaretakerNoteDraft] = useState("");
   const hasAccess = currentUser?.role === "admin";
 
@@ -219,12 +243,15 @@ function AdminPanel({
     () =>
       caretakerUsers.map((user, index) => {
         const knownMainCaretaker = user.email === "opiekun@na-rossie.local";
-        const assignedPlaceIds = knownMainCaretaker
+        const defaultAssignedPlaceIds = knownMainCaretaker
           ? [1, 4, 10]
           : places
               .filter((_, placeIndex) => placeIndex % Math.max(1, caretakerUsers.length) === index)
               .slice(0, 4)
               .map((place) => place.id);
+        const assignedPlaceIds = Array.isArray(caretakerAssignments[user.email])
+          ? caretakerAssignments[user.email]
+          : defaultAssignedPlaceIds;
 
         return {
           id: user.email,
@@ -249,7 +276,7 @@ function AdminPanel({
               : ["Zaktualizowano przypisany sektor", "Dodano notatke wewnetrzna", "Wymaga kolejnej kontroli"],
         };
       }),
-    [caretakerUsers, isEnglish, places]
+    [caretakerAssignments, caretakerUsers, isEnglish, places]
   );
 
   const managedPlaces = useMemo(
@@ -280,6 +307,23 @@ function AdminPanel({
   const selectedCaretakerAttention = selectedCaretakerPlaces.filter((place) =>
     ["check", "needs_care", "missing_photo", "missing_data"].includes(reviewStates[place.id]?.status ?? "")
   );
+  const getCaretakersForPlace = (placeId: number) =>
+    caretakerRecords.filter((caretaker) => caretaker.assignedPlaceIds.includes(placeId));
+  const getCaretakerLabelForPlace = (placeId: number) => {
+    const owners = getCaretakersForPlace(placeId);
+    if (owners.length === 0) return isEnglish ? "No caretaker assigned" : "Brak opiekuna";
+    return owners.map((owner) => owner.user.username).join(", ");
+  };
+  const getCaretakerLabelForCategory = (categoryLabel: string) => {
+    const placeIds = managedPlaces
+      .filter((place) => place.categoryLabel === categoryLabel)
+      .map((place) => place.id);
+    const owners = caretakerRecords.filter((caretaker) =>
+      caretaker.assignedPlaceIds.some((placeId) => placeIds.includes(placeId))
+    );
+    if (owners.length === 0) return isEnglish ? "No caretaker assigned" : "Brak opiekuna";
+    return Array.from(new Set(owners.map((owner) => owner.user.username))).join(", ");
+  };
   const categoryCounts = managedPlaces.reduce<Record<string, number>>((acc, place) => {
     acc[place.categoryLabel] = (acc[place.categoryLabel] ?? 0) + 1;
     return acc;
@@ -324,6 +368,13 @@ function AdminPanel({
         saveCaretakerNote: "Save caretaker note",
         recentActivity: "Recent activity",
         reviewPlace: "Review",
+        manageAssignments: "Manage assigned places",
+        assignmentHint: "Add or remove graves assigned to this caretaker.",
+        assign: "Assign",
+        removeAssignment: "Remove",
+        assigned: "Assigned",
+        unassigned: "Not assigned",
+        caretakerOwner: "Caretaker",
       }
     : {
         accessTitle: "Dostep administratora",
@@ -363,6 +414,13 @@ function AdminPanel({
         saveCaretakerNote: "Zapisz notatke opiekuna",
         recentActivity: "Ostatnia aktywnosc",
         reviewPlace: "Kontrola",
+        manageAssignments: "Zarzadzaj przypisanymi miejscami",
+        assignmentHint: "Dodaj albo usun groby przypisane temu opiekunowi.",
+        assign: "Przypisz",
+        removeAssignment: "Usun",
+        assigned: "Przypisane",
+        unassigned: "Nieprzypisane",
+        caretakerOwner: "Opiekun",
       };
 
   const openEditor = (placeId: number) => {
@@ -462,6 +520,24 @@ function AdminPanel({
     writeCaretakerNotes(nextNotes);
   };
 
+  const toggleCaretakerAssignment = (placeId: number) => {
+    if (!selectedCaretaker) return;
+
+    const nextAssignedIds = new Set(selectedCaretaker.assignedPlaceIds);
+    if (nextAssignedIds.has(placeId)) {
+      nextAssignedIds.delete(placeId);
+    } else {
+      nextAssignedIds.add(placeId);
+    }
+
+    const nextAssignments = {
+      ...caretakerAssignments,
+      [selectedCaretaker.id]: Array.from(nextAssignedIds),
+    };
+    setCaretakerAssignments(nextAssignments);
+    writeCaretakerAssignments(nextAssignments);
+  };
+
   if (!hasAccess) {
     return (
       <main className="admin-page">
@@ -550,6 +626,9 @@ function AdminPanel({
                   <span>
                     <strong>{place.name}</strong>
                     <small>{place.adminCategory} - {place.years}</small>
+                    <small className="admin-owner-line">
+                      {copy.caretakerOwner}: {getCaretakerLabelForPlace(place.id)}
+                    </small>
                     {place.isHidden && <em>{isEnglish ? "Hidden from public catalog" : "Ukryte w katalogu publicznym"}</em>}
                   </span>
                   <button onClick={() => openEditor(place.id)} type="button">
@@ -573,6 +652,9 @@ function AdminPanel({
                 <span className="eyebrow">{isEnglish ? "Edit entry" : "Edycja wpisu"}</span>
                 <h2>{selectedPlace.name}</h2>
                 <small>{selectedPlace.years}</small>
+                <small className="admin-owner-line">
+                  {copy.caretakerOwner}: {getCaretakerLabelForPlace(selectedPlace.id)}
+                </small>
               </div>
               <label>
                 {copy.category}
@@ -619,6 +701,11 @@ function AdminPanel({
                 <h3>{report.placeName}</h3>
                 <p>{report.note}</p>
                 <small>{formatDate(report.createdAt, language)}</small>
+                {report.placeId && (
+                  <small className="admin-owner-line">
+                    {copy.caretakerOwner}: {getCaretakerLabelForPlace(report.placeId)}
+                  </small>
+                )}
                 <div>
                   {report.placeId && (
                     <button onClick={() => onShowPlace(report.placeId as number)} type="button">
@@ -735,6 +822,7 @@ function AdminPanel({
                           <span>
                             <strong>{place.name}</strong>
                             <small>{place.categoryLabel} - {place.years}</small>
+                            <small>{copy.caretakerOwner}: {selectedCaretaker.user.username}</small>
                             <em>{state === "good" ? (isEnglish ? "Good" : "Zadbany") : state}</em>
                           </span>
                           <button onClick={() => openEditor(place.id)} type="button">
@@ -746,6 +834,34 @@ function AdminPanel({
                         </article>
                       );
                     })}
+                  </div>
+
+                  <div className="admin-assignment-manager">
+                    <div>
+                      <strong>{copy.manageAssignments}</strong>
+                      <p>{copy.assignmentHint}</p>
+                    </div>
+
+                    <div className="admin-assignment-list">
+                      {managedPlaces.map((place) => {
+                        const isAssigned = selectedCaretakerPlaceIds.has(place.id);
+
+                        return (
+                          <article className={isAssigned ? "is-assigned" : ""} key={place.id}>
+                            <img alt={place.name} src={place.image} />
+                            <span>
+                              <strong>{place.name}</strong>
+                              <small>{place.categoryLabel}</small>
+                              <em>{isAssigned ? copy.assigned : copy.unassigned}</em>
+                            </span>
+                            <button onClick={() => toggleCaretakerAssignment(place.id)} type="button">
+                              {isAssigned ? <FaMinus /> : <FaPlus />}
+                              {isAssigned ? copy.removeAssignment : copy.assign}
+                            </button>
+                          </article>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="admin-caretaker-bottom">
@@ -790,6 +906,9 @@ function AdminPanel({
                   <strong>{category}</strong>
                   <small>{count}</small>
                 </span>
+                <small className="admin-owner-line">
+                  {copy.caretakerOwner}: {getCaretakerLabelForCategory(category)}
+                </small>
                 <div>
                   <i style={{ width: `${Math.max(8, (count / managedPlaces.length) * 100)}%` }} />
                 </div>

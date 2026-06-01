@@ -25,6 +25,8 @@
 .admin-caretaker-detail,
 .admin-caretaker-contact,
 .admin-assigned-place,
+.admin-assignment-manager,
+.admin-assignment-list article,
 .admin-caretaker-activity,
 .admin-stats-grid article {
   border: 1px solid rgba(122, 167, 223, 0.32);
@@ -69,6 +71,7 @@
 .admin-report-card button,
 .admin-users-table button,
 .admin-assigned-place button,
+.admin-assignment-list button,
 .admin-caretaker-bottom button {
   display: inline-flex;
   align-items: center;
@@ -99,6 +102,7 @@
 .admin-report-card button:hover,
 .admin-users-table button:hover,
 .admin-assigned-place button:hover,
+.admin-assignment-list button:hover,
 .admin-caretaker-bottom button:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 34px rgba(37, 99, 235, 0.16);
@@ -291,6 +295,16 @@
   font-size: 0.78rem;
   font-style: normal;
   font-weight: 850;
+}
+
+.admin-owner-line {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8 !important;
+  font-size: 0.76rem;
+  font-weight: 950;
 }
 
 .admin-place-row button,
@@ -635,6 +649,82 @@
   font-size: 0.82rem;
 }
 
+.admin-assignment-manager {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 22px;
+}
+
+.admin-assignment-manager > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-assignment-manager strong {
+  color: #0c1730;
+}
+
+.admin-assignment-manager p {
+  color: #53647f;
+  line-height: 1.45;
+}
+
+.admin-assignment-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.admin-assignment-list article {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 18px;
+}
+
+.admin-assignment-list article.is-assigned {
+  border-color: rgba(37, 99, 235, 0.45);
+  background:
+    radial-gradient(circle at 96% 12%, rgba(37, 99, 235, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.96);
+}
+
+.admin-assignment-list img {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  object-fit: cover;
+}
+
+.admin-assignment-list span {
+  display: grid;
+  gap: 3px;
+}
+
+.admin-assignment-list small,
+.admin-assignment-list em {
+  color: #53647f;
+  font-style: normal;
+  line-height: 1.3;
+}
+
+.admin-assignment-list em {
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.admin-assignment-list button {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 0.82rem;
+}
+
 .admin-caretaker-bottom {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(230px, 0.75fr);
@@ -731,6 +821,8 @@ html[data-theme="night"] .admin-caretaker-card,
 html[data-theme="night"] .admin-caretaker-detail,
 html[data-theme="night"] .admin-caretaker-contact,
 html[data-theme="night"] .admin-assigned-place,
+html[data-theme="night"] .admin-assignment-manager,
+html[data-theme="night"] .admin-assignment-list article,
 html[data-theme="night"] .admin-caretaker-activity,
 html[data-theme="night"] .admin-stats-grid article,
 html[data-theme="night"] .admin-editor input,
@@ -755,6 +847,8 @@ html[data-theme="night"] .admin-caretaker-card strong,
 html[data-theme="night"] .admin-caretaker-detail h3,
 html[data-theme="night"] .admin-caretaker-stats strong,
 html[data-theme="night"] .admin-assigned-place strong,
+html[data-theme="night"] .admin-assignment-manager strong,
+html[data-theme="night"] .admin-assignment-list strong,
 html[data-theme="night"] .admin-caretaker-bottom label,
 html[data-theme="night"] .admin-caretaker-activity strong,
 html[data-theme="night"] .admin-stats-grid strong {
@@ -778,6 +872,9 @@ html[data-theme="night"] .admin-caretaker-contact,
 html[data-theme="night"] .admin-caretaker-stats span,
 html[data-theme="night"] .admin-assigned-place small,
 html[data-theme="night"] .admin-assigned-place em,
+html[data-theme="night"] .admin-assignment-manager p,
+html[data-theme="night"] .admin-assignment-list small,
+html[data-theme="night"] .admin-assignment-list em,
 html[data-theme="night"] .admin-caretaker-activity span,
 html[data-theme="night"] .admin-stats-grid small {
   color: #c9d6ea;
@@ -791,7 +888,9 @@ html[data-theme="night"] .admin-report-card button,
 html[data-theme="night"] .admin-users-table button,
 html[data-theme="night"] .admin-caretaker-card b,
 html[data-theme="night"] .caretaker-status-pill,
+html[data-theme="night"] .admin-owner-line,
 html[data-theme="night"] .admin-assigned-place button,
+html[data-theme="night"] .admin-assignment-list button,
 html[data-theme="night"] .admin-caretaker-bottom button,
 html[data-theme="night"] .admin-report-card > span,
 html[data-theme="night"] .role-chip {
@@ -804,6 +903,13 @@ html[data-theme="night"] .admin-tabs button.active,
 html[data-theme="night"] .admin-editor-actions button:last-child {
   background: linear-gradient(135deg, #1d4ed8, #0b2753);
   color: #ffffff;
+}
+
+html[data-theme="night"] .admin-assignment-list article.is-assigned {
+  border-color: rgba(142, 197, 255, 0.42);
+  background:
+    radial-gradient(circle at 96% 12%, rgba(142, 197, 255, 0.12), transparent 34%),
+    rgba(13, 37, 79, 0.92);
 }
 
 html[data-theme="night"] .admin-stats-grid article div {
@@ -829,6 +935,10 @@ html[data-theme="night"] .admin-stats-grid article div {
   .admin-caretaker-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .admin-assignment-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -842,12 +952,14 @@ html[data-theme="night"] .admin-stats-grid article div {
   .admin-place-row,
   .admin-caretaker-stats,
   .admin-assigned-place,
+  .admin-assignment-list article,
   .admin-editor-actions {
     grid-template-columns: 1fr;
   }
 
   .admin-place-row img,
-  .admin-assigned-place img {
+  .admin-assigned-place img,
+  .admin-assignment-list img {
     width: 100%;
     height: 180px;
   }
@@ -856,6 +968,7 @@ html[data-theme="night"] .admin-stats-grid article div {
   .admin-report-card button,
   .admin-users-table button,
   .admin-assigned-place button,
+  .admin-assignment-list button,
   .admin-caretaker-bottom button {
     width: 100%;
   }
