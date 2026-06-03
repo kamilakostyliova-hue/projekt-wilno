@@ -161,7 +161,7 @@ const formatDuration = (seconds: number) => {
 
 const routeModeLabel = (mode: string, language: "pl" | "en") => {
   const labels = {
-    pl: { walk: "Pieszo", bike: "Rower", car: "Samochod" },
+    pl: { walk: "Pieszo", bike: "Rower", car: "Samochód" },
     en: { walk: "Walking", bike: "Bike", car: "Car" },
   };
 
@@ -494,7 +494,7 @@ function UserProfilePage({
 
   const openSavedRoute = (route: SavedRouteRecord) => {
     onOpenSavedRoute(route);
-    setNotice(languageKey === "en" ? "Saved route opened from this device." : "Otworzono trase zapisana na tym urzadzeniu.");
+    setNotice(languageKey === "en" ? "Saved route opened from this device." : "Otworzono trasę zapisaną na tym urządzeniu.");
   };
 
   const removeSavedRoute = (routeId: string) => {
@@ -502,6 +502,14 @@ function UserProfilePage({
     setSavedRoutes(nextRoutes);
     window.localStorage.setItem(savedRoutesKey, JSON.stringify(nextRoutes));
     window.dispatchEvent(new Event("rossa-profile-data-changed"));
+  };
+
+  const removeWalkHistory = (walkId: string) => {
+    const nextHistory = walkHistory.filter((walk) => walk.id !== walkId);
+    setWalkHistory(nextHistory);
+    window.localStorage.setItem(walkHistoryKey, JSON.stringify(nextHistory));
+    window.dispatchEvent(new Event("rossa-profile-data-changed"));
+    setNotice(languageKey === "en" ? "Walk history entry removed." : "Usunięto wpis z historii spacerów.");
   };
 
   const downloadRouteCard = async (route: SavedRouteRecord) => {
@@ -905,11 +913,11 @@ function UserProfilePage({
         )}
       </section>
 
-      <section className="profile-split">
-        <article className="profile-panel">
+      <section className="profile-panel wide-panel route-history-panel">
+        <article>
           <header>
             <FaRoute />
-            <h2>{languageKey === "en" ? "Walk history cards" : "Historia spacerow"}</h2>
+            <h2>{languageKey === "en" ? "Walk history cards" : "Historia spacerów"}</h2>
           </header>
           {savedRoutes.length === 0 ? (
             <div className="profile-empty">{t("profile.noRoutes")}</div>
@@ -926,7 +934,7 @@ function UserProfilePage({
                       {route.savedOnDevice
                         ? languageKey === "en"
                           ? "On this device"
-                          : "Na tym urzadzeniu"
+                          : "Na tym urządzeniu"
                         : languageKey === "en"
                           ? "Old save"
                           : "Stary zapis"}
@@ -972,13 +980,13 @@ function UserProfilePage({
 
                   <div className="route-card-actions">
                     <button onClick={() => openSavedRoute(route)} type="button">
-                      <FaRoute /> {languageKey === "en" ? "Show route" : "Pokaz trase"}
+                      <FaRoute /> {languageKey === "en" ? "Show route" : "Pokaż trasę"}
                     </button>
                     <button onClick={() => void downloadRouteCard(route)} type="button">
                       <FaDownload /> PNG
                     </button>
                     <button onClick={() => removeSavedRoute(route.id)} type="button">
-                      <FaTrash /> {languageKey === "en" ? "Remove" : "Usun"}
+                      <FaTrash /> {languageKey === "en" ? "Remove" : "Usuń"}
                     </button>
                   </div>
                 </article>
@@ -991,7 +999,7 @@ function UserProfilePage({
       <section className="profile-panel wide-panel">
         <header>
           <FaHistory />
-          <h2>{languageKey === "en" ? "Recent walk activity" : "Ostatnia aktywnosc spacerow"}</h2>
+          <h2>{languageKey === "en" ? "Recent walk activity" : "Ostatnia aktywność spacerów"}</h2>
         </header>
         {walkHistory.length === 0 ? (
           <div className="profile-empty">{t("profile.noHistory")}</div>
@@ -1004,9 +1012,14 @@ function UserProfilePage({
                   <strong>{walk.routeName}</strong>
                   <p>{formatDistance(walk.distance)} - {formatDuration(walk.duration)} - {t("profile.points", { count: walk.pointCount })}</p>
                   <small>{t("profile.startedAt")}: {formatDate(walk.startedAt)}</small>
-                  <button className="timeline-download" onClick={() => void downloadWalkCard(walk)} type="button">
-                    <FaDownload /> PNG
-                  </button>
+                  <div className="timeline-actions">
+                    <button className="timeline-download" onClick={() => void downloadWalkCard(walk)} type="button">
+                      <FaDownload /> PNG
+                    </button>
+                    <button className="timeline-delete" onClick={() => removeWalkHistory(walk.id)} type="button">
+                      <FaTrash /> {languageKey === "en" ? "Remove" : "Usuń"}
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}

@@ -2042,7 +2042,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
             onClick={() => setDrawerOpen(true)}
             type="button"
           >
-            <FaLayerGroup /> Katalog kategorii
+            <FaLayerGroup /> {copy.categories}
           </button>
           {drawerOpen && (
             <button
