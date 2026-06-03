@@ -7331,3 +7331,560 @@ html[data-theme="night"] .issue-report-actions button {
     color: #dcecff !important;
   }
 }
+
+/* Premium mobile polish: phone layout behaves like a compact guide app. */
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 16% 0%, rgba(96, 165, 250, 0.18), transparent 36%),
+      linear-gradient(180deg, #f7fbff 0%, #edf5ff 44%, #f8fbff 100%);
+  }
+
+  .layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: calc(100svh - 68px) !important;
+    padding: 10px 10px calc(88px + env(safe-area-inset-bottom)) !important;
+    overflow: clip !important;
+    background:
+      radial-gradient(circle at 12% 6%, rgba(37, 99, 235, 0.12), transparent 30%),
+      radial-gradient(circle at 86% 14%, rgba(142, 197, 255, 0.18), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(238, 246, 255, 0.8)) !important;
+  }
+
+  .center {
+    display: grid !important;
+    min-width: 0 !important;
+    gap: 12px !important;
+  }
+
+  .workspace-bar,
+  .list,
+  .route-panel,
+  .walk-planner,
+  .tour-mode-panel,
+  .details .card {
+    border: 1px solid rgba(122, 167, 223, 0.3) !important;
+    border-radius: 24px !important;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.92), transparent 34%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(244, 249, 255, 0.9)) !important;
+    box-shadow:
+      0 18px 44px rgba(10, 31, 68, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(18px);
+  }
+
+  .workspace-bar {
+    position: relative;
+    display: grid !important;
+    gap: 10px !important;
+    padding: 15px !important;
+    overflow: hidden !important;
+  }
+
+  .workspace-bar::after {
+    position: absolute;
+    right: 18px;
+    bottom: 12px;
+    width: 84px;
+    height: 84px;
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.12), transparent 66%);
+    content: "";
+    pointer-events: none;
+  }
+
+  .workspace-bar .eyebrow {
+    color: #2563eb !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .workspace-bar h2 {
+    max-width: 11ch;
+    color: #0c1730 !important;
+    font-size: clamp(1.65rem, 8.5vw, 2.45rem) !important;
+    line-height: 0.98 !important;
+    text-wrap: balance;
+  }
+
+  .workspace-bar p {
+    max-width: 34rem;
+    color: #596b86 !important;
+    font-size: 0.91rem !important;
+    line-height: 1.45 !important;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .workspace-actions,
+  .route-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .workspace-actions .small-button,
+  .route-actions button,
+  .route-actions a,
+  .details .card > button,
+  .details .card .fav,
+  .details .card .nav,
+  .details .card .visited-action,
+  .details .card .report-action {
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    border-radius: 17px !important;
+    font-size: 0.88rem !important;
+    font-weight: 900 !important;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease !important;
+  }
+
+  .workspace-actions .small-button:hover,
+  .route-actions button:hover,
+  .details .card > button:hover,
+  .item:hover {
+    transform: translateY(-3px) !important;
+  }
+
+  .map-shell,
+  .map-card,
+  .map,
+  .premium-map,
+  .leaflet-container {
+    max-width: 100% !important;
+    border-radius: 26px !important;
+  }
+
+  .map-shell,
+  .map-card {
+    overflow: hidden !important;
+    border: 1px solid rgba(122, 167, 223, 0.34) !important;
+    box-shadow: 0 20px 46px rgba(10, 31, 68, 0.12) !important;
+  }
+
+  .map,
+  .premium-map {
+    height: min(58svh, 430px) !important;
+    min-height: 330px !important;
+  }
+
+  .leaflet-control-zoom {
+    overflow: hidden;
+    border: 1px solid rgba(122, 167, 223, 0.38) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 24px rgba(10, 31, 68, 0.14) !important;
+  }
+
+  .leaflet-control-zoom a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+
+  .route-panel {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 14px !important;
+  }
+
+  .route-panel h3,
+  .walk-planner h3,
+  .tour-mode-panel h3,
+  .list-header h3 {
+    color: #0c1730 !important;
+    font-size: 1.12rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .route-summary,
+  .route-stats,
+  .route-meta,
+  .route-info-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .route-summary > *,
+  .route-stats > *,
+  .route-meta > *,
+  .route-info-grid > * {
+    min-width: 0 !important;
+    border-radius: 16px !important;
+  }
+
+  .list {
+    display: grid !important;
+    gap: 9px !important;
+    max-height: none !important;
+    padding: 11px !important;
+    overflow: visible !important;
+  }
+
+  .list-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .list-header input,
+  .list-layout .list-header input {
+    width: 100% !important;
+    min-height: 43px !important;
+    padding: 0 14px !important;
+    border: 1px solid rgba(122, 167, 223, 0.36) !important;
+    border-radius: 15px !important;
+    background: rgba(255, 255, 255, 0.86) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .item {
+    display: grid !important;
+    grid-template-columns: 74px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    border: 1px solid rgba(122, 167, 223, 0.26) !important;
+    border-radius: 21px !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    box-shadow: 0 12px 30px rgba(10, 31, 68, 0.08) !important;
+  }
+
+  .item.active {
+    border-color: rgba(37, 99, 235, 0.5) !important;
+    background: linear-gradient(135deg, #ffffff, #edf6ff) !important;
+    box-shadow: 0 18px 40px rgba(37, 99, 235, 0.15) !important;
+  }
+
+  .item img {
+    width: 74px !important;
+    height: 74px !important;
+    min-width: 74px !important;
+    border-radius: 17px !important;
+    object-fit: cover !important;
+  }
+
+  .item > div {
+    min-width: 0 !important;
+  }
+
+  .item h4 {
+    margin: 0 0 3px !important;
+    color: #101a2f !important;
+    font-size: 1rem !important;
+    line-height: 1.12 !important;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .item p {
+    margin: 2px 0 !important;
+    color: #64748b !important;
+    font-size: 0.79rem !important;
+    line-height: 1.35 !important;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .item .tag,
+  .item .badge,
+  .item small {
+    max-width: 100%;
+    font-size: 0.72rem !important;
+  }
+
+  .item-actions {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+  }
+
+  .item-actions button {
+    min-height: 36px !important;
+    border-radius: 14px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .details {
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .details > h3 {
+    display: none !important;
+  }
+
+  .details .card {
+    display: grid !important;
+    gap: 11px !important;
+    max-height: none !important;
+    padding: 12px !important;
+    overflow: visible !important;
+  }
+
+  .details .card img,
+  .details-card-image,
+  .card > img {
+    width: 100% !important;
+    height: min(44vw, 198px) !important;
+    min-height: 170px !important;
+    border-radius: 22px !important;
+    object-fit: cover !important;
+    box-shadow: 0 14px 32px rgba(10, 31, 68, 0.14) !important;
+  }
+
+  .details .card h2,
+  .details .card h4 {
+    color: #101a2f !important;
+    font-size: clamp(1.45rem, 7.5vw, 2.05rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .details .card p {
+    color: #4f6078 !important;
+    font-size: 0.93rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .details-meta,
+  .person-meta,
+  .detail-chips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .details-meta span,
+  .person-meta span,
+  .detail-chips span {
+    min-height: 32px !important;
+    border-radius: 999px !important;
+    background: #edf5ff !important;
+    color: #225a92 !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+  }
+
+  .timeline,
+  .history-timeline {
+    max-height: 230px !important;
+    overflow-y: auto !important;
+    padding-right: 3px !important;
+    scrollbar-width: thin;
+  }
+
+  .audio-guide-card,
+  .audio-card,
+  .issue-report-box,
+  .visit-box,
+  .quiz-card {
+    max-width: 100% !important;
+    border-radius: 20px !important;
+    padding: 12px !important;
+  }
+
+  .audio-guide-card button,
+  .audio-card button,
+  .issue-report-box button,
+  .quiz-card button {
+    white-space: normal !important;
+  }
+
+  .walk-layout {
+    padding: 10px 10px calc(88px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .walk-layout .center {
+    gap: 12px !important;
+  }
+
+  .walk-category-list,
+  .walk-route-grid,
+  .tour-mode-grid,
+  .walk-planner-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+  }
+
+  .walk-category-card,
+  .walk-route-step,
+  .tour-mode-card,
+  .planner-card {
+    border-radius: 20px !important;
+    box-shadow: 0 12px 30px rgba(10, 31, 68, 0.08) !important;
+  }
+
+  .walk-route-list {
+    display: grid !important;
+    gap: 9px !important;
+  }
+
+  .walk-route-step {
+    display: grid !important;
+    grid-template-columns: 34px 58px minmax(0, 1fr) !important;
+    align-items: center !important;
+    padding: 9px !important;
+  }
+
+  .walk-route-step img {
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 15px !important;
+  }
+
+  .tour-mode-panel {
+    position: relative !important;
+    inset: auto !important;
+  }
+
+  .drawer-toggle {
+    width: min(236px, calc(100vw - 34px)) !important;
+    min-height: 48px !important;
+    padding: 0 16px !important;
+    box-shadow:
+      0 18px 44px rgba(10, 31, 68, 0.32),
+      0 0 0 7px rgba(255, 255, 255, 0.52) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .workspace-actions,
+  .route-actions,
+  .route-summary,
+  .route-stats,
+  .route-meta,
+  .route-info-grid,
+  .item-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .workspace-bar {
+    padding: 14px !important;
+  }
+
+  .map,
+  .premium-map {
+    height: 54svh !important;
+    min-height: 300px !important;
+  }
+
+  .item {
+    grid-template-columns: 66px minmax(0, 1fr) !important;
+  }
+
+  .item img {
+    width: 66px !important;
+    height: 66px !important;
+    min-width: 66px !important;
+  }
+
+  .details .card img,
+  .details-card-image,
+  .card > img {
+    height: 174px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-theme="night"] body {
+    background:
+      radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.2), transparent 36%),
+      linear-gradient(180deg, #07172f 0%, #0b2347 54%, #07172f 100%);
+  }
+
+  html[data-theme="night"] .layout {
+    background:
+      radial-gradient(circle at 16% 4%, rgba(96, 165, 250, 0.14), transparent 32%),
+      radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.18), transparent 34%),
+      linear-gradient(180deg, rgba(7, 23, 47, 0.96), rgba(10, 33, 68, 0.98)) !important;
+  }
+
+  html[data-theme="night"] .workspace-bar,
+  html[data-theme="night"] .list,
+  html[data-theme="night"] .route-panel,
+  html[data-theme="night"] .walk-planner,
+  html[data-theme="night"] .tour-mode-panel,
+  html[data-theme="night"] .details .card {
+    border-color: rgba(142, 197, 255, 0.22) !important;
+    background:
+      radial-gradient(circle at 14% 0%, rgba(96, 165, 250, 0.14), transparent 36%),
+      linear-gradient(145deg, rgba(13, 37, 79, 0.94), rgba(7, 27, 61, 0.92)) !important;
+    box-shadow:
+      0 18px 46px rgba(0, 7, 20, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  html[data-theme="night"] .workspace-bar h2,
+  html[data-theme="night"] .route-panel h3,
+  html[data-theme="night"] .walk-planner h3,
+  html[data-theme="night"] .tour-mode-panel h3,
+  html[data-theme="night"] .list-header h3,
+  html[data-theme="night"] .item h4,
+  html[data-theme="night"] .details .card h2,
+  html[data-theme="night"] .details .card h4 {
+    color: #f8fbff !important;
+  }
+
+  html[data-theme="night"] .workspace-bar p,
+  html[data-theme="night"] .item p,
+  html[data-theme="night"] .details .card p {
+    color: #c8d8ee !important;
+  }
+
+  html[data-theme="night"] .list-header input,
+  html[data-theme="night"] .list-layout .list-header input,
+  html[data-theme="night"] .item {
+    border-color: rgba(142, 197, 255, 0.2) !important;
+    background: rgba(13, 37, 79, 0.72) !important;
+    color: #f8fbff !important;
+  }
+
+  html[data-theme="night"] .item.active {
+    border-color: rgba(142, 197, 255, 0.46) !important;
+    background: linear-gradient(135deg, rgba(15, 45, 91, 0.96), rgba(29, 78, 216, 0.5)) !important;
+  }
+
+  html[data-theme="night"] .details-meta span,
+  html[data-theme="night"] .person-meta span,
+  html[data-theme="night"] .detail-chips span {
+    background: rgba(142, 197, 255, 0.12) !important;
+    color: #dcecff !important;
+  }
+}

@@ -1115,3 +1115,235 @@ html[data-theme="night"] .right .share-nav-button::after {
   background: rgba(13, 37, 79, 0.98);
   color: #f8fbff;
 }
+
+/* Final premium mobile navigation. */
+@media (max-width: 760px) {
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 700;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 9px !important;
+    min-height: auto !important;
+    padding: max(9px, env(safe-area-inset-top)) 10px 10px !important;
+    border-bottom: 1px solid rgba(122, 167, 223, 0.3) !important;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.16), transparent 34%),
+      rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 12px 32px rgba(10, 31, 68, 0.1) !important;
+    backdrop-filter: blur(20px);
+  }
+
+  .logo {
+    min-width: 0 !important;
+    gap: 8px !important;
+    padding: 2px 0 !important;
+  }
+
+  .logo-mark {
+    width: 37px !important;
+    height: 37px !important;
+    border-radius: 13px !important;
+    background: linear-gradient(135deg, #0f3d76, #2563eb) !important;
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.22) !important;
+    font-size: 22px !important;
+  }
+
+  .logo span:not(.logo-mark) {
+    min-width: 0;
+  }
+
+  .logo strong {
+    max-width: 150px;
+    overflow: hidden;
+    color: #0c1730 !important;
+    font-size: 1.25rem !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .logo small {
+    max-width: 150px;
+    overflow: hidden;
+    color: #6b7891 !important;
+    font-size: 0.58rem !important;
+    letter-spacing: 0.1em !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hamburger {
+    justify-self: end !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    border: 1px solid rgba(122, 167, 223, 0.36) !important;
+    border-radius: 15px !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    box-shadow: 0 10px 24px rgba(10, 31, 68, 0.1) !important;
+    color: #0c1730 !important;
+  }
+
+  .menu {
+    grid-column: 1 / -1 !important;
+    display: flex !important;
+    gap: 7px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 2px 2px 5px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .menu button {
+    flex: 0 0 auto !important;
+    min-height: 38px !important;
+    padding: 0 13px !important;
+    border: 1px solid rgba(122, 167, 223, 0.3) !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    box-shadow: 0 8px 18px rgba(10, 31, 68, 0.06) !important;
+    color: #33445f !important;
+    font-size: 0.9rem !important;
+    scroll-snap-align: start;
+  }
+
+  .menu button:hover,
+  .menu button.active {
+    border-color: rgba(37, 99, 235, 0.5) !important;
+    background: linear-gradient(135deg, #ffffff, #e9f3ff) !important;
+    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.14) !important;
+    color: #143e75 !important;
+  }
+
+  .menu button.active {
+    box-shadow:
+      0 12px 26px rgba(37, 99, 235, 0.14),
+      inset 0 -2px 0 #2563eb !important;
+  }
+
+  .right {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) repeat(4, auto) !important;
+    gap: 7px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-items: center !important;
+  }
+
+  .right input {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.86) !important;
+  }
+
+  .right button,
+  .right .share-nav-button,
+  .mode-pill,
+  .profile-button {
+    min-width: 40px !important;
+    width: auto !important;
+    min-height: 40px !important;
+    padding: 0 10px !important;
+    border-radius: 14px !important;
+    white-space: nowrap !important;
+  }
+
+  .mode-pill span,
+  .right .share-nav-button span {
+    display: none !important;
+  }
+
+  .profile-name,
+  .profile-favs,
+  .right .login-button span {
+    display: none !important;
+  }
+
+  .profile-menu-wrap {
+    justify-self: end;
+  }
+
+  .profile-menu {
+    position: fixed !important;
+    top: auto !important;
+    right: 10px !important;
+    bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+    left: 10px !important;
+    width: auto !important;
+    border-radius: 22px !important;
+    box-shadow: 0 24px 64px rgba(10, 31, 68, 0.22) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .right {
+    grid-template-columns: minmax(0, 1fr) repeat(3, auto) !important;
+  }
+
+  .right .mode-pill.online,
+  .right .mode-pill.offline {
+    display: none !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo strong,
+  .logo small {
+    max-width: 122px;
+  }
+
+  .right button,
+  .right .share-nav-button,
+  .mode-pill,
+  .profile-button {
+    min-width: 38px !important;
+    min-height: 38px !important;
+    padding: 0 8px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-theme="night"] .navbar {
+    border-bottom-color: rgba(142, 197, 255, 0.22) !important;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(96, 165, 250, 0.12), transparent 34%),
+      rgba(7, 23, 47, 0.92) !important;
+    box-shadow: 0 14px 38px rgba(0, 7, 20, 0.42) !important;
+  }
+
+  html[data-theme="night"] .logo strong {
+    color: #f8fbff !important;
+  }
+
+  html[data-theme="night"] .logo small {
+    color: #b9c9df !important;
+  }
+
+  html[data-theme="night"] .hamburger,
+  html[data-theme="night"] .menu button,
+  html[data-theme="night"] .right input,
+  html[data-theme="night"] .right button,
+  html[data-theme="night"] .right .share-nav-button,
+  html[data-theme="night"] .profile-button {
+    border-color: rgba(142, 197, 255, 0.22) !important;
+    background: rgba(13, 37, 79, 0.82) !important;
+    color: #f8fbff !important;
+  }
+
+  html[data-theme="night"] .menu button:hover,
+  html[data-theme="night"] .menu button.active {
+    border-color: rgba(142, 197, 255, 0.46) !important;
+    background: linear-gradient(135deg, rgba(13, 37, 79, 0.94), rgba(37, 99, 235, 0.58)) !important;
+    color: #f8fbff !important;
+  }
+}
