@@ -9,6 +9,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
 import database
+import caretakers
 import users
 
 
@@ -78,6 +79,59 @@ class RequirementTests(unittest.TestCase):
         self.assertEqual(created["email"], "test@example.com")
         self.assertIsNotNone(logged_in)
         self.assertIsNone(wrong_password)
+
+    def test_caretaker_assignments_are_saved_and_replaced(self) -> None:
+        caretakers.replace_caretaker_assignments(
+            "opiekun@example.com",
+            [1, 4, 10],
+            "admin@example.com",
+            self.db_path,
+        )
+        caretakers.replace_caretaker_assignments(
+            "opiekun@example.com",
+            [2, 4],
+            "admin@example.com",
+            self.db_path,
+        )
+
+        assignments = caretakers.list_caretaker_assignments(self.db_path)
+        self.assertEqual(assignments["opiekun@example.com"], [2, 4])
+
+    def test_caretaker_update_is_saved(self) -> None:
+        created = caretakers.create_caretaker_update(
+            caretaker_email="opiekun@example.com",
+            caretaker_name="Opiekun Testowy",
+            note="Sprawdzono stan dwoch grobow.",
+            assigned_count=3,
+            open_tasks_count=1,
+            database_path=self.db_path,
+        )
+        updates = caretakers.list_caretaker_updates("opiekun@example.com", self.db_path)
+
+        self.assertEqual(created["caretakerEmail"], "opiekun@example.com")
+        self.assertEqual(len(updates), 1)
+        self.assertEqual(updates[0]["openTasksCount"], 1)
+
+    def test_user_care_report_can_be_saved_and_resolved(self) -> None:
+        created = caretakers.create_care_report(
+            place_id=4,
+            place_name="Antoni Wiwulski",
+            report_type="needs_care",
+            note="Grob wymaga sprawdzenia po zimie.",
+            reporter_email="visitor@example.com",
+            database_path=self.db_path,
+        )
+        updated = caretakers.update_care_report_status(
+            int(created["id"]),
+            "resolved",
+            self.db_path,
+        )
+        reports = caretakers.list_care_reports(database_path=self.db_path)
+
+        self.assertEqual(created["status"], "new")
+        self.assertIsNotNone(updated)
+        self.assertEqual(updated["status"], "resolved")
+        self.assertEqual(len(reports), 1)
 
 
 if __name__ == "__main__":

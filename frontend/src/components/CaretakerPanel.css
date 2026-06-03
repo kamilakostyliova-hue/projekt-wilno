@@ -18,6 +18,15 @@
 .admin-caretaker-detail,
 .admin-contact-card,
 .assigned-place-row,
+.caretaker-task-board,
+.caretaker-task-grid article,
+.caretaker-admin-note,
+.caretaker-assignment-focus,
+.caretaker-task-list,
+.caretaker-admin-report,
+.caretaker-place-pill,
+.caretaker-task-row,
+.caretaker-update-card,
 .place-review-panel,
 .review-checklist,
 .review-side-panel,
@@ -85,6 +94,8 @@
 .review-checklist button,
 .review-side-panel button,
 .report-actions button,
+.caretaker-task-row button,
+.caretaker-admin-report button,
 .status-row button {
   display: inline-flex;
   align-items: center;
@@ -109,6 +120,8 @@
 .review-checklist button:hover:not(:disabled),
 .review-side-panel button:hover,
 .report-actions button:hover,
+.caretaker-task-row button:hover,
+.caretaker-admin-report button:hover:not(:disabled),
 .status-row button:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 34px rgba(37, 99, 235, 0.18);
@@ -229,6 +242,237 @@
 .caretaker-stats span {
   color: #53647f;
   font-weight: 800;
+}
+
+.caretaker-task-board {
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(37, 99, 235, 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.94));
+  animation: screenFade 0.24s ease both;
+}
+
+.caretaker-task-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.caretaker-task-head h2,
+.caretaker-assignment-focus h3,
+.caretaker-task-list h3,
+.caretaker-admin-report h3 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  line-height: 1;
+}
+
+.caretaker-task-head h2 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.caretaker-task-head p,
+.caretaker-assignment-focus p,
+.caretaker-task-list p,
+.caretaker-admin-report p,
+.caretaker-admin-note p {
+  color: #53647f;
+  line-height: 1.55;
+}
+
+.caretaker-task-head > strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 16px;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+.caretaker-task-head > strong small {
+  color: #53647f;
+  font-size: 0.78rem;
+}
+
+.caretaker-task-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.caretaker-task-grid article {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.caretaker-task-grid svg,
+.caretaker-admin-note svg {
+  color: #1d4ed8;
+  font-size: 22px;
+}
+
+.caretaker-task-grid strong {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.caretaker-task-grid span {
+  color: #53647f;
+  font-weight: 850;
+}
+
+.caretaker-admin-note {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(37, 99, 235, 0.12), transparent 32%),
+    rgba(255, 255, 255, 0.88);
+}
+
+.caretaker-admin-note strong {
+  color: #0c1730;
+}
+
+.caretaker-task-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr) minmax(280px, 0.85fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.caretaker-assignment-focus,
+.caretaker-task-list,
+.caretaker-admin-report {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.caretaker-assignment-focus > div,
+.caretaker-update-history {
+  display: grid;
+  gap: 9px;
+}
+
+.caretaker-place-pill {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border-radius: 18px;
+  color: #0c1730;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.caretaker-place-pill:hover,
+.caretaker-task-row:hover,
+.caretaker-update-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px rgba(10, 31, 68, 0.12);
+}
+
+.caretaker-place-pill img {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.caretaker-place-pill span,
+.caretaker-task-row span,
+.caretaker-update-card {
+  display: grid;
+  gap: 3px;
+}
+
+.caretaker-place-pill strong,
+.caretaker-task-row strong,
+.caretaker-update-history > strong {
+  color: #0c1730;
+}
+
+.caretaker-place-pill small,
+.caretaker-task-row small,
+.caretaker-update-card small,
+.caretaker-update-card span {
+  color: #53647f;
+  font-weight: 780;
+}
+
+.caretaker-task-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.caretaker-task-row button,
+.caretaker-admin-report button {
+  min-height: 36px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #1d4ed8;
+}
+
+.caretaker-admin-report textarea {
+  min-height: 116px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #d7e4f5;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0c1730;
+  font: inherit;
+  outline: none;
+}
+
+.caretaker-admin-report textarea:focus {
+  border-color: #7aa7df;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.caretaker-admin-report button:disabled {
+  cursor: default;
+  opacity: 0.62;
+  transform: none;
+  box-shadow: none;
+}
+
+.caretaker-update-card {
+  padding: 11px;
+  border-radius: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.caretaker-empty-state {
+  padding: 14px;
+  border: 1px dashed rgba(122, 167, 223, 0.38);
+  border-radius: 18px;
+  color: #53647f;
+  font-weight: 850;
 }
 
 .admin-overview-panel {
@@ -877,6 +1121,63 @@
   gap: 10px;
 }
 
+.report-dashboard-head {
+  display: grid;
+  gap: 10px;
+}
+
+.report-filter-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.report-filter-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(122, 167, 223, 0.32);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(37, 99, 235, 0.1), transparent 36%),
+    rgba(255, 255, 255, 0.92);
+  color: #173b72;
+  cursor: pointer;
+  font-weight: 950;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.report-filter-tabs button:hover,
+.report-filter-tabs button.active {
+  border-color: rgba(37, 99, 235, 0.56);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.13);
+  transform: translateY(-2px);
+}
+
+.report-filter-tabs button.active {
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+}
+
+.report-filter-tabs strong {
+  display: grid;
+  min-width: 34px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+}
+
+.report-filter-tabs button.active strong {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .report-card {
   display: grid;
   gap: 12px;
@@ -907,6 +1208,39 @@
 .status-row small {
   color: #53647f;
   line-height: 1.45;
+}
+
+.report-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.report-status-chip {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8 !important;
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.report-status-chip.status-new {
+  background: #fff1f2;
+  color: #a61b49 !important;
+}
+
+.report-status-chip.status-review {
+  background: #fff7dd;
+  color: #8a5b00 !important;
+}
+
+.report-status-chip.status-resolved {
+  background: #e8f7ef;
+  color: #166534 !important;
 }
 
 .report-actions {
@@ -995,6 +1329,15 @@ html[data-theme="night"] .admin-caretaker-detail,
 html[data-theme="night"] .admin-contact-card,
 html[data-theme="night"] .assigned-place-row,
 html[data-theme="night"] .admin-activity-list,
+html[data-theme="night"] .caretaker-task-board,
+html[data-theme="night"] .caretaker-task-grid article,
+html[data-theme="night"] .caretaker-admin-note,
+html[data-theme="night"] .caretaker-assignment-focus,
+html[data-theme="night"] .caretaker-task-list,
+html[data-theme="night"] .caretaker-admin-report,
+html[data-theme="night"] .caretaker-place-pill,
+html[data-theme="night"] .caretaker-task-row,
+html[data-theme="night"] .caretaker-update-card,
 html[data-theme="night"] .place-review-panel,
 html[data-theme="night"] .review-checklist,
 html[data-theme="night"] .review-side-panel,
@@ -1004,6 +1347,7 @@ html[data-theme="night"] .selected-report,
 html[data-theme="night"] .status-row,
 html[data-theme="night"] .caretaker-user-card,
 html[data-theme="night"] .caretaker-login-card input,
+html[data-theme="night"] .caretaker-admin-report textarea,
 html[data-theme="night"] .review-side-panel textarea {
   border-color: rgba(142, 197, 255, 0.22);
   background: rgba(13, 37, 79, 0.88);
@@ -1022,6 +1366,15 @@ html[data-theme="night"] .assigned-place-list > strong,
 html[data-theme="night"] .assigned-place-row b,
 html[data-theme="night"] .admin-note-box,
 html[data-theme="night"] .admin-activity-list > strong,
+html[data-theme="night"] .caretaker-task-head h2,
+html[data-theme="night"] .caretaker-task-grid strong,
+html[data-theme="night"] .caretaker-admin-note strong,
+html[data-theme="night"] .caretaker-assignment-focus h3,
+html[data-theme="night"] .caretaker-task-list h3,
+html[data-theme="night"] .caretaker-admin-report h3,
+html[data-theme="night"] .caretaker-place-pill strong,
+html[data-theme="night"] .caretaker-task-row strong,
+html[data-theme="night"] .caretaker-update-history > strong,
 html[data-theme="night"] .place-review-content h2,
 html[data-theme="night"] .review-alert span,
 html[data-theme="night"] .review-checklist h3,
@@ -1047,6 +1400,18 @@ html[data-theme="night"] .admin-contact-card,
 html[data-theme="night"] .admin-mini-stats span,
 html[data-theme="night"] .assigned-place-row small,
 html[data-theme="night"] .admin-activity-list span,
+html[data-theme="night"] .caretaker-task-head p,
+html[data-theme="night"] .caretaker-task-head > strong small,
+html[data-theme="night"] .caretaker-task-grid span,
+html[data-theme="night"] .caretaker-admin-note p,
+html[data-theme="night"] .caretaker-assignment-focus p,
+html[data-theme="night"] .caretaker-task-list p,
+html[data-theme="night"] .caretaker-admin-report p,
+html[data-theme="night"] .caretaker-place-pill small,
+html[data-theme="night"] .caretaker-task-row small,
+html[data-theme="night"] .caretaker-update-card small,
+html[data-theme="night"] .caretaker-update-card span,
+html[data-theme="night"] .caretaker-empty-state,
 html[data-theme="night"] .place-review-content p,
 html[data-theme="night"] .place-review-content small,
 html[data-theme="night"] .place-review-meta,
@@ -1064,11 +1429,16 @@ html[data-theme="night"] .caretaker-demo-box,
 html[data-theme="night"] .caretaker-message,
 html[data-theme="night"] .admin-overview-head > strong,
 html[data-theme="night"] .admin-caretaker-card b,
+html[data-theme="night"] .caretaker-task-head > strong,
 html[data-theme="night"] .caretaker-status-pill,
+html[data-theme="night"] .report-filter-tabs button,
 html[data-theme="night"] .admin-note-box textarea,
 html[data-theme="night"] .admin-note-box button,
 html[data-theme="night"] .assigned-place-row button,
+html[data-theme="night"] .caretaker-task-row button,
+html[data-theme="night"] .caretaker-admin-report button,
 html[data-theme="night"] .report-card span,
+html[data-theme="night"] .report-status-chip,
 html[data-theme="night"] .status-row b,
 html[data-theme="night"] .review-status-badge,
 html[data-theme="night"] .selected-report span,
@@ -1121,6 +1491,11 @@ html[data-theme="night"] .review-status-picker button.active {
   color: #ffffff;
 }
 
+html[data-theme="night"] .report-filter-tabs button.active {
+  background: linear-gradient(135deg, #1d4ed8, #0b2753);
+  color: #ffffff;
+}
+
 html[data-theme="night"] .review-status-badge.status-needs_care,
 html[data-theme="night"] .review-status-badge.status-missing_photo,
 html[data-theme="night"] .review-status-badge.status-missing_data {
@@ -1151,6 +1526,7 @@ html[data-theme="night"] .admin-caretaker-card.active {
 @media (max-width: 1080px) {
   .caretaker-hero,
   .caretaker-grid,
+  .caretaker-task-columns,
   .admin-overview-grid,
   .admin-detail-head,
   .admin-detail-bottom,
@@ -1160,6 +1536,11 @@ html[data-theme="night"] .admin-caretaker-card.active {
   }
 
   .caretaker-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .caretaker-task-grid,
+  .report-filter-tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1174,11 +1555,26 @@ html[data-theme="night"] .admin-caretaker-card.active {
   }
 
   .caretaker-stats,
+  .caretaker-task-grid,
+  .report-filter-tabs,
   .admin-mini-stats,
   .assigned-place-row,
+  .caretaker-task-row,
   .review-task,
   .status-row {
     grid-template-columns: 1fr;
+  }
+
+  .caretaker-task-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .caretaker-task-head > strong,
+  .caretaker-task-row button,
+  .caretaker-admin-report button {
+    width: 100%;
+    justify-content: center;
   }
 
   .admin-overview-head {

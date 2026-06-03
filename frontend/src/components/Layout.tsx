@@ -37,6 +37,7 @@ import {
 } from "./routingConfig";
 import "./Layout.css";
 import type { AppLanguage, ThemeMode, UserProfile, UserSettings, ViewId } from "../App";
+import { saveCareReport } from "../services/caretakerData";
 import {
   getLanguageKey,
   layoutText,
@@ -235,31 +236,31 @@ const baseCategories = [
   {
     id: "all",
     label: "Wszystkie",
-    description: "PeÅ‚na lista osÃ³b i miejsc pamiÄ™ci.",
+    description: "Pełna lista osób i miejsc pamięci.",
     icon: FaMapMarkerAlt,
   },
   {
     id: "wojskowi",
     label: "Wojskowi",
-    description: "DowÃ³dcy, powstaÅ„cy i osoby zwiÄ…zane z walkÄ… o wolnoÅ›Ä‡.",
+    description: "Dowódcy, powstańcy i osoby związane z walką o wolność.",
     icon: FaShieldAlt,
   },
   {
     id: "politycy",
     label: "Politycy",
-    description: "DziaÅ‚acze paÅ„stwowi, spoÅ‚ecznicy i sygnatariusze.",
+    description: "Działacze państwowi, społecznicy i sygnatariusze.",
     icon: FaLandmark,
   },
   {
     id: "artysci",
-    label: "ArtyÅ›ci",
+    label: "Artyści",
     description: "Poeci, pisarze, malarze, kompozytorzy i architekci.",
     icon: FaPalette,
   },
   {
     id: "architektura",
     label: "Architektura",
-    description: "Architekci, inÅ¼ynierowie i miejsca zwiÄ…zane z rozwojem Wilna.",
+    description: "Architekci, inżynierowie i miejsca związane z rozwojem Wilna.",
     icon: FaDraftingCompass,
   },
   {
@@ -271,7 +272,7 @@ const baseCategories = [
   {
     id: "duchowni",
     label: "Duchowni",
-    description: "KsiÄ™Å¼a i postacie religijne zwiÄ…zane z Wilnem.",
+    description: "Księża i postacie religijne związane z Wilnem.",
     icon: FaCross,
   },
 ] satisfies Array<{
@@ -284,7 +285,7 @@ const baseCategories = [
 const basePlaces: CemeteryPlace[] = [
   {
     id: 1,
-    name: "JÃ³zef PiÅ‚sudski",
+    name: "Józef Piłsudski",
     years: "1867 - 1935",
     category: "wojskowi",
     categoryLabel: "Wojskowy",
@@ -292,15 +293,15 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.juzef.jpg"),
     gallery: [assetImage("juzef.1.jpg"), assetImage("juzef.2.jpg"), assetImage("juzef.3.jpg")],
     description:
-      "Na Rossie znajduje siÄ™ mauzoleum Matka i Serce Syna, gdzie spoczywa matka JÃ³zefa PiÅ‚sudskiego oraz serce marszaÅ‚ka. To jedno z najwaÅ¼niejszych miejsc pamiÄ™ci na cmentarzu.",
+      "Na Rossie znajduje się mauzoleum Matka i Serce Syna, gdzie spoczywa matka Józefa Piłsudskiego oraz serce marszałka. To jedno z najważniejszych miejsc pamięci na cmentarzu.",
     shortDescription:
-      "Symboliczne miejsce zwiÄ…zane z sercem marszaÅ‚ka i grobem jego matki.",
+      "Symboliczne miejsce związane z sercem marszałka i grobem jego matki.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 5,
   },
   {
     id: 2,
-    name: "WÅ‚adysÅ‚aw Syrokomla",
+    name: "Władysław Syrokomla",
     years: "1823 - 1862",
     category: "artysci",
     categoryLabel: "Artysta",
@@ -308,9 +309,9 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.wladyslaw.jpg"),
     gallery: [assetImage("wladyslaw.1.jpg"), assetImage("wladyslaw.2.jpg"), assetImage("wladyslaw.3.jpg")],
     description:
-      "Poeta i tÅ‚umacz zwiÄ…zany z WileÅ„szczyznÄ…. Jego twÃ³rczoÅ›Ä‡ Å‚Ä…czyÅ‚a tematykÄ™ historycznÄ…, ludowÄ… i krajobrazowÄ….",
+      "Poeta i tłumacz związany z Wileńszczyzną. Jego twórczość łączyła tematykę historyczną, ludową i krajobrazową.",
     shortDescription:
-      "Poeta WileÅ„szczyzny, autor gawÄ™d i utworÃ³w o tematyce historycznej.",
+      "Poeta Wileńszczyzny, autor gawęd i utworów o tematyce historycznej.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 4,
   },
@@ -324,9 +325,9 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.joachim.png"),
     gallery: [assetImage("joachim.1.jpg"), assetImage("joachim.2.jpg"), assetImage("joachim.3.jpg")],
     description:
-      "Historyk, profesor Uniwersytetu WileÅ„skiego i dziaÅ‚acz polityczny. Jego grÃ³b jest waÅ¼nym punktem pamiÄ™ci akademickiego Wilna.",
+      "Historyk, profesor Uniwersytetu Wileńskiego i działacz polityczny. Jego grób jest ważnym punktem pamięci akademickiego Wilna.",
     shortDescription:
-      "Historyk, profesor Uniwersytetu WileÅ„skiego i polityk emigracyjny.",
+      "Historyk, profesor Uniwersytetu Wileńskiego i polityk emigracyjny.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 5,
   },
@@ -341,14 +342,14 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.antoni.jpg"),
     gallery: [assetImage("antoni.1.jpg"), assetImage("antoni.2.JPG"), assetImage("antoni.3.jpg")],
     description:
-      "Architekt i rzeÅºbiarz zwiÄ…zany z Wilnem. Na Rossie upamiÄ™tnia go jeden z charakterystycznych nagrobkÃ³w artystycznej czÄ™Å›ci nekropolii.",
-    shortDescription: "Architekt i rzeÅºbiarz zwiÄ…zany z Wilnem.",
+      "Architekt i rzeźbiarz związany z Wilnem. Na Rossie upamiętnia go jeden z charakterystycznych nagrobków artystycznej części nekropolii.",
+    shortDescription: "Architekt i rzeźbiarz związany z Wilnem.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 4,
   },
   {
     id: 5,
-    name: "Jonas BasanaviÄius",
+    name: "Jonas Basanavičius",
     years: "1851 - 1927",
     category: "politycy",
     categoryLabel: "Polityk",
@@ -356,15 +357,15 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.jonas.jpg"),
     gallery: [assetImage("jonas.1.jpg"), assetImage("jonas.2.jpg"), assetImage("jonas.3.jpg")],
     description:
-      "Lekarz, dziaÅ‚acz narodowy i sygnatariusz Aktu NiepodlegÅ‚oÅ›ci Litwy. Jego miejsce pochÃ³wku pokazuje wielokulturowy charakter Rossy.",
+      "Lekarz, działacz narodowy i sygnatariusz Aktu Niepodległości Litwy. Jego miejsce pochówku pokazuje wielokulturowy charakter Rossy.",
     shortDescription:
-      "Litewski dziaÅ‚acz narodowy, lekarz i sygnatariusz niepodlegÅ‚oÅ›ci.",
+      "Litewski działacz narodowy, lekarz i sygnatariusz niepodległości.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 5,
   },
   {
     id: 6,
-    name: "Euzebiusz SÅ‚owacki",
+    name: "Euzebiusz Słowacki",
     years: "1773 - 1814",
     category: "naukowcy",
     categoryLabel: "Naukowiec",
@@ -372,9 +373,9 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.euzebiusz.jpg"),
     gallery: [assetImage("euzebiusz.1.jpg"), assetImage("euzebiusz.2.jpg"), assetImage("euzebiusz.3.jpg")],
     description:
-      "Profesor wymowy i poezji Uniwersytetu WileÅ„skiego oraz ojciec Juliusza SÅ‚owackiego. Jego grÃ³b przypomina o literackich zwiÄ…zkach Wilna.",
+      "Profesor wymowy i poezji Uniwersytetu Wileńskiego oraz ojciec Juliusza Słowackiego. Jego grób przypomina o literackich związkach Wilna.",
     shortDescription:
-      "Profesor Uniwersytetu WileÅ„skiego i ojciec Juliusza SÅ‚owackiego.",
+      "Profesor Uniwersytetu Wileńskiego i ojciec Juliusza Słowackiego.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 3,
   },
@@ -388,14 +389,14 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.vladas.jpg"),
     gallery: [assetImage("vlad.1.webp"), assetImage("vlad.2.webp"), assetImage("vlad.3.jpg")],
     description:
-      "KsiÄ…dz, polityk i sygnatariusz aktu niepodlegÅ‚oÅ›ci Litwy. W aplikacji reprezentuje kategoriÄ™ duchownych oraz miejsca pamiÄ™ci symbolicznej.",
-    shortDescription: "Duchowny i polityk, punkt pamiÄ™ci symbolicznej.",
+      "Ksiądz, polityk i sygnatariusz aktu niepodległości Litwy. W aplikacji reprezentuje kategorię duchownych oraz miejsca pamięci symbolicznej.",
+    shortDescription: "Duchowny i polityk, punkt pamięci symbolicznej.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 4,
   },
   {
     id: 9,
-    name: "Mikalojus Konstantinas ÄŒiurlionis",
+    name: "Mikalojus Konstantinas Čiurlionis",
     years: "1875 - 1911",
     category: "artysci",
     categoryLabel: "Artysta",
@@ -403,8 +404,8 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.mikolaj.jpg"),
     gallery: [assetImage("mikolaj.1.jpg"), assetImage("mikolaj.2.jpg"), assetImage("mikolaj.3.jpg")],
     description:
-      "Kompozytor i malarz, jedna z najwaÅ¼niejszych postaci kultury litewskiej. Jego twÃ³rczoÅ›Ä‡ Å‚Ä…czyÅ‚a muzykÄ™, malarstwo i symbolizm.",
-    shortDescription: "Litewski kompozytor i malarz, twÃ³rca symbolistyczny.",
+      "Kompozytor i malarz, jedna z najważniejszych postaci kultury litewskiej. Jego twórczość łączyła muzykę, malarstwo i symbolizm.",
+    shortDescription: "Litewski kompozytor i malarz, twórca symbolistyczny.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 5,
   },
@@ -418,14 +419,14 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.balys.jpg"),
     gallery: [assetImage("balys.1.jpg"), assetImage("balys.2.jpg"), assetImage("balys.3.jpg")],
     description:
-      "Pisarz, poeta i badacz teatru. Jego twÃ³rczoÅ›Ä‡ naleÅ¼y do waÅ¼nych Å›wiadectw kultury litewskiej pierwszej poÅ‚owy XX wieku.",
-    shortDescription: "Pisarz i teatrolog, waÅ¼na postaÄ‡ kultury litewskiej.",
+      "Pisarz, poeta i badacz teatru. Jego twórczość należy do ważnych świadectw kultury litewskiej pierwszej połowy XX wieku.",
+    shortDescription: "Pisarz i teatrolog, ważna postać kultury litewskiej.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 4,
   },
   {
     id: 11,
-    name: "JÃ³zef MontwiÅ‚Å‚",
+    name: "Józef Montwiłł",
     years: "1850 - 1911",
     category: "politycy",
     tags: ["architektura"],
@@ -434,14 +435,14 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.montwill.jpg"),
     gallery: [assetImage("montwill.1.jpg"), assetImage("montwill.2.jpg"), assetImage("montwill.3.jpg")],
     description:
-      "Bankier, spoÅ‚ecznik i filantrop zasÅ‚uÅ¼ony dla Wilna. WspieraÅ‚ instytucje dobroczynne oraz projekty miejskie.",
-    shortDescription: "SpoÅ‚ecznik i filantrop zasÅ‚uÅ¼ony dla Wilna.",
+      "Bankier, społecznik i filantrop zasłużony dla Wilna. Wspierał instytucje dobroczynne oraz projekty miejskie.",
+    shortDescription: "Społecznik i filantrop zasłużony dla Wilna.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 4,
   },
   {
     id: 12,
-    name: "Petras VileiÅ¡is",
+    name: "Petras Vileišis",
     years: "1851 - 1926",
     category: "naukowcy",
     tags: ["architektura"],
@@ -450,8 +451,8 @@ const basePlaces: CemeteryPlace[] = [
     image: assetImage("g.petras.jpg"),
     gallery: [assetImage("petras.1.jpg"), assetImage("petras.2.jpg"), assetImage("petras.3.jpg")],
     description:
-      "InÅ¼ynier, wydawca i dziaÅ‚acz spoÅ‚eczny. ByÅ‚ jednÄ… z postaci litewskiego odrodzenia narodowego i modernizacji Å¼ycia publicznego.",
-    shortDescription: "InÅ¼ynier, wydawca i dziaÅ‚acz spoÅ‚eczny.",
+      "Inżynier, wydawca i działacz społeczny. Był jedną z postaci litewskiego odrodzenia narodowego i modernizacji życia publicznego.",
+    shortDescription: "Inżynier, wydawca i działacz społeczny.",
     source: "Wikipedia / Wikimedia Commons",
     rating: 4,
   },
@@ -465,7 +466,7 @@ const placeMatchesCategory = (place: CemeteryPlace, categoryId: CategoryId) =>
 const baseHomeTimeline = [
   {
     year: "1800",
-    title: "Epoka Uniwersytetu WileÅ„skiego",
+    title: "Epoka Uniwersytetu Wileńskiego",
     placeIds: [3, 6],
   },
   {
@@ -475,12 +476,12 @@ const baseHomeTimeline = [
   },
   {
     year: "1900",
-    title: "Miasto artystÃ³w i dziaÅ‚aczy",
+    title: "Miasto artystów i działaczy",
     placeIds: [1, 4, 9, 11],
   },
   {
     year: "1950",
-    title: "PamiÄ™Ä‡ XX wieku",
+    title: "Pamięć XX wieku",
     placeIds: [7, 10, 12],
   },
 ];
@@ -1356,22 +1357,33 @@ function Layout({
     return true;
   };
 
-  const submitIssueReport = () => {
+  const submitIssueReport = async () => {
     if (!selectedPlace) return;
 
     const reports = readStorageArray<CareReport>(careReportsKey);
     const languageKeyForIssue = appLanguage === "en" ? "en" : "pl";
-    const report: CareReport = {
-      id: `report-${Date.now()}`,
+    const reportPayload = {
       placeId: selectedPlace.id,
       placeName: selectedPlace.name,
       type: issueReportType,
       note: issueReportNote.trim() || issueTypeLabels[issueReportType][languageKeyForIssue],
+      reporterEmail: currentUser?.email,
+    };
+    const remoteReport = await saveCareReport(reportPayload);
+    const report: CareReport = {
+      id: remoteReport?.id ?? `report-${Date.now()}`,
+      placeId: selectedPlace.id,
+      placeName: selectedPlace.name,
+      type: issueReportType,
+      note: reportPayload.note,
       status: "new",
-      createdAt: new Date().toISOString(),
+      createdAt: remoteReport?.createdAt ?? new Date().toISOString(),
     };
 
-    window.localStorage.setItem(careReportsKey, JSON.stringify([report, ...reports].slice(0, 80)));
+    window.localStorage.setItem(
+      careReportsKey,
+      JSON.stringify([report, ...reports.filter((item) => item.id !== report.id)].slice(0, 80))
+    );
     window.dispatchEvent(new Event("rossa-care-reports-changed"));
     setIssueReportOpen(false);
     setIssueReportNote("");

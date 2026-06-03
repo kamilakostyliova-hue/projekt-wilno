@@ -18,6 +18,14 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import type { AppLanguage, UserProfile, UserRole } from "../App";
+import {
+  fetchCaretakerAssignments,
+  fetchCaretakerUpdates,
+  fetchCareReports,
+  saveCaretakerAssignments,
+  updateCareReportStatus,
+  type CaretakerAdminUpdate,
+} from "../services/caretakerData";
 import type { CareReport, ReportType } from "./CaretakerPanel";
 import "./AdminPanel.css";
 
@@ -44,6 +52,7 @@ type AdminPanelProps = {
 };
 
 type AdminTab = "overview" | "people" | "reports" | "users" | "statistics";
+type AdminReportFilter = "all" | CareReport["status"];
 
 type LocalAuthUser = {
   id: number;
@@ -81,6 +90,7 @@ const adminDraftsKey = "rossa-admin-place-drafts";
 const reviewStorageKey = "rossa-care-place-review";
 const adminCaretakerNotesKey = "rossa-admin-caretaker-notes";
 const adminCaretakerAssignmentsKey = "rossa-admin-caretaker-assignments";
+const caretakerAdminUpdatesKey = "rossa-caretaker-admin-updates";
 
 const reportLabels: Record<ReportType, { pl: string; en: string }> = {
   missing_photo: { pl: "Brakuje zdjecia", en: "Missing photo" },
@@ -172,6 +182,7 @@ const writeCaretakerNotes = (notes: Record<string, string>) => {
 
 const writeCaretakerAssignments = (assignments: Record<string, number[]>) => {
   window.localStorage.setItem(adminCaretakerAssignmentsKey, JSON.stringify(assignments));
+  window.dispatchEvent(new Event("rossa-admin-assignments-changed"));
 };
 
 const formatDate = (value: string, language: AppLanguage) => {
@@ -193,6 +204,7 @@ function AdminPanel({
 }: AdminPanelProps) {
   const isEnglish = language === "en";
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [reportFilter, setReportFilter] = useState<AdminReportFilter>("all");
   const [reports, setReports] = useState<CareReport[]>(() => readStorageArray<CareReport>(reportsStorageKey));
   const [users, setUsers] = useState<LocalAuthUser[]>(() => readStorageArray<LocalAuthUser>(localUsersKey));
   const [drafts, setDrafts] = useState<Record<number, AdminPlaceDraft>>(() => readStorageRecord<AdminPlaceDraft>(adminDraftsKey));
@@ -204,6 +216,9 @@ function AdminPanel({
   const [caretakerNotes, setCaretakerNotes] = useState<Record<string, string>>(() => readStringStorageRecord(adminCaretakerNotesKey));
   const [caretakerAssignments, setCaretakerAssignments] = useState<Record<string, number[]>>(() =>
     readNumberArrayStorageRecord(adminCaretakerAssignmentsKey)
+  );
+  const [caretakerUpdates, setCaretakerUpdates] = useState<CaretakerAdminUpdate[]>(() =>
+    readStorageArray<CaretakerAdminUpdate>(caretakerAdminUpdatesKey)
   );
   const [caretakerNoteDraft, setCaretakerNoteDraft] = useState("");
   const hasAccess = currentUser?.role === "admin";
@@ -292,6 +307,16 @@ function AdminPanel({
   );
   const selectedPlace = managedPlaces.find((place) => place.id === selectedPlaceId) ?? managedPlaces[0] ?? null;
   const unresolvedReports = reports.filter((report) => report.status !== "resolved");
+  const reportCounts: Record<AdminReportFilter, number> = {
+    all: reports.length,
+    new: reports.filter((report) => report.status === "new").length,
+    review: reports.filter((report) => report.status === "review").length,
+    resolved: reports.filter((report) => report.status === "resolved").length,
+  };
+  const filteredReports =
+    reportFilter === "all"
+      ? reports
+      : reports.filter((report) => report.status === reportFilter);
   const hiddenPlacesCount = managedPlaces.filter((place) => place.isHidden).length;
   const draftCount = Object.keys(drafts).length;
   const reviewStates = readStorageRecord<{ status?: string }>(reviewStorageKey);
@@ -307,6 +332,9 @@ function AdminPanel({
   const selectedCaretakerAttention = selectedCaretakerPlaces.filter((place) =>
     ["check", "needs_care", "missing_photo", "missing_data"].includes(reviewStates[place.id]?.status ?? "")
   );
+  const selectedCaretakerUpdates = selectedCaretaker
+    ? caretakerUpdates.filter((update) => update.caretakerEmail === selectedCaretaker.user.email)
+    : [];
   const getCaretakersForPlace = (placeId: number) =>
     caretakerRecords.filter((caretaker) => caretaker.assignedPlaceIds.includes(placeId));
   const getCaretakerLabelForPlace = (placeId: number) => {
@@ -352,6 +380,16 @@ function AdminPanel({
         category: "Category",
         adminNote: "Admin note",
         noReports: "No open reports.",
+        noReportsInFilter: "No reports in this status.",
+        allReports: "All",
+        newReports: "New",
+        reviewReports: "In review",
+        resolvedReports: "Resolved",
+        markReview: "Take into review",
+        reopen: "Reopen",
+        statusNew: "New",
+        statusReview: "In review",
+        statusResolved: "Resolved",
         resolve: "Resolve",
         role: "Role",
         created: "Created",
@@ -375,6 +413,8 @@ function AdminPanel({
         assigned: "Assigned",
         unassigned: "Not assigned",
         caretakerOwner: "Caretaker",
+        caretakerReports: "Caretaker reports",
+        noCaretakerReports: "This caretaker has not sent a report yet.",
       }
     : {
         accessTitle: "Dostep administratora",
@@ -398,6 +438,16 @@ function AdminPanel({
         category: "Kategoria",
         adminNote: "Notatka administratora",
         noReports: "Brak otwartych zgloszen.",
+        noReportsInFilter: "Brak zgloszen w tym statusie.",
+        allReports: "Wszystkie",
+        newReports: "Nowe",
+        reviewReports: "W trakcie",
+        resolvedReports: "Rozwiazane",
+        markReview: "Przyjmij do pracy",
+        reopen: "Otworz ponownie",
+        statusNew: "Nowe",
+        statusReview: "W trakcie",
+        statusResolved: "Rozwiazane",
         resolve: "Rozwiaz",
         role: "Rola",
         created: "Utworzono",
@@ -421,7 +471,80 @@ function AdminPanel({
         assigned: "Przypisane",
         unassigned: "Nieprzypisane",
         caretakerOwner: "Opiekun",
+        caretakerReports: "Raporty opiekuna",
+        noCaretakerReports: "Ten opiekun nie wyslal jeszcze raportu.",
       };
+
+  const reportFilterOptions: Array<{ id: AdminReportFilter; label: string }> = [
+    { id: "all", label: copy.allReports },
+    { id: "new", label: copy.newReports },
+    { id: "review", label: copy.reviewReports },
+    { id: "resolved", label: copy.resolvedReports },
+  ];
+
+  const reportStatusLabels: Record<CareReport["status"], string> = {
+    new: copy.statusNew,
+    review: copy.statusReview,
+    resolved: copy.statusResolved,
+  };
+
+  useEffect(() => {
+    const refreshAdminStorage = () => {
+      setReports(readStorageArray<CareReport>(reportsStorageKey));
+      setUsers(readStorageArray<LocalAuthUser>(localUsersKey));
+      setDrafts(readStorageRecord<AdminPlaceDraft>(adminDraftsKey));
+      setCaretakerNotes(readStringStorageRecord(adminCaretakerNotesKey));
+      setCaretakerAssignments(readNumberArrayStorageRecord(adminCaretakerAssignmentsKey));
+      setCaretakerUpdates(readStorageArray<CaretakerAdminUpdate>(caretakerAdminUpdatesKey));
+    };
+
+    window.addEventListener("storage", refreshAdminStorage);
+    window.addEventListener("rossa-care-reports-changed", refreshAdminStorage);
+    window.addEventListener("rossa-admin-assignments-changed", refreshAdminStorage);
+    window.addEventListener("rossa-admin-notes-changed", refreshAdminStorage);
+    window.addEventListener("rossa-caretaker-updates-changed", refreshAdminStorage);
+    return () => {
+      window.removeEventListener("storage", refreshAdminStorage);
+      window.removeEventListener("rossa-care-reports-changed", refreshAdminStorage);
+      window.removeEventListener("rossa-admin-assignments-changed", refreshAdminStorage);
+      window.removeEventListener("rossa-admin-notes-changed", refreshAdminStorage);
+      window.removeEventListener("rossa-caretaker-updates-changed", refreshAdminStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncCaretakerData = async () => {
+      const [remoteAssignments, remoteUpdates, remoteReports] = await Promise.all([
+        fetchCaretakerAssignments(),
+        fetchCaretakerUpdates(),
+        fetchCareReports(),
+      ]);
+      if (cancelled) return;
+
+      if (remoteAssignments) {
+        setCaretakerAssignments(remoteAssignments);
+        writeCaretakerAssignments(remoteAssignments);
+      }
+      if (remoteUpdates) {
+        setCaretakerUpdates(remoteUpdates);
+        window.localStorage.setItem(
+          caretakerAdminUpdatesKey,
+          JSON.stringify(remoteUpdates)
+        );
+      }
+      if (remoteReports) {
+        setReports(remoteReports as CareReport[]);
+        writeReports(remoteReports as CareReport[]);
+      }
+    };
+
+    void syncCaretakerData();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const openEditor = (placeId: number) => {
     const place = managedPlaces.find((item) => item.id === placeId);
@@ -486,12 +609,17 @@ function AdminPanel({
     writeDrafts(nextDrafts);
   };
 
-  const resolveReport = (reportId: string) => {
+  const setReportStatus = async (reportId: string, status: CareReport["status"]) => {
+    await updateCareReportStatus(reportId, status);
     const nextReports = reports.map((report) =>
-      report.id === reportId ? { ...report, status: "resolved" as const } : report
+      report.id === reportId ? { ...report, status } : report
     );
     setReports(nextReports);
     writeReports(nextReports);
+  };
+
+  const resolveReport = (reportId: string) => {
+    void setReportStatus(reportId, "resolved");
   };
 
   const updateUserRole = (email: string, role: UserRole) => {
@@ -536,6 +664,11 @@ function AdminPanel({
     };
     setCaretakerAssignments(nextAssignments);
     writeCaretakerAssignments(nextAssignments);
+    void saveCaretakerAssignments(
+      selectedCaretaker.id,
+      nextAssignments[selectedCaretaker.id],
+      currentUser?.email
+    );
   };
 
   if (!hasAccess) {
@@ -693,14 +826,34 @@ function AdminPanel({
             <FaClipboardList />
             <h2>{isEnglish ? "Report moderation" : "Moderacja zgloszen"}</h2>
           </header>
+          <div className="report-dashboard-head">
+            <div className="report-filter-tabs" aria-label={isEnglish ? "Report status filter" : "Filtr statusu zgloszen"}>
+              {reportFilterOptions.map((filter) => (
+                <button
+                  className={reportFilter === filter.id ? "active" : ""}
+                  key={filter.id}
+                  onClick={() => setReportFilter(filter.id)}
+                  type="button"
+                >
+                  <span>{filter.label}</span>
+                  <strong>{reportCounts[filter.id]}</strong>
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="admin-report-grid">
-            {unresolvedReports.length === 0 && <p>{copy.noReports}</p>}
-            {unresolvedReports.map((report) => (
+            {filteredReports.length === 0 && <p className="admin-empty-state">{copy.noReportsInFilter}</p>}
+            {filteredReports.map((report) => (
               <article className={`admin-report-card status-${report.status}`} key={report.id}>
                 <span>{reportLabels[report.type][language]}</span>
                 <h3>{report.placeName}</h3>
                 <p>{report.note}</p>
-                <small>{formatDate(report.createdAt, language)}</small>
+                <div className="report-card-meta">
+                  <small>{formatDate(report.createdAt, language)}</small>
+                  <small className={`report-status-chip status-${report.status}`}>
+                    {reportStatusLabels[report.status]}
+                  </small>
+                </div>
                 {report.placeId && (
                   <small className="admin-owner-line">
                     {copy.caretakerOwner}: {getCaretakerLabelForPlace(report.placeId)}
@@ -712,9 +865,20 @@ function AdminPanel({
                       <FaMapMarkerAlt /> {copy.map}
                     </button>
                   )}
-                  <button onClick={() => resolveReport(report.id)} type="button">
-                    <FaCheckCircle /> {copy.resolve}
-                  </button>
+                  {report.status !== "review" && report.status !== "resolved" && (
+                    <button onClick={() => void setReportStatus(report.id, "review")} type="button">
+                      <FaClipboardList /> {copy.markReview}
+                    </button>
+                  )}
+                  {report.status !== "resolved" ? (
+                    <button onClick={() => resolveReport(report.id)} type="button">
+                      <FaCheckCircle /> {copy.resolve}
+                    </button>
+                  ) : (
+                    <button onClick={() => void setReportStatus(report.id, "new")} type="button">
+                      <FaEdit /> {copy.reopen}
+                    </button>
+                  )}
                 </div>
               </article>
             ))}
@@ -884,6 +1048,23 @@ function AdminPanel({
                           <FaCheckCircle /> {activity}
                         </span>
                       ))}
+
+                      <div className="admin-caretaker-updates">
+                        <strong>{copy.caretakerReports}</strong>
+                        {selectedCaretakerUpdates.length === 0 ? (
+                          <p>{copy.noCaretakerReports}</p>
+                        ) : (
+                          selectedCaretakerUpdates.slice(0, 4).map((update) => (
+                            <article key={update.id}>
+                              <small>{formatDate(update.createdAt, language)}</small>
+                              <p>{update.note}</p>
+                              <em>
+                                {update.assignedCount} {copy.assignedPlaces} - {update.openTasksCount} {isEnglish ? "open tasks" : "otwartych zadan"}
+                              </em>
+                            </article>
+                          ))
+                        )}
+                      </div>
                     </div>
                   </div>
                 </article>

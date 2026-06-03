@@ -28,6 +28,7 @@
 .admin-assignment-manager,
 .admin-assignment-list article,
 .admin-caretaker-activity,
+.admin-caretaker-updates article,
 .admin-stats-grid article {
   border: 1px solid rgba(122, 167, 223, 0.32);
   background: rgba(255, 255, 255, 0.92);
@@ -368,6 +369,63 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.report-dashboard-head {
+  display: grid;
+  gap: 10px;
+}
+
+.report-filter-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.report-filter-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(122, 167, 223, 0.32);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(37, 99, 235, 0.1), transparent 36%),
+    rgba(255, 255, 255, 0.92);
+  color: #173b72;
+  cursor: pointer;
+  font-weight: 950;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.report-filter-tabs button:hover,
+.report-filter-tabs button.active {
+  border-color: rgba(37, 99, 235, 0.56);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.13);
+  transform: translateY(-2px);
+}
+
+.report-filter-tabs button.active {
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+}
+
+.report-filter-tabs strong {
+  display: grid;
+  min-width: 34px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+}
+
+.report-filter-tabs button.active strong {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .admin-report-card {
   display: grid;
   gap: 10px;
@@ -397,6 +455,48 @@
 .role-caretaker {
   background: #fff7dd;
   color: #8a5b00;
+}
+
+.report-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.report-status-chip {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8 !important;
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.report-status-chip.status-new {
+  background: #fff1f2;
+  color: #a61b49 !important;
+}
+
+.report-status-chip.status-review {
+  background: #fff7dd;
+  color: #8a5b00 !important;
+}
+
+.report-status-chip.status-resolved {
+  background: #e8f7ef;
+  color: #166534 !important;
+}
+
+.admin-empty-state {
+  grid-column: 1 / -1;
+  padding: 16px;
+  border: 1px dashed rgba(122, 167, 223, 0.42);
+  border-radius: 18px;
+  color: #53647f;
+  font-weight: 850;
 }
 
 .admin-report-card div,
@@ -457,7 +557,8 @@
 
 .admin-caretaker-list,
 .admin-assigned-list,
-.admin-caretaker-activity {
+.admin-caretaker-activity,
+.admin-caretaker-updates {
   display: grid;
   gap: 10px;
 }
@@ -773,6 +874,31 @@
   color: #16a34a;
 }
 
+.admin-caretaker-updates {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(122, 167, 223, 0.24);
+}
+
+.admin-caretaker-updates article {
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  border-radius: 16px;
+}
+
+.admin-caretaker-updates p {
+  color: #53647f;
+  line-height: 1.45;
+}
+
+.admin-caretaker-updates small,
+.admin-caretaker-updates em {
+  color: #64748b;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .admin-stats-grid article {
   display: grid;
   gap: 8px;
@@ -824,6 +950,7 @@ html[data-theme="night"] .admin-assigned-place,
 html[data-theme="night"] .admin-assignment-manager,
 html[data-theme="night"] .admin-assignment-list article,
 html[data-theme="night"] .admin-caretaker-activity,
+html[data-theme="night"] .admin-caretaker-updates article,
 html[data-theme="night"] .admin-stats-grid article,
 html[data-theme="night"] .admin-editor input,
 html[data-theme="night"] .admin-editor textarea,
@@ -851,6 +978,7 @@ html[data-theme="night"] .admin-assignment-manager strong,
 html[data-theme="night"] .admin-assignment-list strong,
 html[data-theme="night"] .admin-caretaker-bottom label,
 html[data-theme="night"] .admin-caretaker-activity strong,
+html[data-theme="night"] .admin-caretaker-updates strong,
 html[data-theme="night"] .admin-stats-grid strong {
   color: #f8fbff;
 }
@@ -876,12 +1004,16 @@ html[data-theme="night"] .admin-assignment-manager p,
 html[data-theme="night"] .admin-assignment-list small,
 html[data-theme="night"] .admin-assignment-list em,
 html[data-theme="night"] .admin-caretaker-activity span,
+html[data-theme="night"] .admin-caretaker-updates p,
+html[data-theme="night"] .admin-caretaker-updates small,
+html[data-theme="night"] .admin-caretaker-updates em,
 html[data-theme="night"] .admin-stats-grid small {
   color: #c9d6ea;
 }
 
 html[data-theme="night"] .admin-user-card button,
 html[data-theme="night"] .admin-tabs button,
+html[data-theme="night"] .report-filter-tabs button,
 html[data-theme="night"] .admin-place-row button,
 html[data-theme="night"] .admin-editor-actions button,
 html[data-theme="night"] .admin-report-card button,
@@ -893,16 +1025,23 @@ html[data-theme="night"] .admin-assigned-place button,
 html[data-theme="night"] .admin-assignment-list button,
 html[data-theme="night"] .admin-caretaker-bottom button,
 html[data-theme="night"] .admin-report-card > span,
-html[data-theme="night"] .role-chip {
+html[data-theme="night"] .role-chip,
+html[data-theme="night"] .report-status-chip {
   border-color: rgba(142, 197, 255, 0.24);
   background: rgba(142, 197, 255, 0.1);
   color: #dbeafe;
 }
 
 html[data-theme="night"] .admin-tabs button.active,
+html[data-theme="night"] .report-filter-tabs button.active,
 html[data-theme="night"] .admin-editor-actions button:last-child {
   background: linear-gradient(135deg, #1d4ed8, #0b2753);
   color: #ffffff;
+}
+
+html[data-theme="night"] .admin-empty-state {
+  border-color: rgba(142, 197, 255, 0.28);
+  color: #c9d6ea;
 }
 
 html[data-theme="night"] .admin-assignment-list article.is-assigned {
@@ -932,6 +1071,7 @@ html[data-theme="night"] .admin-stats-grid article div {
   .admin-overview,
   .admin-users-table,
   .admin-report-grid,
+  .report-filter-tabs,
   .admin-caretaker-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -949,6 +1089,7 @@ html[data-theme="night"] .admin-stats-grid article div {
   .admin-overview,
   .admin-users-table,
   .admin-report-grid,
+  .report-filter-tabs,
   .admin-place-row,
   .admin-caretaker-stats,
   .admin-assigned-place,
