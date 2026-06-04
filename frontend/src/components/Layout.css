@@ -9258,3 +9258,30 @@ html[data-theme="night"] .issue-report-actions button {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Required mobile behavior: in the Map tab, the Categories button stays fixed on screen. */
+@media (max-width: 760px) {
+  .layout.map-layout .drawer-toggle,
+  .layout.map-layout .drawer-toggle.active,
+  .layout.map-layout .drawer-toggle.hidden {
+    position: fixed !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    left: 50% !important;
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .layout.map-layout .sidebar {
+    position: fixed !important;
+    top: auto !important;
+    right: 10px !important;
+    bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+    left: 10px !important;
+    z-index: 9998 !important;
+  }
+}
