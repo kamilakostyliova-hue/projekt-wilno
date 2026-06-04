@@ -8120,3 +8120,183 @@ html[data-theme="night"] .issue-report-actions button {
     animation: none !important;
   }
 }
+
+@keyframes rossaAuroraFlow {
+  0%,
+  100% {
+    background-position: 0% 48%, 100% 18%, 50% 100%;
+  }
+
+  50% {
+    background-position: 100% 58%, 0% 28%, 46% 0%;
+  }
+}
+
+@keyframes rossaSparkleBlink {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  45% {
+    opacity: 0.72;
+    transform: translate3d(8px, -10px, 0) scale(1.05);
+  }
+
+  70% {
+    opacity: 0.42;
+    transform: translate3d(-6px, 8px, 0) scale(0.98);
+  }
+}
+
+@keyframes rossaCardFloat {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile wow layer for every route, including the project description page. */
+@media (max-width: 760px) {
+  .app-view {
+    position: relative;
+    isolation: isolate;
+    min-height: calc(100svh - 64px);
+    overflow-x: clip;
+    background:
+      radial-gradient(circle at 8% 6%, rgba(125, 211, 252, 0.28), transparent 34%),
+      radial-gradient(circle at 92% 18%, rgba(37, 99, 235, 0.22), transparent 34%),
+      linear-gradient(180deg, #f7fbff 0%, #eef6ff 48%, #f8fbff 100%);
+    background-size: 160% 160%, 150% 150%, 100% 100%;
+    animation: rossaAuroraFlow 12s ease-in-out infinite;
+  }
+
+  .app-view::before,
+  .app-view::after {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    content: "";
+    pointer-events: none;
+  }
+
+  .app-view::before {
+    background:
+      radial-gradient(circle at 18% 18%, rgba(37, 99, 235, 0.16) 0 2px, transparent 3px),
+      radial-gradient(circle at 78% 14%, rgba(125, 211, 252, 0.38) 0 2px, transparent 3px),
+      radial-gradient(circle at 64% 72%, rgba(37, 99, 235, 0.18) 0 2px, transparent 3px),
+      radial-gradient(circle at 24% 86%, rgba(125, 211, 252, 0.3) 0 1px, transparent 3px);
+    background-size: 160px 160px, 210px 210px, 180px 180px, 130px 130px;
+    animation: rossaSparkleBlink 7s ease-in-out infinite;
+  }
+
+  .app-view::after {
+    background:
+      linear-gradient(120deg, transparent 0 22%, rgba(255, 255, 255, 0.42) 36%, transparent 52%),
+      radial-gradient(circle at 50% 102%, rgba(37, 99, 235, 0.14), transparent 38%);
+    opacity: 0.7;
+    mix-blend-mode: screen;
+    animation: rossaSparkleBlink 9s ease-in-out infinite reverse;
+  }
+
+  .app-view > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .project-page,
+  .profile-page,
+  .person-page,
+  .admin-page,
+  .caretaker-page {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    background: transparent !important;
+  }
+
+  .project-hero,
+  .project-slideshow,
+  .project-grid article,
+  .project-info-card,
+  .home-project-card,
+  .profile-panel,
+  .admin-panel,
+  .caretaker-panel,
+  .person-panel {
+    animation: rossaCardFloat 0.48s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .project-slideshow,
+  .project-grid article:nth-child(2),
+  .profile-panel:nth-of-type(2) {
+    animation-delay: 0.05s;
+  }
+
+  .project-grid article:nth-child(3),
+  .profile-panel:nth-of-type(3) {
+    animation-delay: 0.1s;
+  }
+
+  .project-university-seal {
+    box-shadow:
+      0 22px 54px rgba(10, 31, 68, 0.14),
+      0 0 42px rgba(37, 99, 235, 0.12) !important;
+    transition: transform 0.24s ease, box-shadow 0.24s ease;
+  }
+
+  .project-university-seal:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 28px 68px rgba(10, 31, 68, 0.18),
+      0 0 56px rgba(37, 99, 235, 0.18) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-theme="night"] .app-view {
+    background:
+      radial-gradient(circle at 8% 6%, rgba(125, 211, 252, 0.16), transparent 34%),
+      radial-gradient(circle at 92% 18%, rgba(37, 99, 235, 0.28), transparent 34%),
+      linear-gradient(180deg, #06162e 0%, #0a244c 48%, #06162e 100%);
+    background-size: 160% 160%, 150% 150%, 100% 100%;
+  }
+
+  html[data-theme="night"] .app-view::before {
+    background:
+      radial-gradient(circle at 18% 18%, rgba(142, 197, 255, 0.22) 0 2px, transparent 3px),
+      radial-gradient(circle at 78% 14%, rgba(125, 211, 252, 0.24) 0 2px, transparent 3px),
+      radial-gradient(circle at 64% 72%, rgba(37, 99, 235, 0.28) 0 2px, transparent 3px),
+      radial-gradient(circle at 24% 86%, rgba(142, 197, 255, 0.2) 0 1px, transparent 3px);
+    background-size: 160px 160px, 210px 210px, 180px 180px, 130px 130px;
+  }
+
+  html[data-theme="night"] .app-view::after {
+    background:
+      linear-gradient(120deg, transparent 0 22%, rgba(142, 197, 255, 0.12) 36%, transparent 52%),
+      radial-gradient(circle at 50% 102%, rgba(125, 211, 252, 0.12), transparent 38%);
+  }
+}
+
+@media (max-width: 760px) and (prefers-reduced-motion: reduce) {
+  .app-view,
+  .app-view::before,
+  .app-view::after,
+  .project-hero,
+  .project-slideshow,
+  .project-grid article,
+  .project-info-card,
+  .home-project-card,
+  .profile-panel,
+  .admin-panel,
+  .caretaker-panel,
+  .person-panel {
+    animation: none !important;
+  }
+}
