@@ -153,6 +153,13 @@ function Navbar({
     setProfileOpen(false);
   };
 
+  const openLogin = () => {
+    setMenuOpen(false);
+    setProfileOpen(false);
+    setShareOpen(false);
+    onLoginClick();
+  };
+
   const copyShareLink = async () => {
     try {
       await navigator.clipboard.writeText(projectShareUrl);
@@ -314,7 +321,7 @@ function Navbar({
               )}
             </div>
           ) : (
-            <button className="login-button" onClick={onLoginClick} type="button">
+            <button className="login-button" onClick={openLogin} type="button">
               <FaUserCircle /> {t("nav.login")}
             </button>
           )}

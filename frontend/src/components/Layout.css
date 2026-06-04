@@ -8300,3 +8300,256 @@ html[data-theme="night"] .issue-report-actions button {
     animation: none !important;
   }
 }
+
+/* Final mobile correction: visible map, clean categories, no horizontal overflow. */
+@media (max-width: 760px) {
+  html,
+  body,
+  #root,
+  .app-view {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .layout,
+  .center,
+  .list,
+  .details,
+  .details .card,
+  .categories-page,
+  .category-grid,
+  .category-preview,
+  .project-page,
+  .profile-page,
+  .admin-page,
+  .caretaker-page,
+  .person-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 10px 10px calc(84px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .center {
+    display: grid !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .workspace-bar {
+    margin: 0 !important;
+    padding: 14px 14px 12px !important;
+    border-radius: 24px !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .workspace-bar .eyebrow {
+    font-size: 0.82rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .workspace-bar h2 {
+    max-width: 12ch !important;
+    font-size: clamp(1.95rem, 9vw, 2.55rem) !important;
+    line-height: 0.98 !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .workspace-bar p {
+    display: none !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .workspace-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .workspace-actions button,
+  .layout:not(.walk-layout):not(.list-layout) .route-actions button,
+  .layout:not(.walk-layout):not(.list-layout) .small-button {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 46px !important;
+    padding: 0 14px !important;
+    border-radius: 999px !important;
+    font-size: clamp(0.96rem, 4vw, 1.1rem) !important;
+    white-space: normal !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .route-panel {
+    padding: 10px !important;
+    border-radius: 22px !important;
+  }
+
+  .layout:not(.walk-layout):not(.list-layout) .list {
+    margin: 0 !important;
+    padding: 18px 12px !important;
+    border-radius: 24px !important;
+    transform: none !important;
+  }
+
+  .list-header {
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .list-header h3 {
+    font-size: clamp(1.35rem, 6vw, 1.8rem) !important;
+  }
+
+  .list-header input {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  .item {
+    display: grid !important;
+    grid-template-columns: 74px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 12px !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+  }
+
+  .item img {
+    width: 74px !important;
+    height: 74px !important;
+    border-radius: 18px !important;
+    object-fit: cover !important;
+  }
+
+  .item h4,
+  .item p,
+  .item span,
+  .tag {
+    max-width: 100% !important;
+    overflow-wrap: anywhere;
+  }
+
+  .item-actions,
+  .favorite-toggle {
+    max-width: 100% !important;
+  }
+
+  .details {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .details .card {
+    margin: 0 !important;
+    padding: 14px !important;
+    border-radius: 26px !important;
+  }
+
+  .details .card img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: min(52vw, 210px) !important;
+    border-radius: 22px !important;
+    object-fit: cover !important;
+  }
+
+  .details .card h2 {
+    font-size: clamp(2rem, 10vw, 3rem) !important;
+    line-height: 0.98 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .details .card > button,
+  .audio-button,
+  .walk-start {
+    width: 100% !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+  }
+
+  .categories-page {
+    display: grid !important;
+    gap: 14px !important;
+    padding: 10px 12px calc(86px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .categories-hero {
+    display: none !important;
+  }
+
+  .category-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .category-tile {
+    min-height: 154px !important;
+    padding: 16px !important;
+    border-radius: 26px !important;
+    color: #0b1730 !important;
+    overflow: hidden !important;
+    box-shadow:
+      0 18px 42px rgba(10, 31, 68, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+  }
+
+  .category-tile svg {
+    width: 34px !important;
+    height: 34px !important;
+    color: #2563eb !important;
+  }
+
+  .category-tile strong {
+    color: #0b1730 !important;
+    font-size: clamp(1.25rem, 5.7vw, 1.8rem) !important;
+    line-height: 1.02 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .category-tile span {
+    width: max-content !important;
+    max-width: 100% !important;
+    padding: 6px 10px !important;
+    border-radius: 999px !important;
+    background: rgba(37, 99, 235, 0.1) !important;
+    color: #1d4f86 !important;
+    font-size: 0.86rem !important;
+    font-weight: 900 !important;
+  }
+
+  .category-tile p {
+    display: none !important;
+  }
+
+  .category-preview {
+    margin: 0 !important;
+    padding: 14px !important;
+    border-radius: 24px !important;
+  }
+
+  .category-person {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  html[data-theme="night"] .category-tile strong,
+  html[data-theme="night"] .category-tile {
+    color: #f8fbff !important;
+  }
+}

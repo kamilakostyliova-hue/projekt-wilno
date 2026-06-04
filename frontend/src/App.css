@@ -531,3 +531,60 @@ html[data-theme="night"] .auth-demo-note {
     box-shadow: 0 -10px 24px rgba(13, 37, 79, 0.88), 0 14px 30px rgba(37, 99, 235, 0.24);
   }
 }
+
+/* Final mobile auth fix: login must sit above the hamburger drawer and stay tappable. */
+@media (max-width: 760px) {
+  .auth-shell {
+    z-index: 9000 !important;
+    align-items: start !important;
+    justify-items: center !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding:
+      max(12px, env(safe-area-inset-top))
+      10px
+      max(18px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .auth-card {
+    width: min(100%, 430px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 26px) !important;
+    padding: 16px !important;
+    gap: 8px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border-radius: 24px !important;
+  }
+
+  .auth-card h2 {
+    font-size: clamp(1.55rem, 7vw, 2rem) !important;
+  }
+
+  .auth-card p,
+  .auth-demo-note {
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .auth-role-switch {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+
+  .auth-role-switch button {
+    min-height: 40px !important;
+    padding: 8px 10px !important;
+  }
+
+  .auth-card input {
+    min-height: 39px !important;
+  }
+
+  .auth-primary {
+    position: sticky !important;
+    bottom: 0 !important;
+    min-height: 42px !important;
+    margin-top: 2px !important;
+  }
+}
