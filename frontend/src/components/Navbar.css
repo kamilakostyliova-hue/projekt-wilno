@@ -1116,6 +1116,134 @@ html[data-theme="night"] .right .share-nav-button::after {
   color: #f8fbff;
 }
 
+/* Mobile hamburger opens a polished bottom sheet. */
+@media (max-width: 760px) {
+  .nav-content {
+    position: fixed !important;
+    top: auto !important;
+    right: 10px !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    left: 10px !important;
+    z-index: 720 !important;
+    display: grid !important;
+    width: auto !important;
+    max-height: min(78svh, 620px) !important;
+    gap: 12px !important;
+    padding: 14px !important;
+    overflow-y: auto !important;
+    border: 1px solid rgba(122, 167, 223, 0.34) !important;
+    border-radius: 28px !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.18), transparent 36%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(241, 248, 255, 0.96)) !important;
+    box-shadow: 0 28px 80px rgba(7, 20, 42, 0.28) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(18px) scale(0.97) !important;
+    transition: opacity 0.22s ease, transform 0.22s ease !important;
+  }
+
+  .nav-content.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+  }
+
+  .nav-scrim {
+    z-index: 710 !important;
+    background: rgba(7, 20, 42, 0.42) !important;
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-content .menu {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .nav-content .menu button {
+    width: 100% !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+  }
+
+  .nav-content .right {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .nav-content .right input,
+  .nav-content .language-pill,
+  .nav-content .mode-pill,
+  .nav-content .share-nav-button,
+  .nav-content .login-button,
+  .nav-content .profile-chip {
+    width: 100% !important;
+    min-height: 44px !important;
+    justify-content: center !important;
+    border-radius: 16px !important;
+  }
+
+  .nav-content .language-pill {
+    display: grid !important;
+    grid-template-columns: auto 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 4px !important;
+    border: 1px solid rgba(122, 167, 223, 0.3) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+  }
+
+  .nav-content .mode-pill span,
+  .nav-content .share-nav-button span,
+  .nav-content .login-button span,
+  .nav-content .profile-chip > span {
+    display: grid !important;
+  }
+
+  .nav-content .profile-chip {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    text-align: left !important;
+  }
+
+  .nav-content .profile-chip strong {
+    max-width: none !important;
+  }
+
+  .profile-dropdown {
+    position: static !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 16px 38px rgba(10, 31, 68, 0.14) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .nav-content .menu {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-theme="night"] .nav-content {
+    border-color: rgba(142, 197, 255, 0.24) !important;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(96, 165, 250, 0.16), transparent 36%),
+      linear-gradient(145deg, rgba(13, 37, 79, 0.98), rgba(7, 27, 61, 0.96)) !important;
+    box-shadow: 0 28px 80px rgba(0, 7, 20, 0.56) !important;
+  }
+
+  html[data-theme="night"] .nav-content .language-pill,
+  html[data-theme="night"] .profile-dropdown {
+    border-color: rgba(142, 197, 255, 0.22) !important;
+    background: rgba(13, 37, 79, 0.82) !important;
+  }
+}
+
 /* Final premium mobile navigation. */
 @media (max-width: 760px) {
   .navbar {
