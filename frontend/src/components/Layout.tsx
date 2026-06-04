@@ -2048,15 +2048,6 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
               </span>
             </button>
 
-            {drawerOpen && (
-              <button
-                aria-label={copy.closeFilters}
-                className="drawer-scrim"
-                onClick={() => setDrawerOpen(false)}
-                type="button"
-              />
-            )}
-
             <div className={`sidebar ${drawerOpen ? "open" : ""}`}>
               <button
                 aria-label={copy.closeFilters}

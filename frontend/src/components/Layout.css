@@ -9288,6 +9288,15 @@ html[data-theme="night"] .issue-report-actions button {
 
 /* Portal-based mobile map categories: independent from page scroll. */
 @media (max-width: 760px) {
+  .map-category-portal {
+    pointer-events: none !important;
+  }
+
+  .map-category-portal .drawer-scrim {
+    display: none !important;
+    pointer-events: none !important;
+  }
+
   .map-layout .center {
     display: grid !important;
     gap: 12px !important;
