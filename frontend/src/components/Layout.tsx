@@ -2038,8 +2038,8 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
       {activeView !== "walk" && (
         <>
           <button
-            className={`drawer-toggle ${drawerOpen ? "hidden" : ""}`}
-            onClick={() => setDrawerOpen(true)}
+            className={`drawer-toggle ${drawerOpen ? "active" : ""}`}
+            onClick={() => setDrawerOpen((current) => !current)}
             type="button"
           >
             <FaLayerGroup />

@@ -986,3 +986,38 @@ html[data-theme="night"] .map-compass,html[data-theme="night"] .tooltip-actions 
     min-height: 410px !important;
   }
 }
+
+/* Mobile v2 scroll stability: no sticky map controls, no layout jumps. */
+@media (max-width: 760px) {
+  .map-premium-head {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+  }
+
+  .transport-switcher {
+    position: static !important;
+    z-index: auto !important;
+  }
+
+  .map.premium-map,
+  .map.premium-map.is-fullscreen {
+    contain: layout paint !important;
+  }
+
+  .map.premium-map .map-canvas,
+  .map.premium-map.is-fullscreen .map-canvas,
+  .map.premium-map:not(.is-fullscreen) .map-canvas {
+    height: 56svh !important;
+    min-height: 450px !important;
+    max-height: 610px !important;
+  }
+
+  .leaflet-popup {
+    max-width: calc(100vw - 38px) !important;
+  }
+
+  .leaflet-popup-content {
+    margin: 8px !important;
+  }
+}
