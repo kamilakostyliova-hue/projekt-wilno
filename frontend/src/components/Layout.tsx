@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   FaBookOpen,
   FaCheckCircle,
@@ -2029,13 +2030,81 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
     );
   }
 
+  const mapCategoryPortal =
+    activeView === "map" && typeof document !== "undefined"
+      ? createPortal(
+          <div className="map-category-portal">
+            <button
+              className={`drawer-toggle ${drawerOpen ? "active" : ""}`}
+              onClick={() => setDrawerOpen((current) => !current)}
+              type="button"
+            >
+              <FaLayerGroup />
+              <span className="drawer-toggle-copy">
+                <strong>{copy.categories}</strong>
+                <small>
+                  {activeCategoryInfo.label} - {filteredPlaces.length} {copy.items}
+                </small>
+              </span>
+            </button>
+
+            {drawerOpen && (
+              <button
+                aria-label={copy.closeFilters}
+                className="drawer-scrim"
+                onClick={() => setDrawerOpen(false)}
+                type="button"
+              />
+            )}
+
+            <div className={`sidebar ${drawerOpen ? "open" : ""}`}>
+              <button
+                aria-label={copy.closeFilters}
+                className="drawer-close"
+                onClick={() => setDrawerOpen(false)}
+                type="button"
+              >
+                <FaTimes aria-hidden="true" />
+              </button>
+              <h3>Kategorie</h3>
+
+              {categories.map((category) => {
+                const Icon = category.icon;
+                const count = getCurrentCategoryCount(category.id);
+
+                return (
+                  <button
+                    className={activeCategory === category.id ? "active" : ""}
+                    key={category.id}
+                    onClick={() => {
+                      handleCategoryClick(category.id);
+                      setDrawerOpen(false);
+                    }}
+                    type="button"
+                  >
+                    <Icon />
+                    <span className="category-button-text">
+                      <strong>{category.label}</strong>
+                      <small>{count} {copy.items}</small>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>,
+          document.body
+        )
+      : null;
+
   return (
-    <div
-      className={`layout ${activeView === "walk" ? "walk-layout" : ""} ${
-        activeView === "list" ? "list-layout" : ""
-      } ${activeView === "map" ? "map-layout" : ""}`}
-    >
-      {activeView !== "walk" && (
+    <>
+      {mapCategoryPortal}
+      <div
+        className={`layout ${activeView === "walk" ? "walk-layout" : ""} ${
+          activeView === "list" ? "list-layout" : ""
+        } ${activeView === "map" ? "map-layout" : ""}`}
+      >
+      {activeView !== "walk" && activeView !== "map" && (
         <>
           <button
             className={`drawer-toggle ${drawerOpen ? "active" : ""}`}
@@ -2060,7 +2129,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
           )}
         </>
       )}
-      {activeView !== "walk" && (
+      {activeView !== "walk" && activeView !== "map" && (
       <div className={`sidebar ${drawerOpen ? "open" : ""}`}>
         <button
           aria-label={copy.closeFilters}
@@ -2890,7 +2959,8 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
