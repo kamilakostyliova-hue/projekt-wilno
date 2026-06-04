@@ -755,3 +755,162 @@ html[data-theme="night"] .map-compass,html[data-theme="night"] .tooltip-actions 
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Mobile map-first redesign: the map is the main product surface. */
+@media (max-width: 760px) {
+  .map.premium-map {
+    display: grid !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    border-radius: 28px !important;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(125, 211, 252, 0.16), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(238, 246, 255, 0.96)) !important;
+    box-shadow:
+      0 20px 58px rgba(10, 31, 68, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.96) !important;
+  }
+
+  .map-premium-head {
+    display: grid !important;
+    margin: 0 !important;
+  }
+
+  .map-premium-head > div:first-child {
+    display: none !important;
+  }
+
+  .transport-switcher {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    width: 100% !important;
+    padding: 5px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.84) !important;
+  }
+
+  .transport-switcher button {
+    min-height: 38px !important;
+    padding: 0 8px !important;
+    border-radius: 999px !important;
+    font-size: clamp(0.78rem, 3.3vw, 0.92rem) !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .map-premium-actions {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+
+  .map-premium-actions button {
+    min-width: 0 !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border-radius: 16px !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+  }
+
+  .map-premium-actions button svg {
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+  }
+
+  .map.premium-map:not(.is-fullscreen) .map-canvas {
+    height: clamp(500px, 64svh, 690px) !important;
+    min-height: 500px !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+  }
+
+  .map-legend {
+    display: none !important;
+  }
+
+  .map-compass {
+    right: 12px !important;
+    bottom: 74px !important;
+    min-width: 58px !important;
+    min-height: 46px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+  }
+
+  .map-audio-panel {
+    right: auto !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    width: 54px !important;
+    height: 54px !important;
+    max-width: 54px !important;
+    padding: 6px !important;
+    border-radius: 999px !important;
+  }
+
+  .map-audio-panel span {
+    display: none !important;
+  }
+
+  .map-audio-panel button {
+    width: 42px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+  }
+
+  .map-audio-panel button svg {
+    width: 17px !important;
+    height: 17px !important;
+    margin: 0 !important;
+  }
+
+  .route-info-card {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    border-radius: 22px !important;
+  }
+
+  .route-info-card div {
+    min-width: 0 !important;
+    padding: 9px !important;
+    border-radius: 16px !important;
+  }
+
+  .route-info-card p {
+    grid-column: 1 / -1 !important;
+    margin: 0 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+  }
+
+  html[data-theme="night"] .map.premium-map {
+    background:
+      radial-gradient(circle at 8% 0%, rgba(125, 211, 252, 0.11), transparent 34%),
+      linear-gradient(180deg, rgba(13, 37, 79, 0.98), rgba(7, 27, 61, 0.96)) !important;
+  }
+}
+
+@media (max-width: 370px) {
+  .map.premium-map:not(.is-fullscreen) .map-canvas {
+    height: clamp(430px, 58svh, 620px) !important;
+    min-height: 430px !important;
+  }
+
+  .route-info-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

@@ -2033,7 +2033,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
     <div
       className={`layout ${activeView === "walk" ? "walk-layout" : ""} ${
         activeView === "list" ? "list-layout" : ""
-      }`}
+      } ${activeView === "map" ? "map-layout" : ""}`}
     >
       {activeView !== "walk" && (
         <>
@@ -2042,7 +2042,13 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
             onClick={() => setDrawerOpen(true)}
             type="button"
           >
-            <FaLayerGroup /> {copy.categories}
+            <FaLayerGroup />
+            <span className="drawer-toggle-copy">
+              <strong>{copy.categories}</strong>
+              <small>
+                {activeCategoryInfo.label} - {filteredPlaces.length} {copy.items}
+              </small>
+            </span>
           </button>
           {drawerOpen && (
             <button
