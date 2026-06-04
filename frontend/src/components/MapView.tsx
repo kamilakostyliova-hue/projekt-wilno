@@ -183,14 +183,12 @@ function MapView({
 
   const mapKey = useMemo(
     () =>
-      (selectedPlaceId ?? "empty") +
-      "-" +
       transportMode +
       "-" +
       hasRoute +
       "-" +
       (userLocation?.join(",") ?? "gate"),
-    [hasRoute, selectedPlaceId, transportMode, userLocation]
+    [hasRoute, transportMode, userLocation]
   );
 
   const toggleAudioWalk = () => {

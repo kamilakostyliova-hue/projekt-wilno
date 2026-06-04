@@ -914,3 +914,75 @@ html[data-theme="night"] .map-compass,html[data-theme="night"] .tooltip-actions 
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Final mobile stability: no accidental fullscreen/jump after marker selection. */
+@media (max-width: 760px) {
+  .map.premium-map,
+  .map.premium-map.is-fullscreen {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    padding: 8px !important;
+    border-radius: 28px !important;
+  }
+
+  .map-premium-head {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 720 !important;
+  }
+
+  .transport-switcher {
+    position: relative !important;
+    z-index: 721 !important;
+  }
+
+  .map-premium-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .map-premium-actions button:last-child {
+    display: none !important;
+  }
+
+  .map.premium-map .map-canvas,
+  .map.premium-map.is-fullscreen .map-canvas,
+  .map.premium-map:not(.is-fullscreen) .map-canvas {
+    height: 58svh !important;
+    min-height: 470px !important;
+    max-height: 640px !important;
+    flex: none !important;
+    border-radius: 24px !important;
+  }
+
+  .leaflet-container {
+    height: 100% !important;
+    min-height: 100% !important;
+  }
+
+  .premium-popup .leaflet-popup-content-wrapper {
+    max-width: min(280px, calc(100vw - 48px)) !important;
+  }
+
+  .marker-tooltip-card {
+    max-width: min(260px, calc(100vw - 64px)) !important;
+  }
+
+  .marker-tooltip-card img {
+    width: 72px !important;
+    height: 72px !important;
+    flex: 0 0 72px !important;
+  }
+}
+
+@media (max-width: 370px) {
+  .map.premium-map .map-canvas,
+  .map.premium-map.is-fullscreen .map-canvas,
+  .map.premium-map:not(.is-fullscreen) .map-canvas {
+    height: 54svh !important;
+    min-height: 410px !important;
+  }
+}

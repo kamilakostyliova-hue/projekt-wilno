@@ -8867,3 +8867,56 @@ html[data-theme="night"] .issue-report-actions button {
     min-height: 92px !important;
   }
 }
+
+/* Final mobile stability: floating categories must stay visible and drawer must not hang the page. */
+@media (max-width: 760px) {
+  .layout.map-layout {
+    padding-bottom: calc(158px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .drawer-toggle {
+    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+    min-height: 64px !important;
+    animation: rossaCategoryFloat 3.2s ease-in-out infinite;
+  }
+
+  .drawer-toggle.hidden {
+    visibility: hidden !important;
+  }
+
+  .sidebar {
+    max-height: min(66svh, 560px) !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar:not(.open) {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .sidebar.open {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .drawer-scrim {
+    touch-action: none;
+  }
+
+  .map-layout .list,
+  .map-layout .details {
+    scroll-margin-bottom: 160px;
+  }
+}
+
+@keyframes rossaCategoryFloat {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
