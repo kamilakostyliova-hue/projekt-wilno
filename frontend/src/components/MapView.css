@@ -1021,3 +1021,20 @@ html[data-theme="night"] .map-compass,html[data-theme="night"] .tooltip-actions 
     margin: 8px !important;
   }
 }
+
+/* Restore mobile map heading after category-button changes. */
+@media (max-width: 760px) {
+  .map-premium-head > div:first-child {
+    display: block !important;
+  }
+
+  .map-premium-head .eyebrow {
+    display: inline-flex !important;
+  }
+
+  .map-premium-head h3 {
+    display: block !important;
+    font-size: clamp(1.55rem, 7vw, 2.15rem) !important;
+    line-height: 1 !important;
+  }
+}

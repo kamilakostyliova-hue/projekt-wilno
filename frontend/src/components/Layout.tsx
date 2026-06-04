@@ -2643,7 +2643,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                   </h2>
                   <p className="years">{selectedPlace.years}</p>
                   {renderPlaceBadges(selectedPlace)}
-                  <p className="desc">{selectedPlace.shortDescription}</p>
+                  <p className="desc">{selectedPlace.description}</p>
                   <div className="mobile-details-actions">
                     <button
                       className={`fav ${isSelectedFavorite ? "active" : ""}`}
