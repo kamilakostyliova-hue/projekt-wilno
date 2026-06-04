@@ -2557,6 +2557,48 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
               </div>
             )}
 
+            {activeView === "map" && selectedPlace && (
+              <div className="details mobile-map-details">
+                <h3>{copy.placeDetails}</h3>
+                <div className="card">
+                  {renderImage(selectedPlace)}
+                  <h2>
+                    {selectedPlace.name}{" "}
+                    <span
+                      className={
+                        selectedPlace.category === "wojskowi" ? "tag blue" : "tag"
+                      }
+                    >
+                      {selectedPlace.categoryLabel}
+                    </span>
+                  </h2>
+                  <p className="years">{selectedPlace.years}</p>
+                  {renderPlaceBadges(selectedPlace)}
+                  <p className="desc">{selectedPlace.shortDescription}</p>
+                  <div className="mobile-details-actions">
+                    <button
+                      className={`fav ${isSelectedFavorite ? "active" : ""}`}
+                      onClick={() => toggleFavorite(selectedPlace.id)}
+                      type="button"
+                    >
+                      <FaHeart />{" "}
+                      {isSelectedFavorite ? copy.removeFavorite : copy.addFavorite}
+                    </button>
+                    <button className="nav" onClick={handleNavigate} type="button">
+                      <FaRoute /> {copy.planRoute}
+                    </button>
+                    <button
+                      className="visited-action"
+                      onClick={() => openPersonDetails(selectedPlace.id)}
+                      type="button"
+                    >
+                      <FaExternalLinkAlt /> {copy.fullPersonPage}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeView !== "walk" ? (
             <div className="list">
               <div className="list-header">

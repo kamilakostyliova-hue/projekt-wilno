@@ -9128,3 +9128,133 @@ html[data-theme="night"] .issue-report-actions button {
     min-height: 76px !important;
   }
 }
+
+/* Final category-button contract: fixed at the bottom, visible while scrolling. */
+@media (max-width: 760px) {
+  .layout.map-layout {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .map-layout > .details:not(.mobile-map-details) {
+    display: none !important;
+  }
+
+  .mobile-map-details {
+    display: block !important;
+    order: 3 !important;
+    margin: 0 !important;
+  }
+
+  .mobile-map-details .card {
+    padding: 12px !important;
+    border-radius: 28px !important;
+  }
+
+  .mobile-map-details .card > img {
+    height: clamp(160px, 44vw, 220px) !important;
+    border-radius: 22px !important;
+  }
+
+  .mobile-map-details .timeline,
+  .mobile-map-details .source,
+  .mobile-map-details .rating,
+  .mobile-map-details .audio-guide,
+  .mobile-map-details .issue-report-box,
+  .mobile-map-details .route-summary-card {
+    display: none !important;
+  }
+
+  .mobile-details-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mobile-details-actions button {
+    width: 100% !important;
+    min-height: 44px !important;
+    border-radius: 999px !important;
+  }
+
+  .drawer-toggle,
+  .drawer-toggle.hidden,
+  .drawer-toggle.active {
+    position: fixed !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    left: 50% !important;
+    z-index: 9000 !important;
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    align-items: center !important;
+    width: min(260px, calc(100vw - 32px)) !important;
+    min-width: 0 !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    padding: 7px 14px 7px 10px !important;
+    border-radius: 999px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) !important;
+    animation: none !important;
+  }
+
+  .drawer-toggle svg {
+    width: 19px !important;
+    height: 19px !important;
+  }
+
+  .drawer-toggle-copy {
+    justify-items: start !important;
+    text-align: left !important;
+  }
+
+  .drawer-toggle-copy strong {
+    max-width: none !important;
+    font-size: 0.9rem !important;
+  }
+
+  .drawer-toggle-copy small {
+    display: block !important;
+    max-width: 176px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    top: auto !important;
+    right: 10px !important;
+    bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+    left: 10px !important;
+    z-index: 8900 !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(54svh, 460px) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(14px) scale(0.97) !important;
+  }
+
+  .sidebar.open {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .drawer-toggle,
+  .drawer-toggle.hidden,
+  .drawer-toggle.active {
+    width: min(230px, calc(100vw - 28px)) !important;
+  }
+
+  .sidebar {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
