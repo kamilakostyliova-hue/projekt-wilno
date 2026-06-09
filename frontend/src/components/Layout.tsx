@@ -41,6 +41,7 @@ import "./Layout.css";
 import type { AppLanguage, ThemeMode, UserProfile, UserSettings, ViewId } from "../App";
 import { saveCareReport } from "../services/caretakerData";
 import {
+  categoryText,
   getLanguageKey,
   layoutText,
   localizeCategory,
@@ -640,6 +641,16 @@ const issueTypeLabels: Record<ReportType, { pl: string; en: string }> = {
   other: { pl: "Inna uwaga", en: "Other note" },
 };
 
+const customPlacesStorageKey = "rossa-custom-places";
+const editableCategoryIds: Array<Exclude<CategoryId, "all">> = [
+  "wojskowi",
+  "politycy",
+  "artysci",
+  "architektura",
+  "naukowcy",
+  "duchowni",
+];
+
 const readStorageArray = <T,>(storageKey: string): T[] => {
   if (typeof window === "undefined") return [];
 
@@ -666,8 +677,66 @@ const readStorageRecord = <T,>(storageKey: string): Record<number, T> => {
   }
 };
 
+const isEditableCategoryId = (value: unknown): value is Exclude<CategoryId, "all"> =>
+  typeof value === "string" &&
+  editableCategoryIds.includes(value as Exclude<CategoryId, "all">);
+
+const readCustomPlaces = (): CemeteryPlace[] =>
+  readStorageArray<Partial<CemeteryPlace>>(customPlacesStorageKey)
+    .map((place): CemeteryPlace | null => {
+      if (
+        typeof place.id !== "number" ||
+        typeof place.name !== "string" ||
+        typeof place.years !== "string" ||
+        typeof place.description !== "string" ||
+        typeof place.shortDescription !== "string" ||
+        typeof place.image !== "string" ||
+        !Array.isArray(place.position) ||
+        typeof place.position[0] !== "number" ||
+        typeof place.position[1] !== "number" ||
+        !isEditableCategoryId(place.category)
+      ) {
+        return null;
+      }
+
+      const customPlace: CemeteryPlace = {
+        id: place.id,
+        name: place.name,
+        years: place.years,
+        category: place.category,
+        tags: Array.isArray(place.tags)
+          ? place.tags.filter(isEditableCategoryId)
+          : undefined,
+        categoryLabel:
+          typeof place.categoryLabel === "string" && place.categoryLabel.trim()
+            ? place.categoryLabel
+            : categoryText[place.category]?.label.pl ?? place.category,
+        position: [place.position[0], place.position[1]],
+        image: place.image,
+        gallery: Array.isArray(place.gallery)
+          ? place.gallery.filter((item): item is string => typeof item === "string")
+          : undefined,
+        description: place.description,
+        shortDescription: place.shortDescription,
+        source:
+          typeof place.source === "string" && place.source.trim()
+            ? place.source
+            : "Dodane przez administratora",
+        rating:
+          typeof place.rating === "number"
+            ? Math.min(5, Math.max(1, Math.round(place.rating)))
+            : 4,
+      };
+
+      return customPlace;
+    })
+    .filter((place): place is CemeteryPlace => place !== null);
+
+const getAvailablePlaceIds = () =>
+  new Set([...basePlaces, ...readCustomPlaces()].map((place) => place.id));
+
 const getInitialVisited = (storageKey: string): VisitedPlaceRecord[] => {
-  const validPlaceIds = new Set(basePlaces.map((place) => place.id));
+  const validPlaceIds = getAvailablePlaceIds();
   return readStorageArray<VisitedPlaceRecord>(storageKey).filter(
     (item) =>
       typeof item.placeId === "number" &&
@@ -677,7 +746,7 @@ const getInitialVisited = (storageKey: string): VisitedPlaceRecord[] => {
 };
 
 const getInitialWantVisits = (storageKey: string): WantVisitRecord[] => {
-  const validPlaceIds = new Set(basePlaces.map((place) => place.id));
+  const validPlaceIds = getAvailablePlaceIds();
   return readStorageArray<WantVisitRecord>(storageKey).filter(
     (item) =>
       typeof item.placeId === "number" &&
@@ -696,7 +765,7 @@ const getInitialFavorites = (storageKey: string) => {
       window.localStorage.getItem(storageKey) ??
       window.localStorage.getItem("rossa-favorites");
     const parsedFavorites = savedFavorites ? JSON.parse(savedFavorites) : [];
-    const validPlaceIds = new Set(basePlaces.map((place) => place.id));
+    const validPlaceIds = getAvailablePlaceIds();
 
     return Array.isArray(parsedFavorites)
       ? parsedFavorites.filter(
@@ -836,16 +905,24 @@ function Layout({
             quizTryAgain: "Dobry początek. Możesz spróbować ponownie po spacerze.",
             categoryQuestion: (name: string) => `Do jakiej kategorii należy ${name}?`,
             tourFinished: "Spacer ukończony. Czas na krótki quiz.",
-          },
+      },
     [languageKey]
   );
+  const [customPlaces, setCustomPlaces] = useState<CemeteryPlace[]>(() => readCustomPlaces());
   const categories = useMemo(
     () => baseCategories.map((category) => localizeCategory(category, languageKey)),
     [languageKey]
   );
   const places = useMemo(
-    () => basePlaces.map((place) => localizePlace(place, languageKey)),
-    [languageKey]
+    () => [
+      ...basePlaces.map((place) => localizePlace(place, languageKey)),
+      ...customPlaces.map((place) => ({
+        ...place,
+        categoryLabel:
+          categoryText[place.category]?.label[languageKey] ?? place.categoryLabel,
+      })),
+    ],
+    [customPlaces, languageKey]
   );
   const homeTimeline = useMemo(
     () => baseHomeTimeline.map((period) => localizeTimelinePeriod(period, languageKey)),
@@ -1147,6 +1224,18 @@ function Layout({
   }, []);
 
   useEffect(() => {
+    const refreshCustomPlaces = () => setCustomPlaces(readCustomPlaces());
+
+    window.addEventListener("storage", refreshCustomPlaces);
+    window.addEventListener("rossa-custom-places-changed", refreshCustomPlaces);
+
+    return () => {
+      window.removeEventListener("storage", refreshCustomPlaces);
+      window.removeEventListener("rossa-custom-places-changed", refreshCustomPlaces);
+    };
+  }, []);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => setDrawerOpen(false), 0);
 
     return () => window.clearTimeout(timer);
@@ -1163,7 +1252,7 @@ function Layout({
 
   const favoritePlaces = useMemo(
     () => places.filter((place) => favoriteIds.includes(place.id)),
-    [favoriteIds]
+    [favoriteIds, places]
   );
   const visitedIds = useMemo(() => visitedItems.map((item) => item.placeId), [visitedItems]);
   const visitedProgress = Math.round((visitedIds.length / places.length) * 100);
@@ -1171,8 +1260,25 @@ function Layout({
     () => (timelineFilter === "all" ? homeTimeline : homeTimeline.filter((period) => period.year === timelineFilter)),
     [timelineFilter]
   );
+  const canSeeCareLayer =
+    currentUser?.role === "admin" ||
+    currentUser?.role === "caretaker" ||
+    currentUser?.role === "volunteer";
+  useEffect(() => {
+    const careOnlyFilters: PlaceStatusFilter[] = [
+      "check",
+      "needs_care",
+      "missing_photo",
+      "missing_data",
+    ];
+
+    if (!canSeeCareLayer && careOnlyFilters.includes(statusFilter)) {
+      setStatusFilter("all");
+    }
+  }, [canSeeCareLayer, statusFilter]);
   const openCareReportsByPlace = useMemo(() => {
     const grouped = new Map<number, CareReport[]>();
+    if (!canSeeCareLayer) return grouped;
 
     careReports
       .filter((report) => report.placeId !== null && report.status !== "resolved")
@@ -1182,10 +1288,11 @@ function Layout({
       });
 
     return grouped;
-  }, [careReports]);
+  }, [canSeeCareLayer, careReports]);
 
   const getCareStatus = useCallback(
     (placeId: number): GraveStatus => {
+      if (!canSeeCareLayer) return "good";
       const reports = openCareReportsByPlace.get(placeId) ?? [];
 
       if (reports.some((report) => report.type === "needs_care")) return "needs_care";
@@ -1194,7 +1301,7 @@ function Layout({
 
       return careReviewStates[placeId]?.status ?? demoCareStatusByPlaceId[placeId] ?? "good";
     },
-    [careReviewStates, openCareReportsByPlace]
+    [canSeeCareLayer, careReviewStates, openCareReportsByPlace]
   );
 
   const getPlaceLayerBadges = useCallback(
@@ -1267,6 +1374,7 @@ function Layout({
     activeCategory,
     favoriteIds,
     getCareStatus,
+    places,
     routeStart,
     searchQuery,
     showNearbyOnly,
@@ -1281,14 +1389,14 @@ function Layout({
       activeCategory === "all"
         ? places
         : places.filter((place) => placeMatchesCategory(place, activeCategory)),
-    [activeCategory]
+    [activeCategory, places]
   );
   const activeCategoryInfo =
     categories.find((category) => category.id === activeCategory) ??
     categories[0];
   const featuredPlaces = useMemo(
     () => places.filter((place) => [1, 4, 9].includes(place.id)),
-    []
+    [places]
   );
   const architecturePlacesTotal = getCurrentCategoryCount("architektura");
   const recommendedCategoryId =
@@ -1301,7 +1409,7 @@ function Layout({
       places.filter((place) =>
         placeMatchesCategory(place, recommendedCategoryId)
       ),
-    [recommendedCategoryId]
+    [places, recommendedCategoryId]
   );
   const recommendedPlaceWord =
     recommendedRoutePlaces.length === 1
@@ -1329,8 +1437,8 @@ function Layout({
     [getPlaceLayerBadges, markerPlaces]
   );
   const statusFilterOptions = useMemo(
-    () =>
-      [
+    () => {
+      const baseOptions = [
         { id: "all", label: copy.all, count: places.length },
         { id: "favorites", label: copy.favorites, count: favoriteIds.length },
         { id: "visited", label: tourCopy.visited, count: visitedIds.length },
@@ -1339,6 +1447,14 @@ function Layout({
           label: tourCopy.planned,
           count: wantVisitItems.length,
         },
+      ] as Array<{ id: PlaceStatusFilter; label: string; count: number }>;
+
+      if (!canSeeCareLayer) {
+        return baseOptions;
+      }
+
+      return [
+        ...baseOptions,
         {
           id: "needs_care",
           label: graveStatusLabels.needs_care[languageKey],
@@ -1359,8 +1475,9 @@ function Layout({
           label: graveStatusLabels.missing_data[languageKey],
           count: places.filter((place) => getCareStatus(place.id) === "missing_data").length,
         },
-      ] as Array<{ id: PlaceStatusFilter; label: string; count: number }>,
-    [copy.all, copy.favorites, favoriteIds.length, getCareStatus, languageKey, places, tourCopy.planned, tourCopy.visited, visitedIds.length, wantVisitItems.length]
+      ] as Array<{ id: PlaceStatusFilter; label: string; count: number }>;
+    },
+    [canSeeCareLayer, copy.all, copy.favorites, favoriteIds.length, getCareStatus, languageKey, places, tourCopy.planned, tourCopy.visited, visitedIds.length, wantVisitItems.length]
   );
 
   const selectedPlace =

@@ -66,6 +66,20 @@ type LocalAuthUser = {
   passwordHash?: string;
 };
 
+type ActiveAuthUser = {
+  email: string;
+  username: string;
+  role?: UserRole;
+  loggedAt: string;
+  lastSeenAt: string;
+};
+
+type CustomPlaceRecord = AdminPlace & {
+  gallery?: string[];
+  rating: number;
+  tags?: string[];
+};
+
 type AdminPlaceDraft = {
   description?: string;
   category?: string;
@@ -103,6 +117,8 @@ type AdminCaretakerRecord = {
 
 const reportsStorageKey = "rossa-care-reports";
 const localUsersKey = "rossa-local-auth-users";
+const activeAuthUsersKey = "rossa-active-auth-users";
+const customPlacesStorageKey = "rossa-custom-places";
 const adminDraftsKey = "rossa-admin-place-drafts";
 const adminHistoryKey = "rossa-admin-change-history";
 const reviewStorageKey = "rossa-care-place-review";
@@ -190,6 +206,11 @@ const writeUsers = (users: LocalAuthUser[]) => {
   window.localStorage.setItem(localUsersKey, JSON.stringify(users));
 };
 
+const writeCustomPlaces = (places: CustomPlaceRecord[]) => {
+  window.localStorage.setItem(customPlacesStorageKey, JSON.stringify(places));
+  window.dispatchEvent(new Event("rossa-custom-places-changed"));
+};
+
 const writeDrafts = (drafts: Record<number, AdminPlaceDraft>) => {
   window.localStorage.setItem(adminDraftsKey, JSON.stringify(drafts));
 };
@@ -225,15 +246,29 @@ function AdminPanel({
   onShowPlace,
 }: AdminPanelProps) {
   const isEnglish = language === "en";
+  const defaultNewPlacePosition = places[0]?.position ?? [54.66842, 25.30236];
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [reportFilter, setReportFilter] = useState<AdminReportFilter>("all");
   const [reports, setReports] = useState<CareReport[]>(() => readStorageArray<CareReport>(reportsStorageKey));
   const [users, setUsers] = useState<LocalAuthUser[]>(() => readStorageArray<LocalAuthUser>(localUsersKey));
+  const [activeUsers, setActiveUsers] = useState<ActiveAuthUser[]>(() =>
+    readStorageArray<ActiveAuthUser>(activeAuthUsersKey)
+  );
   const [drafts, setDrafts] = useState<Record<number, AdminPlaceDraft>>(() => readStorageRecord<AdminPlaceDraft>(adminDraftsKey));
   const [historyRecords, setHistoryRecords] = useState<AdminChangeHistoryRecord[]>(() =>
     readStorageArray<AdminChangeHistoryRecord>(adminHistoryKey)
   );
   const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(places[0]?.id ?? null);
+  const [newPersonName, setNewPersonName] = useState("");
+  const [newPersonYears, setNewPersonYears] = useState("");
+  const [newPersonCategory, setNewPersonCategory] = useState("artysci");
+  const [newPersonShortDescription, setNewPersonShortDescription] = useState("");
+  const [newPersonDescription, setNewPersonDescription] = useState("");
+  const [newPersonImage, setNewPersonImage] = useState("");
+  const [newPersonSource, setNewPersonSource] = useState("");
+  const [newPersonLat, setNewPersonLat] = useState(() => String(defaultNewPlacePosition[0]));
+  const [newPersonLng, setNewPersonLng] = useState(() => String(defaultNewPlacePosition[1]));
+  const [newPersonNotice, setNewPersonNotice] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editNote, setEditNote] = useState("");
   const [editCategory, setEditCategory] = useState("");
@@ -267,6 +302,45 @@ function AdminPanel({
     ],
     []
   );
+
+  useEffect(() => {
+    const refreshActiveUsers = () =>
+      setActiveUsers(readStorageArray<ActiveAuthUser>(activeAuthUsersKey));
+
+    window.addEventListener("storage", refreshActiveUsers);
+    window.addEventListener("rossa-active-auth-users-changed", refreshActiveUsers);
+
+    return () => {
+      window.removeEventListener("storage", refreshActiveUsers);
+      window.removeEventListener("rossa-active-auth-users-changed", refreshActiveUsers);
+    };
+  }, []);
+
+  const displayedActiveUsers = useMemo<ActiveAuthUser[]>(() => {
+    const activeByEmail = new Map(activeUsers.map((user) => [user.email, user]));
+
+    if (currentUser) {
+      const existing = activeByEmail.get(currentUser.email);
+      activeByEmail.set(currentUser.email, {
+        email: currentUser.email,
+        username: currentUser.name,
+        role: currentUser.role,
+        loggedAt: existing?.loggedAt ?? currentUser.createdAt,
+        lastSeenAt: existing?.lastSeenAt ?? new Date().toISOString(),
+      });
+    }
+
+    return Array.from(activeByEmail.values());
+  }, [activeUsers, currentUser]);
+
+  const categoryOptions = useMemo(() => {
+    const byId = new Map<string, string>();
+    places.forEach((place) => {
+      byId.set(place.category, place.categoryLabel);
+    });
+
+    return Array.from(byId, ([id, label]) => ({ id, label }));
+  }, [places]);
 
   const allUsers = useMemo(() => {
     const seen = new Set(users.map((user) => user.email));
@@ -330,18 +404,89 @@ function AdminPanel({
       })),
     [drafts, places]
   );
+  const demoReports = useMemo<CareReport[]>(
+    () => [
+      {
+        id: "demo-report-1",
+        placeId: 4,
+        placeName: places.find((place) => place.id === 4)?.name ?? "Antoni Wiwulski",
+        type: "needs_care",
+        note: isEnglish ? "Demo report: check grave condition after winter." : "Zgloszenie demo: sprawdzic stan grobu po zimie.",
+        status: "new",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 20).toISOString(),
+      },
+      {
+        id: "demo-report-2",
+        placeId: 10,
+        placeName: places.find((place) => place.id === 10)?.name ?? "Balys Sruoga",
+        type: "missing_photo",
+        note: isEnglish ? "Demo report: add a newer grave photo." : "Zgloszenie demo: dodac nowsze zdjecie grobu.",
+        status: "review",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+      },
+      {
+        id: "demo-report-3",
+        placeId: 1,
+        placeName: places.find((place) => place.id === 1)?.name ?? "Jozef Pilsudski",
+        type: "wrong_description",
+        note: isEnglish
+          ? "Demo report: visitor suggests adding information about the heart of the marshal."
+          : "Zgloszenie demo: odwiedzajacy proponuje dopisac informacje o sercu marszalka.",
+        status: "new",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(),
+      },
+      {
+        id: "demo-report-4",
+        placeId: 2,
+        placeName: places.find((place) => place.id === 2)?.name ?? "Wladyslaw Syrokomla",
+        type: "wrong_location",
+        note: isEnglish
+          ? "Demo report: marker seems shifted from the actual grave path."
+          : "Zgloszenie demo: marker wyglada na przesuniety wzgledem alejki przy grobie.",
+        status: "review",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString(),
+      },
+      {
+        id: "demo-report-5",
+        placeId: 7,
+        placeName: places.find((place) => place.id === 7)?.name ?? "Czeslaw Jankowski",
+        type: "missing_person",
+        note: isEnglish
+          ? "Demo report: add a short biographical note and verify dates."
+          : "Zgloszenie demo: dodac krotka note biograficzna i sprawdzic daty.",
+        status: "new",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 55).toISOString(),
+      },
+      {
+        id: "demo-report-6",
+        placeId: 4,
+        placeName: places.find((place) => place.id === 4)?.name ?? "Antoni Wiwulski",
+        type: "other",
+        note: isEnglish
+          ? "Demo report: cleaned inscription area, photo confirmation is needed."
+          : "Zgloszenie demo: oczyszczono miejsce przy inskrypcji, potrzebne potwierdzenie zdjeciem.",
+        status: "resolved",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+      },
+    ],
+    [isEnglish, places]
+  );
+  const allReports = useMemo(() => {
+    const reportIds = new Set(reports.map((report) => report.id));
+    return [...reports, ...demoReports.filter((report) => !reportIds.has(report.id))];
+  }, [demoReports, reports]);
   const selectedPlace = managedPlaces.find((place) => place.id === selectedPlaceId) ?? managedPlaces[0] ?? null;
-  const unresolvedReports = reports.filter((report) => report.status !== "resolved");
+  const unresolvedReports = allReports.filter((report) => report.status !== "resolved");
   const reportCounts: Record<AdminReportFilter, number> = {
-    all: reports.length,
-    new: reports.filter((report) => report.status === "new").length,
-    review: reports.filter((report) => report.status === "review").length,
-    resolved: reports.filter((report) => report.status === "resolved").length,
+    all: allReports.length,
+    new: allReports.filter((report) => report.status === "new").length,
+    review: allReports.filter((report) => report.status === "review").length,
+    resolved: allReports.filter((report) => report.status === "resolved").length,
   };
   const filteredReports =
     reportFilter === "all"
-      ? reports
-      : reports.filter((report) => report.status === reportFilter);
+      ? allReports
+      : allReports.filter((report) => report.status === reportFilter);
   const hiddenPlacesCount = managedPlaces.filter((place) => place.isHidden).length;
   const draftCount = Object.keys(drafts).length;
   const reviewStates = readStorageRecord<{ status?: string }>(reviewStorageKey);
@@ -420,6 +565,24 @@ function AdminPanel({
         created: "Created",
         promote: "Make caretaker",
         makeAdmin: "Make admin",
+        activeUsersTitle: "Logged in users",
+        activeUsersLead: "Accounts active in this browser session.",
+        loggedIn: "Logged in",
+        offline: "Offline",
+        noActiveUsers: "No active users yet.",
+        addPersonTitle: "Add buried person",
+        addPersonLead: "Administrator can add a new catalog entry with photo, biography and map position.",
+        addPerson: "Add person",
+        name: "Name and surname",
+        years: "Years",
+        shortDescription: "Short description",
+        imageUrl: "Photo URL",
+        source: "Source",
+        latitude: "Latitude",
+        longitude: "Longitude",
+        personAdded: "New person added to the catalog.",
+        personMissingFields: "Enter name and description before saving.",
+        personWrongPosition: "Check latitude and longitude.",
         caretakersTitle: "Caretakers and responsibilities",
         caretakersLead: "Admin can see who cares for each place, open reports and recent activity.",
         assignedPlaces: "assigned places",
@@ -487,6 +650,24 @@ function AdminPanel({
         created: "Utworzono",
         promote: "Nadaj opiekuna",
         makeAdmin: "Nadaj admina",
+        activeUsersTitle: "Zalogowani uzytkownicy",
+        activeUsersLead: "Konta aktywne w tej sesji przegladarki.",
+        loggedIn: "Zalogowany",
+        offline: "Offline",
+        noActiveUsers: "Brak aktywnych uzytkownikow.",
+        addPersonTitle: "Dodaj osobe pochowana",
+        addPersonLead: "Administrator moze dodac nowy wpis katalogu ze zdjeciem, biografia i pozycja na mapie.",
+        addPerson: "Dodaj osobe",
+        name: "Imie i nazwisko",
+        years: "Lata zycia",
+        shortDescription: "Krotki opis",
+        imageUrl: "Adres zdjecia",
+        source: "Zrodlo",
+        latitude: "Szerokosc geogr.",
+        longitude: "Dlugosc geogr.",
+        personAdded: "Nowa osoba zostala dodana do katalogu.",
+        personMissingFields: "Wpisz imie i opis przed zapisem.",
+        personWrongPosition: "Sprawdz szerokosc i dlugosc geograficzna.",
         caretakersTitle: "Opiekunowie i odpowiedzialnosc",
         caretakersLead: "Administrator widzi, kto opiekuje sie miejscami, jakie sa zgloszenia i ostatnie dzialania.",
         assignedPlaces: "przypisane miejsca",
@@ -605,6 +786,64 @@ function AdminPanel({
     setEditCategory(place.adminCategory);
     setEditNote(place.adminDraft?.note ?? "");
     setActiveTab("people");
+  };
+
+  const addCatalogPlace = () => {
+    const name = newPersonName.trim();
+    const description = newPersonDescription.trim();
+    const shortDescription = newPersonShortDescription.trim() || description.slice(0, 120);
+    const categoryId =
+      categoryOptions.find((item) => item.id === newPersonCategory)?.id ??
+      categoryOptions[0]?.id ??
+      "artysci";
+    const latitude = Number(newPersonLat.replace(",", "."));
+    const longitude = Number(newPersonLng.replace(",", "."));
+
+    if (!name || !description) {
+      setNewPersonNotice(copy.personMissingFields);
+      return;
+    }
+
+    if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+      setNewPersonNotice(copy.personWrongPosition);
+      return;
+    }
+
+    const existingCustomPlaces = readStorageArray<CustomPlaceRecord>(customPlacesStorageKey);
+    const nextId = Math.max(
+      0,
+      ...places.map((place) => place.id),
+      ...existingCustomPlaces.map((place) => place.id)
+    ) + 1;
+    const categoryLabel =
+      categoryOptions.find((item) => item.id === categoryId)?.label ?? categoryId;
+    const nextPlace: CustomPlaceRecord = {
+      id: nextId,
+      name,
+      years: newPersonYears.trim() || (isEnglish ? "Years unknown" : "Brak dat"),
+      category: categoryId,
+      categoryLabel,
+      image: newPersonImage.trim() || places[0]?.image || "",
+      description,
+      shortDescription,
+      source: newPersonSource.trim() || (isEnglish ? "Added by administrator" : "Dodane przez administratora"),
+      rating: 4,
+      position: [latitude, longitude],
+    };
+
+    writeCustomPlaces([...existingCustomPlaces, nextPlace]);
+    setNewPersonNotice(copy.personAdded);
+    setSelectedPlaceId(nextPlace.id);
+    setActiveTab("people");
+    setNewPersonName("");
+    setNewPersonYears("");
+    setNewPersonCategory(categoryId);
+    setNewPersonShortDescription("");
+    setNewPersonDescription("");
+    setNewPersonImage("");
+    setNewPersonSource("");
+    setNewPersonLat(String(latitude));
+    setNewPersonLng(String(longitude));
   };
 
   useEffect(() => {
@@ -755,9 +994,12 @@ function AdminPanel({
 
   const setReportStatus = async (reportId: string, status: CareReport["status"]) => {
     await updateCareReportStatus(reportId, status);
-    const nextReports = reports.map((report) =>
-      report.id === reportId ? { ...report, status } : report
-    );
+    const sourceReport = allReports.find((report) => report.id === reportId);
+    const nextReports = reports.some((report) => report.id === reportId)
+      ? reports.map((report) => (report.id === reportId ? { ...report, status } : report))
+      : sourceReport
+        ? [...reports, { ...sourceReport, status }]
+        : reports;
     setReports(nextReports);
     writeReports(nextReports);
   };
@@ -896,6 +1138,69 @@ function AdminPanel({
               <FaDatabase />
               <h2>{isEnglish ? "Catalog management" : "Zarzadzanie katalogiem"}</h2>
             </header>
+            <section className="admin-create-place">
+              <div className="admin-create-head">
+                <span className="eyebrow">{copy.addPersonTitle}</span>
+                <h3>{copy.addPersonTitle}</h3>
+                <p>{copy.addPersonLead}</p>
+              </div>
+              <div className="admin-create-grid">
+                <label>
+                  {copy.name}
+                  <input onChange={(event) => setNewPersonName(event.target.value)} value={newPersonName} />
+                </label>
+                <label>
+                  {copy.years}
+                  <input onChange={(event) => setNewPersonYears(event.target.value)} value={newPersonYears} />
+                </label>
+                <label>
+                  {copy.category}
+                  <select onChange={(event) => setNewPersonCategory(event.target.value)} value={newPersonCategory}>
+                    {categoryOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  {copy.imageUrl}
+                  <input onChange={(event) => setNewPersonImage(event.target.value)} value={newPersonImage} />
+                </label>
+                <label>
+                  {copy.latitude}
+                  <input onChange={(event) => setNewPersonLat(event.target.value)} value={newPersonLat} />
+                </label>
+                <label>
+                  {copy.longitude}
+                  <input onChange={(event) => setNewPersonLng(event.target.value)} value={newPersonLng} />
+                </label>
+              </div>
+              <label className="admin-create-wide">
+                {copy.shortDescription}
+                <input
+                  onChange={(event) => setNewPersonShortDescription(event.target.value)}
+                  value={newPersonShortDescription}
+                />
+              </label>
+              <label className="admin-create-wide">
+                {copy.description}
+                <textarea
+                  onChange={(event) => setNewPersonDescription(event.target.value)}
+                  value={newPersonDescription}
+                />
+              </label>
+              <label className="admin-create-wide">
+                {copy.source}
+                <input onChange={(event) => setNewPersonSource(event.target.value)} value={newPersonSource} />
+              </label>
+              <div className="admin-create-actions">
+                <small>{newPersonNotice || " "}</small>
+                <button onClick={addCatalogPlace} type="button">
+                  <FaPlus /> {copy.addPerson}
+                </button>
+              </div>
+            </section>
             <div className="admin-place-list">
               {managedPlaces.map((place) => (
                 <div className={`admin-place-row ${selectedPlace?.id === place.id ? "active" : ""}`} key={place.id}>
@@ -1036,23 +1341,60 @@ function AdminPanel({
             <FaUsers />
             <h2>{isEnglish ? "Users and permissions" : "Uzytkownicy i uprawnienia"}</h2>
           </header>
+          <section className="admin-active-users">
+            <div className="admin-active-users-head">
+              <span className="eyebrow">{copy.activeUsersTitle}</span>
+              <h3>{copy.activeUsersTitle}</h3>
+              <p>{copy.activeUsersLead}</p>
+            </div>
+            <div className="admin-active-users-list">
+              {displayedActiveUsers.length === 0 ? (
+                <p className="admin-empty-state">{copy.noActiveUsers}</p>
+              ) : (
+                displayedActiveUsers.map((user) => (
+                  <article key={user.email}>
+                    <span className={`role-chip role-${user.role ?? "user"}`}>
+                      {user.role ?? "user"}
+                    </span>
+                    <strong>{user.username}</strong>
+                    <small>{user.email}</small>
+                    <small>
+                      {copy.lastActive}: {formatDate(user.lastSeenAt, language)}
+                    </small>
+                  </article>
+                ))
+              )}
+            </div>
+          </section>
           <div className="admin-users-table">
-            {allUsers.map((user) => (
-              <article key={user.email}>
-                <span className={`role-chip role-${user.role ?? "user"}`}>{user.role ?? "user"}</span>
-                <strong>{user.username}</strong>
-                <small>{user.email}</small>
-                <small>{copy.created}: {formatDate(user.created_at, language)}</small>
-                <div>
-                  <button onClick={() => updateUserRole(user.email, "caretaker")} type="button">
-                    {copy.promote}
-                  </button>
-                  <button onClick={() => updateUserRole(user.email, "admin")} type="button">
-                    {copy.makeAdmin}
-                  </button>
-                </div>
-              </article>
-            ))}
+            {allUsers.map((user) => {
+              const activeSession = displayedActiveUsers.find((item) => item.email === user.email);
+
+              return (
+                <article key={user.email}>
+                  <span className={`role-chip role-${user.role ?? "user"}`}>{user.role ?? "user"}</span>
+                  <strong>{user.username}</strong>
+                  <small>{user.email}</small>
+                  <small>{copy.created}: {formatDate(user.created_at, language)}</small>
+                  <span className={`auth-status ${activeSession ? "online" : "offline"}`}>
+                    {activeSession ? copy.loggedIn : copy.offline}
+                  </span>
+                  {activeSession && (
+                    <small>
+                      {copy.lastActive}: {formatDate(activeSession.lastSeenAt, language)}
+                    </small>
+                  )}
+                  <div>
+                    <button onClick={() => updateUserRole(user.email, "caretaker")} type="button">
+                      {copy.promote}
+                    </button>
+                    <button onClick={() => updateUserRole(user.email, "admin")} type="button">
+                      {copy.makeAdmin}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
 
           {selectedCaretaker && (

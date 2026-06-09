@@ -361,6 +361,50 @@ function CaretakerPanel({
         status: "review",
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
       },
+      {
+        id: "demo-report-3",
+        placeId: 1,
+        placeName: places.find((place) => place.id === 1)?.name ?? "Jozef Pilsudski",
+        type: "wrong_description",
+        note: isEnglish
+          ? "Demo report: visitor suggests adding information about the heart of the marshal."
+          : "Zgloszenie demo: odwiedzajacy proponuje dopisac informacje o sercu marszalka.",
+        status: "new",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 7).toISOString(),
+      },
+      {
+        id: "demo-report-4",
+        placeId: 2,
+        placeName: places.find((place) => place.id === 2)?.name ?? "Wladyslaw Syrokomla",
+        type: "wrong_location",
+        note: isEnglish
+          ? "Demo report: marker seems shifted from the actual grave path."
+          : "Zgloszenie demo: marker wyglada na przesuniety wzgledem alejki przy grobie.",
+        status: "review",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString(),
+      },
+      {
+        id: "demo-report-5",
+        placeId: 7,
+        placeName: places.find((place) => place.id === 7)?.name ?? "Czeslaw Jankowski",
+        type: "missing_person",
+        note: isEnglish
+          ? "Demo report: add a short biographical note and verify dates."
+          : "Zgloszenie demo: dodac krotka note biograficzna i sprawdzic daty.",
+        status: "new",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 55).toISOString(),
+      },
+      {
+        id: "demo-report-6",
+        placeId: 4,
+        placeName: places.find((place) => place.id === 4)?.name ?? "Antoni Wiwulski",
+        type: "other",
+        note: isEnglish
+          ? "Demo report: cleaned inscription area, photo confirmation is needed."
+          : "Zgloszenie demo: oczyszczono miejsce przy inskrypcji, potrzebne potwierdzenie zdjeciem.",
+        status: "resolved",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+      },
     ],
     [isEnglish, places]
   );

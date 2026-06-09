@@ -13,6 +13,14 @@ type LocalAuthUser = ApiUser & {
   passwordHash: string;
 };
 
+type ActiveAuthUser = {
+  email: string;
+  username: string;
+  role?: UserRole;
+  loggedAt: string;
+  lastSeenAt: string;
+};
+
 type AuthEndpoint = "/login" | "/register" | "/caretaker/login" | "/volunteer/login";
 
 type AuthPayload = {
@@ -38,6 +46,7 @@ type BackendAuthResult = AuthResult & {
 
 const userStorageKey = "rossa-user";
 const localAuthUsersKey = "rossa-local-auth-users";
+const activeAuthUsersKey = "rossa-active-auth-users";
 const apiBaseUrl = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
 const apiUrl = (endpoint: AuthEndpoint) => `${apiBaseUrl}${endpoint}`;
@@ -97,6 +106,43 @@ const getLocalAuthUsers = (): LocalAuthUser[] => {
 
 const saveLocalAuthUsers = (users: LocalAuthUser[]) => {
   window.localStorage.setItem(localAuthUsersKey, JSON.stringify(users));
+};
+
+const getActiveAuthUsers = (): ActiveAuthUser[] => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const saved = window.localStorage.getItem(activeAuthUsersKey);
+    return saved ? (JSON.parse(saved) as ActiveAuthUser[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveActiveAuthUsers = (users: ActiveAuthUser[]) => {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(activeAuthUsersKey, JSON.stringify(users));
+  window.dispatchEvent(new Event("rossa-active-auth-users-changed"));
+};
+
+const upsertActiveAuthUser = (user: Pick<ApiUser, "email" | "username" | "role">) => {
+  const now = new Date().toISOString();
+  const activeUsers = getActiveAuthUsers();
+  const existing = activeUsers.find((item) => item.email === user.email);
+  saveActiveAuthUsers([
+    {
+      email: user.email,
+      username: user.username,
+      role: user.role ?? "user",
+      loggedAt: existing?.loggedAt ?? now,
+      lastSeenAt: now,
+    },
+    ...activeUsers.filter((item) => item.email !== user.email),
+  ]);
+};
+
+const removeActiveAuthUser = (email: string) => {
+  saveActiveAuthUsers(getActiveAuthUsers().filter((item) => item.email !== email));
 };
 
 const hashPassword = async (email: string, password: string) => {
@@ -355,6 +401,11 @@ export const useAuth = (language: AppLanguage, theme: ThemeMode) => {
   useEffect(() => {
     if (currentUser) {
       window.localStorage.setItem(userStorageKey, JSON.stringify(currentUser));
+      upsertActiveAuthUser({
+        email: currentUser.email,
+        username: currentUser.name,
+        role: currentUser.role,
+      });
     } else {
       window.localStorage.removeItem(userStorageKey);
     }
@@ -425,8 +476,11 @@ export const useAuth = (language: AppLanguage, theme: ThemeMode) => {
   );
 
   const logout = useCallback(() => {
+    if (currentUser) {
+      removeActiveAuthUser(currentUser.email);
+    }
     setCurrentUser(null);
-  }, []);
+  }, [currentUser]);
 
   return {
     currentUser,

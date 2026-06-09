@@ -20,6 +20,7 @@
 .admin-place-row,
 .admin-report-card,
 .admin-users-table article,
+.admin-active-users-list article,
 .admin-caretaker-section,
 .admin-caretaker-card,
 .admin-caretaker-detail,
@@ -38,19 +39,36 @@
 
 .admin-access-card {
   display: grid;
-  width: min(560px, 100%);
-  gap: 14px;
-  margin: 7vh auto 0;
-  padding: clamp(24px, 4vw, 40px);
-  border-radius: 30px;
+  width: min(460px, 100%);
+  gap: 12px;
+  justify-items: start;
+  margin: clamp(28px, 6vh, 64px) auto 0;
+  overflow: hidden;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: 26px;
 }
 
 .admin-access-card > svg {
+  width: 34px;
+  height: 34px;
+  padding: 10px;
+  border-radius: 18px;
+  background: #eef5ff;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.12);
   color: #1d4ed8;
-  font-size: 2.4rem;
+  font-size: 1.8rem;
 }
 
-.admin-access-card h1,
+.admin-access-card h1 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  line-height: 1;
+  max-width: 10ch;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
 .admin-hero h1 {
   color: #0c1730;
   font-family: var(--font-display);
@@ -64,6 +82,10 @@
   line-height: 1.65;
 }
 
+.admin-access-card p {
+  max-width: 38ch;
+}
+
 .admin-access-card button,
 .admin-user-card button,
 .admin-tabs button,
@@ -73,6 +95,7 @@
 .admin-users-table button,
 .admin-assigned-place button,
 .admin-assignment-list button,
+.admin-create-actions button,
 .admin-caretaker-bottom button {
   display: inline-flex;
   align-items: center;
@@ -89,10 +112,16 @@
 }
 
 .admin-access-card button,
-.admin-editor-actions button:last-child {
+.admin-editor-actions button:last-child,
+.admin-create-actions button {
   background: linear-gradient(135deg, #0c1730, #2563eb);
   color: #ffffff;
   box-shadow: 0 16px 34px rgba(37, 99, 235, 0.18);
+}
+
+.admin-access-card button {
+  width: min(100%, 340px);
+  padding: 0 22px;
 }
 
 .admin-access-card button:hover,
@@ -104,6 +133,7 @@
 .admin-users-table button:hover,
 .admin-assigned-place button:hover,
 .admin-assignment-list button:hover,
+.admin-create-actions button:hover,
 .admin-caretaker-bottom button:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 34px rgba(37, 99, 235, 0.16);
@@ -550,6 +580,130 @@
   gap: 8px;
   padding: 16px;
   border-radius: 20px;
+}
+
+.admin-active-users,
+.admin-create-place {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(122, 167, 223, 0.24);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(37, 99, 235, 0.08), transparent 36%),
+    rgba(248, 251, 255, 0.96);
+}
+
+.admin-active-users-head,
+.admin-create-head {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-active-users-head h3,
+.admin-create-head h3 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.admin-active-users-head p,
+.admin-create-head p {
+  color: #53647f;
+  line-height: 1.45;
+}
+
+.admin-active-users-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-active-users-list article {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.admin-create-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-create-grid label,
+.admin-create-wide {
+  display: grid;
+  gap: 6px;
+  color: #0c1730;
+  font-weight: 900;
+}
+
+.admin-create-grid input,
+.admin-create-grid select,
+.admin-create-wide input,
+.admin-create-wide textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid #d7e4f5;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #0c1730;
+  font: inherit;
+  outline: none;
+}
+
+.admin-create-grid input:focus,
+.admin-create-grid select:focus,
+.admin-create-wide input:focus,
+.admin-create-wide textarea:focus {
+  border-color: #7aa7df;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.admin-create-wide textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.admin-create-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-create-actions small {
+  min-height: 1em;
+  color: #53647f;
+  font-weight: 850;
+}
+
+.admin-create-actions button {
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.auth-status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 950;
+}
+
+.auth-status.online {
+  background: #e8f7ef;
+  color: #166534;
+}
+
+.auth-status.offline {
+  background: #eef5ff;
+  color: #1d4ed8;
 }
 
 .admin-caretaker-section {
@@ -1067,6 +1221,9 @@ html[data-theme="night"] .admin-editor,
 html[data-theme="night"] .admin-place-row,
 html[data-theme="night"] .admin-report-card,
 html[data-theme="night"] .admin-users-table article,
+html[data-theme="night"] .admin-active-users,
+html[data-theme="night"] .admin-active-users-list article,
+html[data-theme="night"] .admin-create-place,
 html[data-theme="night"] .admin-caretaker-section,
 html[data-theme="night"] .admin-caretaker-card,
 html[data-theme="night"] .admin-caretaker-detail,
@@ -1082,6 +1239,10 @@ html[data-theme="night"] .admin-history-panel,
 html[data-theme="night"] .admin-history-card,
 html[data-theme="night"] .admin-editor input,
 html[data-theme="night"] .admin-editor textarea,
+html[data-theme="night"] .admin-create-grid input,
+html[data-theme="night"] .admin-create-grid select,
+html[data-theme="night"] .admin-create-wide input,
+html[data-theme="night"] .admin-create-wide textarea,
 html[data-theme="night"] .admin-caretaker-bottom textarea {
   border-color: rgba(142, 197, 255, 0.22);
   background: rgba(13, 37, 79, 0.88);
@@ -1098,6 +1259,11 @@ html[data-theme="night"] .admin-editor label,
 html[data-theme="night"] .admin-place-row strong,
 html[data-theme="night"] .admin-report-card h3,
 html[data-theme="night"] .admin-users-table strong,
+html[data-theme="night"] .admin-active-users-head h3,
+html[data-theme="night"] .admin-active-users-list strong,
+html[data-theme="night"] .admin-create-head h3,
+html[data-theme="night"] .admin-create-grid label,
+html[data-theme="night"] .admin-create-wide,
 html[data-theme="night"] .admin-caretaker-card strong,
 html[data-theme="night"] .admin-caretaker-detail h3,
 html[data-theme="night"] .admin-caretaker-stats strong,
@@ -1124,6 +1290,10 @@ html[data-theme="night"] .admin-place-row em,
 html[data-theme="night"] .admin-report-card p,
 html[data-theme="night"] .admin-report-card small,
 html[data-theme="night"] .admin-users-table small,
+html[data-theme="night"] .admin-active-users-head p,
+html[data-theme="night"] .admin-active-users-list small,
+html[data-theme="night"] .admin-create-head p,
+html[data-theme="night"] .admin-create-actions small,
 html[data-theme="night"] .admin-caretaker-section header p,
 html[data-theme="night"] .admin-caretaker-card small,
 html[data-theme="night"] .admin-caretaker-card em,
@@ -1154,6 +1324,7 @@ html[data-theme="night"] .admin-place-row button,
 html[data-theme="night"] .admin-editor-actions button,
 html[data-theme="night"] .admin-report-card button,
 html[data-theme="night"] .admin-users-table button,
+html[data-theme="night"] .admin-create-actions button,
 html[data-theme="night"] .admin-caretaker-card b,
 html[data-theme="night"] .caretaker-status-pill,
 html[data-theme="night"] .admin-owner-line,
@@ -1171,7 +1342,8 @@ html[data-theme="night"] .report-status-chip {
 
 html[data-theme="night"] .admin-tabs button.active,
 html[data-theme="night"] .report-filter-tabs button.active,
-html[data-theme="night"] .admin-editor-actions button:last-child {
+html[data-theme="night"] .admin-editor-actions button:last-child,
+html[data-theme="night"] .admin-create-actions button {
   background: linear-gradient(135deg, #1d4ed8, #0b2753);
   color: #ffffff;
 }
@@ -1225,6 +1397,8 @@ html[data-theme="night"] .admin-history-card.action-show {
 
   .admin-overview,
   .admin-users-table,
+  .admin-active-users-list,
+  .admin-create-grid,
   .admin-report-grid,
   .admin-history-list,
   .report-filter-tabs,
@@ -1244,6 +1418,8 @@ html[data-theme="night"] .admin-history-card.action-show {
 
   .admin-overview,
   .admin-users-table,
+  .admin-active-users-list,
+  .admin-create-grid,
   .admin-report-grid,
   .report-filter-tabs,
   .admin-history-list,
@@ -1267,6 +1443,7 @@ html[data-theme="night"] .admin-history-card.action-show {
   .admin-users-table button,
   .admin-assigned-place button,
   .admin-assignment-list button,
+  .admin-create-actions button,
   .admin-caretaker-bottom button {
     width: 100%;
   }
