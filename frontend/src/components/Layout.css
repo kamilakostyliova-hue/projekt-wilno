@@ -9871,7 +9871,7 @@ html[data-theme="night"] .issue-report-actions button {
 
   .map-layout > .details:not(.mobile-map-details) {
     display: block !important;
-    grid-column: 2 !important;
+    grid-column: 3 !important;
     position: sticky !important;
     top: 86px !important;
     max-height: calc(100vh - 110px) !important;
