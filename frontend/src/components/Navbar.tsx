@@ -81,10 +81,13 @@ function Navbar({
   const effectiveOnline = onlineMode && networkOnline;
   const projectMenuLabel =
     language === "en" ? "Project description" : "Opis projektu";
+  const volunteerMenuLabel =
+    language === "en" ? "Volunteer panel" : "Panel wolontariusza";
   const caretakerMenuLabel =
     language === "en" ? "Caretaker panel" : "Panel opiekuna";
   const adminMenuLabel =
     language === "en" ? "Admin panel" : "Panel administratora";
+  const canOpenVolunteerPanel = currentUser?.role === "volunteer";
   const canOpenCaretakerPanel = currentUser?.role === "caretaker";
   const canOpenAdminPanel = currentUser?.role === "admin";
   const profileCaption =
@@ -92,6 +95,10 @@ function Navbar({
       ? language === "en"
         ? "Administrator"
         : "Administrator"
+      : currentUser?.role === "volunteer"
+        ? language === "en"
+          ? "Volunteer"
+          : "Wolontariusz"
       : currentUser?.role === "caretaker"
         ? language === "en"
           ? "Caretaker"
@@ -299,6 +306,11 @@ function Navbar({
                   <button onClick={() => goToView("project")} type="button">
                     <FaExternalLinkAlt /> {projectMenuLabel}
                   </button>
+                  {canOpenVolunteerPanel && (
+                    <button onClick={() => goToView("volunteer")} type="button">
+                      <FaUserShield /> {volunteerMenuLabel}
+                    </button>
+                  )}
                   {canOpenCaretakerPanel && (
                     <button onClick={() => goToView("caretaker")} type="button">
                       <FaUserShield /> {caretakerMenuLabel}

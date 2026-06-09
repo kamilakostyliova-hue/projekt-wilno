@@ -44,6 +44,8 @@ type ReportStatus = "new" | "review" | "resolved";
 type ReportFilter = "all" | ReportStatus;
 type ReviewTaskKind = "danger" | "warning" | "info" | "done";
 export type ReportType = "missing_photo" | "wrong_description" | "needs_care" | "wrong_location" | "missing_person" | "other";
+type CareTaskPriority = "high" | "medium" | "low";
+type CareTaskKind = "report" | "condition" | "photo" | "data";
 
 type CaretakerStatus = "active" | "needs_contact" | "new";
 
@@ -102,6 +104,19 @@ type ReviewTask = {
   done: boolean;
 };
 
+type CareTask = {
+  id: string;
+  placeId: number;
+  title: string;
+  subtitle: string;
+  detail: string;
+  priority: CareTaskPriority;
+  kind: CareTaskKind;
+  status: GraveStatus;
+  reportIds: string[];
+  reportCount: number;
+};
+
 const statusLabels: Record<GraveStatus, { pl: string; en: string }> = {
   good: { pl: "Zadbany", en: "Good" },
   check: { pl: "Do sprawdzenia", en: "Needs check" },
@@ -123,6 +138,19 @@ const reportStatusLabels: Record<ReportStatus, { pl: string; en: string }> = {
   new: { pl: "Nowe", en: "New" },
   review: { pl: "W trakcie", en: "In review" },
   resolved: { pl: "Rozwiazane", en: "Resolved" },
+};
+
+const careTaskPriorityLabels: Record<CareTaskPriority, { pl: string; en: string }> = {
+  high: { pl: "Pilne", en: "Urgent" },
+  medium: { pl: "Wazne", en: "Important" },
+  low: { pl: "Do uzupelnienia", en: "To update" },
+};
+
+const careTaskKindLabels: Record<CareTaskKind, { pl: string; en: string }> = {
+  report: { pl: "Zgloszenie", en: "Report" },
+  condition: { pl: "Stan grobu", en: "Grave condition" },
+  photo: { pl: "Zdjecie", en: "Photo" },
+  data: { pl: "Dane", en: "Data" },
 };
 
 const demoStatusByPlaceId: Record<number, GraveStatus> = {
@@ -461,6 +489,81 @@ function CaretakerPanel({
     { id: "review", label: reportStatusLabels.review[language] },
     { id: "resolved", label: reportStatusLabels.resolved[language] },
   ];
+  const careTaskQueue = useMemo<CareTask[]>(() => {
+    const priorityRank: Record<CareTaskPriority, number> = {
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+    const reportsByPlace = new Map<number, CareReport[]>();
+
+    unresolvedReports.forEach((report) => {
+      if (report.placeId === null) return;
+      const current = reportsByPlace.get(report.placeId) ?? [];
+      reportsByPlace.set(report.placeId, [...current, report]);
+    });
+
+    return visibleStatusRows
+      .map<CareTask | null>(({ place, status }) => {
+        const placeReports = reportsByPlace.get(place.id) ?? [];
+        if (status === "good" && placeReports.length === 0) return null;
+
+        const hasCriticalReport = placeReports.some(
+          (report) => report.type === "needs_care" || report.type === "wrong_location"
+        );
+        const hasPhotoReport = placeReports.some((report) => report.type === "missing_photo");
+        const hasDataReport = placeReports.some(
+          (report) => report.type === "wrong_description" || report.type === "missing_person"
+        );
+        const priority: CareTaskPriority =
+          status === "needs_care" || hasCriticalReport
+            ? "high"
+            : status === "check" || status === "missing_data" || placeReports.length > 0
+              ? "medium"
+              : "low";
+        const kind: CareTaskKind =
+          placeReports.length > 0
+            ? "report"
+            : status === "needs_care" || status === "check"
+              ? "condition"
+              : status === "missing_photo" || hasPhotoReport
+                ? "photo"
+                : status === "missing_data" || hasDataReport
+                  ? "data"
+                  : "condition";
+        const reportText =
+          placeReports.length === 0
+            ? isEnglish
+              ? "no open reports"
+              : "brak otwartych zgloszen"
+            : isEnglish
+              ? `${placeReports.length} open report${placeReports.length > 1 ? "s" : ""}`
+              : `${placeReports.length} otwarte zgloszen${placeReports.length === 1 ? "ie" : ""}`;
+
+        return {
+          id: `care-task-${place.id}-${status}-${placeReports.map((report) => report.id).join("-")}`,
+          placeId: place.id,
+          title: place.name,
+          subtitle: `${statusLabels[status][language]} - ${place.categoryLabel}`,
+          detail: isEnglish
+            ? `${reportText}. Check the record and update the care status.`
+            : `${reportText}. Sprawdz karte i zaktualizuj status opieki.`,
+          priority,
+          kind,
+          status,
+          reportIds: placeReports.map((report) => report.id),
+          reportCount: placeReports.length,
+        };
+      })
+      .filter((task): task is CareTask => task !== null)
+      .sort((first, second) => {
+        const priorityDiff = priorityRank[second.priority] - priorityRank[first.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        const reportDiff = second.reportCount - first.reportCount;
+        if (reportDiff !== 0) return reportDiff;
+        return first.title.localeCompare(second.title);
+      });
+  }, [isEnglish, language, unresolvedReports, visibleStatusRows]);
   const activeCaretakerAdminNote = adminNotes[activeCaretaker.id] ?? adminNotes[activeCaretaker.email] ?? "";
   const selectedCaretakerPlaceIds = new Set(selectedCaretaker?.assignedPlaceIds ?? []);
   const selectedCaretakerPlaces = places.filter((place) => selectedCaretakerPlaceIds.has(place.id));
@@ -626,6 +729,21 @@ function CaretakerPanel({
     );
     const nextReports = [
       ...selectedReports.map((report) => ({ ...report, status: "resolved" as ReportStatus })),
+      ...reports.filter((report) => !selectedIds.has(report.id)),
+    ];
+    setReports(nextReports);
+    window.localStorage.setItem(reportsStorageKey, JSON.stringify(nextReports));
+    window.dispatchEvent(new Event("rossa-care-reports-changed"));
+  };
+
+  const updateTaskReports = async (task: CareTask, status: ReportStatus) => {
+    if (task.reportIds.length === 0) return;
+
+    const selectedIds = new Set(task.reportIds);
+    const sourceReports = allReports.filter((report) => selectedIds.has(report.id));
+    await Promise.all(sourceReports.map((report) => updateCareReportStatus(report.id, status)));
+    const nextReports = [
+      ...sourceReports.map((report) => ({ ...report, status })),
       ...reports.filter((report) => !selectedIds.has(report.id)),
     ];
     setReports(nextReports);
@@ -845,32 +963,36 @@ function CaretakerPanel({
 
             <article className="caretaker-task-list">
               <h3>{isEnglish ? "Priority tasks" : "Najpilniejsze zadania"}</h3>
-              {caretakerOpenTasksCount === 0 ? (
+              {careTaskQueue.length === 0 ? (
                 <p>{isEnglish ? "Everything assigned to you is clean for now." : "Na razie wszystko przypisane do Ciebie jest uporzadkowane."}</p>
               ) : (
                 <>
-                  {unresolvedReports.slice(0, 4).map((report) => (
-                    <div className="caretaker-task-row" key={`report-${report.id}`}>
-                      <span>
-                        <strong>{report.placeName}</strong>
-                        <small>{reportLabels[report.type][language]}</small>
+                  {careTaskQueue.slice(0, 6).map((task) => (
+                    <div className={`caretaker-task-row priority-${task.priority}`} key={task.id}>
+                      <span className="caretaker-task-main">
+                        <em>{careTaskPriorityLabels[task.priority][language]}</em>
+                        <strong>{task.title}</strong>
+                        <small>{task.subtitle}</small>
+                        <small>{task.detail}</small>
                       </span>
-                      {report.placeId && (
-                        <button onClick={() => openPlaceReview(report.placeId as number)} type="button">
-                          <FaEdit /> {isEnglish ? "Open" : "Otworz"}
+                      <span className="caretaker-task-type">
+                        {careTaskKindLabels[task.kind][language]}
+                      </span>
+                      <div className="caretaker-task-actions">
+                        <button onClick={() => openPlaceReview(task.placeId)} type="button">
+                          <FaEdit /> {isEnglish ? "Review" : "Kontrola"}
                         </button>
-                      )}
-                    </div>
-                  ))}
-                  {needsCare.slice(0, 4).map(({ place, status }) => (
-                    <div className="caretaker-task-row" key={`care-${place.id}`}>
-                      <span>
-                        <strong>{place.name}</strong>
-                        <small>{statusLabels[status][language]}</small>
-                      </span>
-                      <button onClick={() => openPlaceReview(place.id)} type="button">
-                        <FaEdit /> {isEnglish ? "Review" : "Kontrola"}
-                      </button>
+                        {task.reportCount > 0 && (
+                          <button onClick={() => updateTaskReports(task, "review")} type="button">
+                            <FaClipboardList /> {isEnglish ? "In review" : "W pracy"}
+                          </button>
+                        )}
+                        {task.reportCount > 0 && (
+                          <button onClick={() => updateTaskReports(task, "resolved")} type="button">
+                            <FaCheckCircle /> {isEnglish ? "Close" : "Zamknij"}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </>

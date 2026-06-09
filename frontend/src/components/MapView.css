@@ -492,6 +492,9 @@ html[data-theme="night"] .location-tooltip small {
 .custom-marker.visited { background: #16a34a; }
 .custom-marker.want { background: #d97706; }
 .custom-marker.favorite { background: #be185d; }
+.custom-marker.check { background: #2f6fa3; }
+.custom-marker.needs-care { background: #dc2626; }
+.custom-marker.missing { background: #7c3aed; }
 .legend-dot.visited { background: #16a34a; }
 .legend-dot.want { background: #d97706; }
 .marker-tooltip-card em { display: inline-flex; width: max-content; margin: 4px 0; padding: 4px 8px; border-radius: 999px; background: #edf5ff; color: #1d4ed8; font-style: normal; font-size: .72rem; font-weight: 900; }
@@ -500,6 +503,9 @@ html[data-theme="night"] .location-tooltip small {
 .tooltip-status-row .visited { background: #e8f7ef; color: #166534; }
 .tooltip-status-row .want { background: #fff7dd; color: #8a5b00; }
 .tooltip-status-row .favorite { background: #fff0f5; color: #a61b49; }
+.tooltip-status-row .check { background: #eaf4ff; color: #1d4e89; }
+.tooltip-status-row .needs-care { background: #fff1f2; color: #b91c1c; }
+.tooltip-status-row .missing { background: #f3e8ff; color: #6d28d9; }
 .tooltip-actions button { border: 1px solid rgba(37, 99, 235, 0.18); border-radius: 999px; background: rgba(255,255,255,.92); color: #173b72; font-weight: 900; min-height: 30px; padding: 6px 9px; cursor: pointer; }
 .map-audio-panel { max-width: min(360px, calc(100% - 28px)); padding: 10px 12px; gap: 8px; }
 .map-audio-panel span { font-size: .74rem; }

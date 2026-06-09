@@ -1,19 +1,60 @@
 {
-  "name": "Na Rossie",
+  "name": "Na Rossie - przewodnik po cmentarzu",
   "short_name": "Na Rossie",
   "description": "Aplikacja turystyczno-historyczna dla Cmentarza Na Rossie w Wilnie.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#eef5ff",
   "theme_color": "#123a63",
   "lang": "pl",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mapa Rossy",
+      "short_name": "Mapa",
+      "description": "Otworz interaktywna mape miejsc pamieci.",
+      "url": "/?view=map",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Spacer tematyczny",
+      "short_name": "Spacer",
+      "description": "Wybierz gotowy spacer po Rossie.",
+      "url": "/?view=walk",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Opis projektu",
+      "short_name": "Projekt",
+      "description": "Pokaz opis projektu i kod QR.",
+      "url": "/?view=project",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/img2.jpg",
+      "sizes": "750x500",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Mapa i przewodnik Na Rossie"
+    },
+    {
+      "src": "/img1.JPG",
+      "sizes": "500x375",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Mobilny przewodnik po Rossie"
     }
   ]
 }

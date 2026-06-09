@@ -1,0 +1,186 @@
+.pwa-install-card {
+  position: fixed;
+  right: clamp(14px, 3vw, 28px);
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 80;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  width: min(440px, calc(100vw - 28px));
+  padding: 18px;
+  border: 1px solid rgba(122, 167, 223, 0.34);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(37, 99, 235, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(238, 245, 255, 0.93));
+  box-shadow: 0 24px 70px rgba(12, 23, 48, 0.18);
+  backdrop-filter: blur(18px);
+  animation: pwaCardIn 0.34s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.pwa-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(122, 167, 223, 0.28);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.78);
+  color: #0c1730;
+}
+
+.pwa-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.24);
+}
+
+.pwa-copy {
+  display: grid;
+  gap: 4px;
+  padding-right: 28px;
+}
+
+.pwa-copy span {
+  color: #1d4ed8;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pwa-copy h2 {
+  color: #0c1730;
+  font-size: 1.35rem;
+}
+
+.pwa-copy p,
+.pwa-copy small {
+  color: #53647f;
+  line-height: 1.45;
+}
+
+.pwa-copy small {
+  font-weight: 800;
+}
+
+.pwa-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+}
+
+.pwa-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 850;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pwa-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.18);
+}
+
+.pwa-primary {
+  flex: 1;
+  border: 1px solid #1d4ed8;
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+}
+
+.pwa-secondary {
+  border: 1px solid rgba(122, 167, 223, 0.36);
+  background: #ffffff;
+  color: #173b72;
+}
+
+.pwa-status {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(238, 245, 255, 0.92);
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.pwa-status.offline {
+  color: #92400e;
+}
+
+html[data-theme="night"] .pwa-install-card {
+  border-color: rgba(142, 197, 255, 0.24);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(142, 197, 255, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(13, 37, 79, 0.95), rgba(8, 18, 38, 0.92));
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.34);
+}
+
+html[data-theme="night"] .pwa-copy h2,
+html[data-theme="night"] .pwa-close {
+  color: #f8fbff;
+}
+
+html[data-theme="night"] .pwa-copy p,
+html[data-theme="night"] .pwa-copy small {
+  color: #c9d6ea;
+}
+
+html[data-theme="night"] .pwa-secondary,
+html[data-theme="night"] .pwa-status,
+html[data-theme="night"] .pwa-close {
+  border-color: rgba(142, 197, 255, 0.22);
+  background: rgba(142, 197, 255, 0.1);
+  color: #dbeafe;
+}
+
+@keyframes pwaCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 760px) {
+  .pwa-install-card {
+    right: 10px;
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    left: 10px;
+    width: auto;
+    border-radius: 24px;
+  }
+
+  .pwa-actions {
+    display: grid;
+  }
+
+  .pwa-secondary,
+  .pwa-primary {
+    width: 100%;
+  }
+}

@@ -1,6 +1,6 @@
-const CACHE_VERSION = "rossa-offline-v1";
-const TILE_CACHE = "rossa-map-tiles-v1";
-const IMAGE_CACHE = "rossa-images-v1";
+const CACHE_VERSION = "rossa-offline-v2";
+const TILE_CACHE = "rossa-map-tiles-v2";
+const IMAGE_CACHE = "rossa-images-v2";
 
 const APP_SHELL = [
   "/",
@@ -12,6 +12,11 @@ const APP_SHELL = [
   "/img2.jpg",
   "/offline-image.svg",
   "/offline-tile.svg",
+];
+
+const TILE_HOSTS = [
+  "tile.openstreetmap.org",
+  "basemaps.cartocdn.com",
 ];
 
 self.addEventListener("install", (event) => {
@@ -85,7 +90,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.hostname.endsWith("tile.openstreetmap.org")) {
+  if (TILE_HOSTS.some((host) => url.hostname.endsWith(host))) {
     event.respondWith(cacheFirst(request, TILE_CACHE, "/offline-tile.svg"));
     return;
   }

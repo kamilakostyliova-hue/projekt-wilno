@@ -30,6 +30,7 @@ import CaretakerPanel, { type CareReport, type ReportType } from "./CaretakerPan
 import MapView from "./MapView";
 import PersonDetailPage from "./PersonDetailPage";
 import UserProfilePage, { type VisitedPlaceRecord, type WantVisitRecord } from "./UserProfilePage";
+import VolunteerPanel from "./VolunteerPanel";
 import {
   transportModes,
   type LatLngTuple,
@@ -56,6 +57,12 @@ type CategoryId =
   | "architektura"
   | "naukowcy"
   | "duchowni";
+type OfficialWalkId =
+  | "highlights"
+  | "pilsudski"
+  | "poets"
+  | "architecture"
+  | "revival";
 
 type CemeteryPlace = {
   id: number;
@@ -103,7 +110,7 @@ type SavedRouteRecord = {
   time: number;
   savedAt: string;
   mode: TransportModeId | string;
-  routeKind?: "category" | "single";
+  routeKind?: "category" | "single" | "official";
   categoryId?: string;
   categoryLabel?: string;
   start?: {
@@ -137,6 +144,31 @@ type WalkHistoryRecord = {
   distance: number;
   duration: number;
   startedAt: string;
+  mode?: TransportModeId | string;
+  routeKind?: "category" | "single" | "official";
+  categoryId?: string;
+  categoryLabel?: string;
+  start?: {
+    label: string;
+    position: LatLngTuple;
+    source: "gate" | "user";
+  };
+  end?: {
+    label: string;
+    position: LatLngTuple | null;
+  };
+  places?: Array<{
+    id: number;
+    name: string;
+    years: string;
+    category: string;
+    categoryLabel: string;
+    position: LatLngTuple;
+    image: string;
+    shortDescription: string;
+  }>;
+  waypoints?: LatLngTuple[];
+  summarySource?: "online" | "offline";
 };
 
 type QuizResultRecord = {
@@ -161,8 +193,43 @@ type TimelineEvent = {
   text: string;
 };
 
-type PlaceStatusFilter = "all" | "favorites";
+type OfficialWalk = {
+  id: OfficialWalkId;
+  title: string;
+  subtitle: string;
+  description: string;
+  placeIds: number[];
+  places: CemeteryPlace[];
+  distance: number;
+  time: number;
+  badge: string;
+  icon: typeof FaMapMarkerAlt;
+};
+
+type GraveStatus = "good" | "check" | "needs_care" | "missing_photo" | "missing_data";
+type PlaceStatusFilter =
+  | "all"
+  | "favorites"
+  | "visited"
+  | "planned"
+  | "check"
+  | "needs_care"
+  | "missing_photo"
+  | "missing_data";
 type TimelineFilter = "all" | "1800" | "1850" | "1900" | "1950";
+type PlaceLayerBadge = {
+  className: "favorite" | "visited" | "want" | "check" | "needs-care" | "missing";
+  label: string;
+};
+
+type PlaceReviewState = {
+  status?: GraveStatus;
+  approvedDescription?: boolean;
+  approvedLocation?: boolean;
+  approvedPhoto?: boolean;
+  note?: string;
+  updatedAt?: string;
+};
 
 const cemeteryGate: LatLngTuple = [54.66842, 25.30236];
 const nearbyLimitMeters = 350;
@@ -488,6 +555,38 @@ const baseHomeTimeline = [
 ];
 
 
+const officialWalkDefinitions = [
+  {
+    id: "highlights",
+    placeIds: [1, 3, 5, 9, 11],
+    icon: FaStar,
+  },
+  {
+    id: "pilsudski",
+    placeIds: [1, 2, 3, 11],
+    icon: FaShieldAlt,
+  },
+  {
+    id: "poets",
+    placeIds: [2, 6, 9, 10],
+    icon: FaBookOpen,
+  },
+  {
+    id: "architecture",
+    placeIds: [4, 11, 12],
+    icon: FaDraftingCompass,
+  },
+  {
+    id: "revival",
+    placeIds: [5, 7, 10, 12],
+    icon: FaLandmark,
+  },
+] satisfies Array<{
+  id: OfficialWalkId;
+  placeIds: number[];
+  icon: typeof FaMapMarkerAlt;
+}>;
+
 const getFavoritesKey = (currentUserId: string | null) =>
   `rossa-favorites-${currentUserId ?? "guest"}`;
 
@@ -513,6 +612,23 @@ const getQuizResultsKey = (currentUserId: string | null) =>
   `rossa-quiz-results-${currentUserId ?? "guest"}`;
 
 const careReportsKey = "rossa-care-reports";
+const careReviewKey = "rossa-care-place-review";
+
+const demoCareStatusByPlaceId: Record<number, GraveStatus> = {
+  1: "good",
+  2: "check",
+  4: "needs_care",
+  7: "missing_data",
+  10: "missing_photo",
+};
+
+const graveStatusLabels: Record<GraveStatus, { pl: string; en: string }> = {
+  good: { pl: "Zadbany", en: "Good" },
+  check: { pl: "Do sprawdzenia", en: "Needs check" },
+  needs_care: { pl: "Wymaga opieki", en: "Needs care" },
+  missing_photo: { pl: "Brak zdjecia", en: "Missing photo" },
+  missing_data: { pl: "Brak danych", en: "Missing data" },
+};
 
 const issueTypeLabels: Record<ReportType, { pl: string; en: string }> = {
   missing_photo: { pl: "Brakuje zdjecia", en: "Missing photo" },
@@ -532,6 +648,20 @@ const readStorageArray = <T,>(storageKey: string): T[] => {
     return Array.isArray(parsed) ? (parsed as T[]) : [];
   } catch {
     return [];
+  }
+};
+
+const readStorageRecord = <T,>(storageKey: string): Record<number, T> => {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const saved = window.localStorage.getItem(storageKey);
+    const parsed = saved ? JSON.parse(saved) : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as Record<number, T>)
+      : {};
+  } catch {
+    return {};
   }
 };
 
@@ -720,6 +850,85 @@ function Layout({
     () => baseHomeTimeline.map((period) => localizeTimelinePeriod(period, languageKey)),
     [languageKey]
   );
+  const officialWalkCopy = useMemo(
+    () =>
+      languageKey === "en"
+        ? {
+            heading: "Official themed walks",
+            lead: "Ready routes for visitors: choose a story, open the map and follow the points in order.",
+            selected: "Selected official route",
+            start: "Start route",
+            map: "Show on map",
+            highlights: {
+              title: "Rasos in 30 minutes",
+              subtitle: "The most important points",
+              description: "A compact route through the most recognizable memorial places.",
+              badge: "5 stops",
+            },
+            pilsudski: {
+              title: "In Piłsudski's footsteps",
+              subtitle: "Independence and memory",
+              description: "A route focused on symbolic memory, statehood and Polish-Lithuanian history.",
+              badge: "historical route",
+            },
+            poets: {
+              title: "Poets and artists",
+              subtitle: "Culture of Vilnius",
+              description: "A calm walk through literary, musical and artistic stories of Rasos.",
+              badge: "culture",
+            },
+            architecture: {
+              title: "Architecture of Rasos",
+              subtitle: "Forms, graves and city memory",
+              description: "A route through artists, architects and people connected with Vilnius urban history.",
+              badge: "architecture",
+            },
+            revival: {
+              title: "Lithuanian revival",
+              subtitle: "Figures of public life",
+              description: "A route showing the multicultural and civic identity of Vilnius.",
+              badge: "Vilnius identity",
+            },
+          }
+        : {
+            heading: "Oficjalne spacery tematyczne",
+            lead: "Gotowe trasy dla zwiedzających: wybierz historię, otwórz mapę i idź punkt po punkcie.",
+            selected: "Wybrana trasa oficjalna",
+            start: "Rozpocznij trasę",
+            map: "Pokaż na mapie",
+            highlights: {
+              title: "Rossa w 30 minut",
+              subtitle: "Najważniejsze punkty",
+              description: "Krótka trasa przez najbardziej rozpoznawalne miejsca pamięci.",
+              badge: "5 punktów",
+            },
+            pilsudski: {
+              title: "Śladami Piłsudskiego",
+              subtitle: "Niepodległość i pamięć",
+              description: "Trasa wokół pamięci symbolicznej, państwowości i historii polsko-litewskiej.",
+              badge: "trasa historyczna",
+            },
+            poets: {
+              title: "Poeci i artyści",
+              subtitle: "Kultura Wilna",
+              description: "Spokojny spacer przez literackie, muzyczne i artystyczne historie Rossy.",
+              badge: "kultura",
+            },
+            architecture: {
+              title: "Architektura Rossy",
+              subtitle: "Formy, groby i pamięć miasta",
+              description: "Trasa przez twórców, architektów i osoby związane z rozwojem Wilna.",
+              badge: "architektura",
+            },
+            revival: {
+              title: "Litewskie odrodzenie",
+              subtitle: "Postacie życia publicznego",
+              description: "Trasa pokazująca wielokulturową i obywatelską tożsamość Wilna.",
+              badge: "tożsamość Wilna",
+            },
+          },
+    [languageKey]
+  );
   const getCurrentCategoryCount = useCallback(
     (categoryId: CategoryId) =>
       categoryId === "all"
@@ -735,6 +944,7 @@ function Layout({
     [places]
   );
   const [activeCategory, setActiveCategory] = useState<CategoryId>("all");
+  const [activeOfficialWalkId, setActiveOfficialWalkId] = useState<OfficialWalkId | null>("highlights");
   const [selectedId, setSelectedId] = useState<number | null>(places[0].id);
   const favoriteStorageKey = useMemo(
     () => getFavoritesKey(currentUserId),
@@ -792,6 +1002,12 @@ function Layout({
   const [issueReportOpen, setIssueReportOpen] = useState(false);
   const [issueReportType, setIssueReportType] = useState<ReportType>("needs_care");
   const [issueReportNote, setIssueReportNote] = useState("");
+  const [careReports, setCareReports] = useState<CareReport[]>(() =>
+    readStorageArray<CareReport>(careReportsKey)
+  );
+  const [careReviewStates, setCareReviewStates] = useState<Record<number, PlaceReviewState>>(() =>
+    readStorageRecord<PlaceReviewState>(careReviewKey)
+  );
   const [tourActive, setTourActive] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [quizOpen, setQuizOpen] = useState(false);
@@ -799,6 +1015,30 @@ function Layout({
   const [quizFeedback, setQuizFeedback] = useState("");
   const [quizResults, setQuizResults] = useState<QuizResultRecord[]>(() =>
     readStorageArray<QuizResultRecord>(quizResultsKey)
+  );
+  const officialWalks = useMemo<OfficialWalk[]>(
+    () =>
+      officialWalkDefinitions.map((definition) => {
+        const placesForWalk = definition.placeIds
+          .map((placeId) => places.find((place) => place.id === placeId))
+          .filter((place): place is CemeteryPlace => Boolean(place));
+        const distance = getRouteDistanceFor(placesForWalk, routeStart);
+        const text = officialWalkCopy[definition.id];
+
+        return {
+          id: definition.id,
+          title: text.title,
+          subtitle: text.subtitle,
+          description: text.description,
+          placeIds: definition.placeIds,
+          places: placesForWalk,
+          distance,
+          time: estimateWalkingTime(distance),
+          badge: text.badge,
+          icon: definition.icon,
+        };
+      }),
+    [officialWalkCopy, places, routeStart]
   );
 
   useEffect(() => {
@@ -865,6 +1105,23 @@ function Layout({
   }, [quizResults, quizResultsKey]);
 
   useEffect(() => {
+    const refreshCareLayers = () => {
+      setCareReports(readStorageArray<CareReport>(careReportsKey));
+      setCareReviewStates(readStorageRecord<PlaceReviewState>(careReviewKey));
+    };
+
+    window.addEventListener("storage", refreshCareLayers);
+    window.addEventListener("rossa-care-reports-changed", refreshCareLayers);
+    window.addEventListener("rossa-care-review-changed", refreshCareLayers);
+
+    return () => {
+      window.removeEventListener("storage", refreshCareLayers);
+      window.removeEventListener("rossa-care-reports-changed", refreshCareLayers);
+      window.removeEventListener("rossa-care-review-changed", refreshCareLayers);
+    };
+  }, []);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => setDrawerOpen(false), 0);
 
     return () => window.clearTimeout(timer);
@@ -889,6 +1146,66 @@ function Layout({
     () => (timelineFilter === "all" ? homeTimeline : homeTimeline.filter((period) => period.year === timelineFilter)),
     [timelineFilter]
   );
+  const openCareReportsByPlace = useMemo(() => {
+    const grouped = new Map<number, CareReport[]>();
+
+    careReports
+      .filter((report) => report.placeId !== null && report.status !== "resolved")
+      .forEach((report) => {
+        const placeId = report.placeId as number;
+        grouped.set(placeId, [...(grouped.get(placeId) ?? []), report]);
+      });
+
+    return grouped;
+  }, [careReports]);
+
+  const getCareStatus = useCallback(
+    (placeId: number): GraveStatus => {
+      const reports = openCareReportsByPlace.get(placeId) ?? [];
+
+      if (reports.some((report) => report.type === "needs_care")) return "needs_care";
+      if (reports.some((report) => report.type === "missing_photo")) return "missing_photo";
+      if (reports.some((report) => report.type === "wrong_description" || report.type === "wrong_location")) return "check";
+
+      return careReviewStates[placeId]?.status ?? demoCareStatusByPlaceId[placeId] ?? "good";
+    },
+    [careReviewStates, openCareReportsByPlace]
+  );
+
+  const getPlaceLayerBadges = useCallback(
+    (place: CemeteryPlace): PlaceLayerBadge[] => {
+      const badges: PlaceLayerBadge[] = [];
+      const careStatus = getCareStatus(place.id);
+      const language = appLanguage === "en" ? "en" : "pl";
+
+      if (visitedIds.includes(place.id)) {
+        badges.push({ className: "visited", label: tourCopy.visited });
+      }
+
+      if (wantVisitItems.some((item) => item.placeId === place.id)) {
+        badges.push({ className: "want", label: tourCopy.planned });
+      }
+
+      if (favoriteIds.includes(place.id)) {
+        badges.push({ className: "favorite", label: copy.favorites });
+      }
+
+      if (careStatus === "check") {
+        badges.push({ className: "check", label: graveStatusLabels.check[language] });
+      }
+
+      if (careStatus === "needs_care") {
+        badges.push({ className: "needs-care", label: graveStatusLabels.needs_care[language] });
+      }
+
+      if (careStatus === "missing_photo" || careStatus === "missing_data") {
+        badges.push({ className: "missing", label: graveStatusLabels[careStatus][language] });
+      }
+
+      return badges;
+    },
+    [appLanguage, copy.favorites, favoriteIds, getCareStatus, tourCopy.planned, tourCopy.visited, visitedIds, wantVisitItems]
+  );
 
   const filteredPlaces = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -897,7 +1214,17 @@ function Layout({
       const matchesCategory = placeMatchesCategory(place, activeCategory);
       const matchesFavorites =
         !showOnlyFavorites || favoriteIds.includes(place.id);
-      const matchesStatus = statusFilter === "all" || (statusFilter === "favorites" && favoriteIds.includes(place.id));
+      const careStatus = getCareStatus(place.id);
+      const isPlanned = wantVisitItems.some((item) => item.placeId === place.id);
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "favorites" && favoriteIds.includes(place.id)) ||
+        (statusFilter === "visited" && visitedIds.includes(place.id)) ||
+        (statusFilter === "planned" && isPlanned) ||
+        (statusFilter === "needs_care" && careStatus === "needs_care") ||
+        (statusFilter === "missing_photo" && careStatus === "missing_photo") ||
+        (statusFilter === "missing_data" && careStatus === "missing_data") ||
+        (statusFilter === "check" && careStatus === "check");
       const matchesNearby =
         !showNearbyOnly ||
         distanceMeters(routeStart, place.position) <= nearbyLimitMeters;
@@ -914,11 +1241,14 @@ function Layout({
   }, [
     activeCategory,
     favoriteIds,
+    getCareStatus,
     routeStart,
     searchQuery,
     showNearbyOnly,
     showOnlyFavorites,
     statusFilter,
+    visitedIds,
+    wantVisitItems,
   ]);
 
   const categoryPeople = useMemo(
@@ -954,9 +1284,59 @@ function Layout({
       : recommendedRoutePlaces.length < 5
         ? copy.placesWord[1]
         : copy.placesWord[2];
+  const activeOfficialWalk =
+    officialWalks.find((walk) => walk.id === activeOfficialWalkId) ??
+    officialWalks[0] ??
+    null;
 
   const markerPlaces =
-    activeView === "favorites" ? favoritePlaces : filteredPlaces;
+    activeView === "favorites"
+      ? favoritePlaces
+      : activeView === "walk" && activeOfficialWalk
+        ? activeOfficialWalk.places
+        : filteredPlaces;
+  const mapPlacesWithLayers = useMemo(
+    () =>
+      markerPlaces.map((place) => ({
+        ...place,
+        layerBadges: getPlaceLayerBadges(place),
+      })),
+    [getPlaceLayerBadges, markerPlaces]
+  );
+  const statusFilterOptions = useMemo(
+    () =>
+      [
+        { id: "all", label: copy.all, count: places.length },
+        { id: "favorites", label: copy.favorites, count: favoriteIds.length },
+        { id: "visited", label: tourCopy.visited, count: visitedIds.length },
+        {
+          id: "planned",
+          label: tourCopy.planned,
+          count: wantVisitItems.length,
+        },
+        {
+          id: "needs_care",
+          label: graveStatusLabels.needs_care[languageKey],
+          count: places.filter((place) => getCareStatus(place.id) === "needs_care").length,
+        },
+        {
+          id: "check",
+          label: graveStatusLabels.check[languageKey],
+          count: places.filter((place) => getCareStatus(place.id) === "check").length,
+        },
+        {
+          id: "missing_photo",
+          label: graveStatusLabels.missing_photo[languageKey],
+          count: places.filter((place) => getCareStatus(place.id) === "missing_photo").length,
+        },
+        {
+          id: "missing_data",
+          label: graveStatusLabels.missing_data[languageKey],
+          count: places.filter((place) => getCareStatus(place.id) === "missing_data").length,
+        },
+      ] as Array<{ id: PlaceStatusFilter; label: string; count: number }>,
+    [copy.all, copy.favorites, favoriteIds.length, getCareStatus, languageKey, places, tourCopy.planned, tourCopy.visited, visitedIds.length, wantVisitItems.length]
+  );
 
   const selectedPlace =
     markerPlaces.find((place) => place.id === selectedId) ??
@@ -983,11 +1363,23 @@ function Layout({
     () => getCurrentCategoryRoutePlaces(activeCategory),
     [activeCategory]
   );
+  const hasOfficialRoute =
+    activeView === "walk" &&
+    routeTargetId === null &&
+    Boolean(activeOfficialWalk && activeOfficialWalk.places.length > 1);
   const hasCategoryRoute =
+    !hasOfficialRoute &&
     activeCategory !== "all" &&
     routeTargetId === null &&
     categoryRoutePlaces.length > 1;
   const routeWaypoints = useMemo(() => {
+    if (hasOfficialRoute && activeOfficialWalk) {
+      return [
+        routeStart,
+        ...activeOfficialWalk.places.map((place) => place.position),
+      ];
+    }
+
     if (hasCategoryRoute) {
       return [
         routeStart,
@@ -1000,7 +1392,7 @@ function Layout({
     }
 
     return [];
-  }, [categoryRoutePlaces, hasCategoryRoute, routeStart, routeTarget]);
+  }, [activeOfficialWalk, categoryRoutePlaces, hasCategoryRoute, hasOfficialRoute, routeStart, routeTarget]);
   const fallbackRouteDistance = useMemo(
     () =>
       routeWaypoints.slice(1).reduce(
@@ -1014,7 +1406,8 @@ function Layout({
     fallbackRouteDistance / transportModes[transportMode].speedMps
   );
   const currentWalkPlaces =
-    activeCategory === "all" ? recommendedRoutePlaces : categoryRoutePlaces;
+    activeOfficialWalk?.places ??
+    (activeCategory === "all" ? recommendedRoutePlaces : categoryRoutePlaces);
   const tourPlaces = useMemo(
     () =>
       currentWalkPlaces.length > 0
@@ -1024,6 +1417,8 @@ function Layout({
   );
   const audioRoutePlaces = hasCategoryRoute
     ? categoryRoutePlaces
+    : hasOfficialRoute && activeOfficialWalk
+      ? activeOfficialWalk.places
     : routeTarget
       ? [routeTarget]
       : selectedPlace
@@ -1109,7 +1504,7 @@ function Layout({
     },
   ];
   const hasActiveRoute =
-    routeWaypoints.length > 1 && (Boolean(routeTarget) || hasCategoryRoute);
+    routeWaypoints.length > 1 && (Boolean(routeTarget) || hasCategoryRoute || hasOfficialRoute);
   const offlineStatus = networkOnline ? copy.routeLocal : copy.noInternet;
   const offlinePanelTitle = onlineMode
     ? copy.onlineNavigation
@@ -1128,6 +1523,7 @@ function Layout({
 
   const pickCategory = (categoryId: CategoryId) => {
     setActiveCategory(categoryId);
+    setActiveOfficialWalkId(null);
     setRouteTargetId(null);
     setRouteSummary(null);
     setRouteStatus(
@@ -1160,9 +1556,36 @@ function Layout({
     routeName: string,
     pointCount: number,
     distance: number,
-    duration: number
+    duration: number,
+    options: {
+      mode?: TransportModeId | string;
+      routeKind?: "category" | "single" | "official";
+      categoryId?: string;
+      categoryLabel?: string;
+      start?: WalkHistoryRecord["start"];
+      end?: WalkHistoryRecord["end"];
+      places?: CemeteryPlace[];
+      waypoints?: LatLngTuple[];
+      summarySource?: "online" | "offline";
+    } = {}
   ) => {
     const history = readStorageArray<WalkHistoryRecord>(walkHistoryKey);
+    const historyPlaces = (options.places ?? []).map((place) => ({
+      id: place.id,
+      name: place.name,
+      years: place.years,
+      category: place.category,
+      categoryLabel: place.categoryLabel,
+      position: place.position,
+      image: place.image,
+      shortDescription: place.shortDescription,
+    }));
+    const lastPlace = historyPlaces[historyPlaces.length - 1];
+    const start = options.start ?? {
+      label: routeStartLabel,
+      position: routeStart,
+      source: routeStartSource,
+    };
     const entry: WalkHistoryRecord = {
       id: `walk-${Date.now()}`,
       routeName,
@@ -1170,9 +1593,63 @@ function Layout({
       distance,
       duration,
       startedAt: new Date().toISOString(),
+      mode: options.mode ?? "walk",
+      routeKind: options.routeKind,
+      categoryId: options.categoryId,
+      categoryLabel: options.categoryLabel,
+      start,
+      end: options.end ?? {
+        label: lastPlace?.name ?? routeName,
+        position: lastPlace?.position ?? null,
+      },
+      places: historyPlaces,
+      waypoints: options.waypoints ?? [start.position, ...historyPlaces.map((place) => place.position)],
+      summarySource: options.summarySource ?? "offline",
     };
     window.localStorage.setItem(walkHistoryKey, JSON.stringify([entry, ...history].slice(0, 30)));
     window.dispatchEvent(new Event("rossa-profile-data-changed"));
+  };
+
+  const selectOfficialWalk = (walkId: OfficialWalkId) => {
+    const walk = officialWalks.find((item) => item.id === walkId);
+    if (!walk) return;
+
+    setActiveOfficialWalkId(walk.id);
+    setActiveCategory("all");
+    setRouteTargetId(null);
+    setRouteSummary(null);
+    setRouteStatus(`${officialWalkCopy.selected}: ${walk.title}`);
+    setTourStepIndex(0);
+
+    if (walk.places[0]) {
+      setSelectedId(walk.places[0].id);
+    }
+  };
+
+  const startOfficialWalk = (walkId: OfficialWalkId) => {
+    const walk = officialWalks.find((item) => item.id === walkId);
+    if (!walk) return;
+
+    selectOfficialWalk(walk.id);
+    recordWalkStart(walk.title, walk.places.length, walk.distance, walk.time, {
+      mode: transportMode,
+      routeKind: "official",
+      categoryId: walk.id,
+      categoryLabel: walk.title,
+      places: walk.places,
+      start: {
+        label: routeStartLabel,
+        position: routeStart,
+        source: routeStartSource,
+      },
+      end: {
+        label: walk.places[walk.places.length - 1]?.name ?? walk.title,
+        position: walk.places[walk.places.length - 1]?.position ?? null,
+      },
+      summarySource: routeSummary ? "online" : "offline",
+      waypoints: [routeStart, ...walk.places.map((place) => place.position)],
+    });
+    onViewChange("walk");
   };
 
   const startCategoryRoute = (categoryId: CategoryId) => {
@@ -1183,7 +1660,24 @@ function Layout({
       categories.find((category) => category.id === categoryId)?.label ?? "Rasos";
 
     if (routePlaces.length > 1) {
-      recordWalkStart(`${routeLabel} Rasos`, routePlaces.length, routeDistance, routeTime);
+      recordWalkStart(`${routeLabel} Rasos`, routePlaces.length, routeDistance, routeTime, {
+        mode: transportMode,
+        routeKind: "category",
+        categoryId,
+        categoryLabel: routeLabel,
+        places: routePlaces,
+        start: {
+          label: routeStartLabel,
+          position: routeStart,
+          source: routeStartSource,
+        },
+        end: {
+          label: routePlaces[routePlaces.length - 1]?.name ?? routeLabel,
+          position: routePlaces[routePlaces.length - 1]?.position ?? null,
+        },
+        summarySource: routeSummary ? "online" : "offline",
+        waypoints: [routeStart, ...routePlaces.map((place) => place.position)],
+      });
     }
 
     pickCategory(categoryId);
@@ -1243,10 +1737,34 @@ function Layout({
     setRouteTargetId(firstPlace.id);
     setRouteSummary(null);
     recordWalkStart(
-      `${tourCopy.title}: ${activeCategory === "all" ? recommendedCategoryInfo.label : activeCategoryInfo.label}`,
+      `${tourCopy.title}: ${
+        activeOfficialWalk
+          ? activeOfficialWalk.title
+          : activeCategory === "all"
+            ? recommendedCategoryInfo.label
+            : activeCategoryInfo.label
+      }`,
       tourPlaces.length,
       getRouteDistanceFor(tourPlaces, routeStart),
-      estimateWalkingTime(getRouteDistanceFor(tourPlaces, routeStart))
+      estimateWalkingTime(getRouteDistanceFor(tourPlaces, routeStart)),
+      {
+        mode: transportMode,
+        routeKind: activeOfficialWalk ? "official" : "category",
+        categoryId: activeOfficialWalk ? activeOfficialWalk.id : activeCategory,
+        categoryLabel: activeOfficialWalk ? activeOfficialWalk.title : activeCategoryInfo.label,
+        places: tourPlaces,
+        start: {
+          label: routeStartLabel,
+          position: routeStart,
+          source: routeStartSource,
+        },
+        end: {
+          label: tourPlaces[tourPlaces.length - 1]?.name ?? firstPlace.name,
+          position: tourPlaces[tourPlaces.length - 1]?.position ?? null,
+        },
+        summarySource: routeSummary ? "online" : "offline",
+        waypoints: [routeStart, ...tourPlaces.map((place) => place.position)],
+      }
     );
     onViewChange("walk");
   };
@@ -1279,7 +1797,9 @@ function Layout({
     const result: QuizResultRecord = {
       id: `quiz-${Date.now()}`,
       routeName:
-        activeCategory === "all"
+        activeOfficialWalk
+          ? activeOfficialWalk.title
+          : activeCategory === "all"
           ? `${recommendedCategoryInfo.label} Rossy`
           : `${activeCategoryInfo.label} Rossy`,
       score,
@@ -1296,10 +1816,20 @@ function Layout({
   const saveCurrentRoute = () => {
     if (!hasActiveRoute && !selectedPlace) return false;
 
-    const routePlaces = hasCategoryRoute ? categoryRoutePlaces : routeTarget ? [routeTarget] : selectedPlace ? [selectedPlace] : [];
+    const routePlaces = hasOfficialRoute && activeOfficialWalk
+      ? activeOfficialWalk.places
+      : hasCategoryRoute
+        ? categoryRoutePlaces
+        : routeTarget
+          ? [routeTarget]
+          : selectedPlace
+            ? [selectedPlace]
+            : [];
     if (routePlaces.length === 0) return false;
 
-    const name = hasCategoryRoute
+    const name = hasOfficialRoute && activeOfficialWalk
+      ? activeOfficialWalk.title
+      : hasCategoryRoute
       ? `${copy.trailPrefix}${activeCategoryInfo.label}`
       : routePlaces[0]
         ? `${copy.routeTo}${routePlaces[0].name}`
@@ -1326,9 +1856,9 @@ function Layout({
       time: Math.round(savedTime),
       savedAt: new Date().toISOString(),
       mode: transportMode,
-      routeKind: hasCategoryRoute ? "category" : "single",
-      categoryId: hasCategoryRoute ? activeCategory : routePlaces[0]?.category,
-      categoryLabel: hasCategoryRoute ? activeCategoryInfo.label : routePlaces[0]?.categoryLabel,
+      routeKind: hasOfficialRoute ? "official" : hasCategoryRoute ? "category" : "single",
+      categoryId: hasOfficialRoute && activeOfficialWalk ? activeOfficialWalk.id : hasCategoryRoute ? activeCategory : routePlaces[0]?.category,
+      categoryLabel: hasOfficialRoute && activeOfficialWalk ? activeOfficialWalk.title : hasCategoryRoute ? activeCategoryInfo.label : routePlaces[0]?.categoryLabel,
       start: {
         label: routeStartLabel,
         position: routeStart,
@@ -1396,6 +1926,8 @@ function Layout({
       route.mode in transportModes ? (route.mode as TransportModeId) : "walk";
     const savedCategory =
       categories.find((category) => category.id === route.categoryId)?.id ?? null;
+    const savedOfficialWalk =
+      officialWalks.find((walk) => walk.id === route.categoryId)?.id ?? null;
     const firstPlaceId = route.places?.[0]?.id ?? null;
 
     setTransportMode(savedMode);
@@ -1405,18 +1937,28 @@ function Layout({
       time: route.time,
     });
 
-    if (route.routeKind === "category" && savedCategory && savedCategory !== "all") {
+    if (route.routeKind === "official" && savedOfficialWalk) {
+      setActiveOfficialWalkId(savedOfficialWalk);
+      setActiveCategory("all");
+      setRouteTargetId(null);
+      setSelectedId(firstPlaceId);
+      onViewChange("walk");
+    } else if (route.routeKind === "category" && savedCategory && savedCategory !== "all") {
+      setActiveOfficialWalkId(null);
       setActiveCategory(savedCategory);
       setRouteTargetId(null);
       setSelectedId(firstPlaceId);
     } else if (firstPlaceId) {
+      setActiveOfficialWalkId(null);
       setActiveCategory("all");
       setSelectedId(firstPlaceId);
       setRouteTargetId(firstPlaceId);
     }
 
     setRouteStatus(`Otworzono trase zapisana na tym urzadzeniu: ${route.name}.`);
-    onViewChange("map");
+    if (route.routeKind !== "official") {
+      onViewChange("map");
+    }
   };
 
   const resetUserData = () => {
@@ -1480,7 +2022,25 @@ function Layout({
       `${copy.routeTo}${selectedPlace.name}`,
       1,
       fallbackRouteDistance || distanceMeters(routeStart, selectedPlace.position),
-      fallbackRouteTime || estimateWalkingTime(distanceMeters(routeStart, selectedPlace.position))
+      fallbackRouteTime || estimateWalkingTime(distanceMeters(routeStart, selectedPlace.position)),
+      {
+        mode: transportMode,
+        routeKind: "single",
+        categoryId: selectedPlace.category,
+        categoryLabel: selectedPlace.categoryLabel,
+        places: [selectedPlace],
+        start: {
+          label: routeStartLabel,
+          position: routeStart,
+          source: routeStartSource,
+        },
+        end: {
+          label: selectedPlace.name,
+          position: selectedPlace.position,
+        },
+        summarySource: routeSummary ? "online" : "offline",
+        waypoints: [routeStart, selectedPlace.position],
+      }
     );
     onViewChange("map");
 
@@ -1567,13 +2127,32 @@ function Layout({
       setActiveCategory("all");
     }
   };
-  const renderPlaceBadges = (place: CemeteryPlace) => (
-    <div className="place-status-badges">
-      {visitedIds.includes(place.id) && <span className="visited"><FaCheckCircle /> {tourCopy.visited}</span>}
-      {wantVisitItems.some((item) => item.placeId === place.id) && <span className="want"><FaMedal /> {tourCopy.planned}</span>}
-      {favoriteIds.includes(place.id) && <span className="favorite"><FaHeart /> {copy.favorites}</span>}
-    </div>
-  );
+  const renderPlaceBadges = (place: CemeteryPlace) => {
+    const badges = getPlaceLayerBadges(place);
+
+    if (badges.length === 0) return null;
+
+    return (
+      <div className="place-status-badges">
+        {badges.map((badge) => {
+          const Icon =
+            badge.className === "visited"
+              ? FaCheckCircle
+              : badge.className === "want"
+                ? FaMedal
+                : badge.className === "favorite"
+                  ? FaHeart
+                  : FaExclamationTriangle;
+
+          return (
+            <span className={badge.className} key={`${place.id}-${badge.className}`}>
+              <Icon /> {badge.label}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   const renderImage = (place: CemeteryPlace, className?: string) => (
     <img
@@ -1609,7 +2188,7 @@ function Layout({
       onStartWalk={startRecommendedRoute}
       onTransportModeChange={setTransportMode}
       onUseLocation={requestCurrentLocation}
-      places={markerPlaces}
+      places={mapPlacesWithLayers}
       routeStatus={onlineMode ? routeStatus : offlineStatus}
       routeSummary={routeSummary}
       routeWaypoints={routeWaypoints}
@@ -1704,6 +2283,19 @@ function Layout({
   if (activeView === "caretaker") {
     return (
       <CaretakerPanel
+        currentUser={currentUser}
+        language={appLanguage}
+        onLoginClick={onLoginClick}
+        onLogout={onLogout}
+        onShowPlace={showPlaceOnMap}
+        places={places}
+      />
+    );
+  }
+
+  if (activeView === "volunteer") {
+    return (
+      <VolunteerPanel
         currentUser={currentUser}
         language={appLanguage}
         onLoginClick={onLoginClick}
@@ -2229,17 +2821,15 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
             </span>
           </label>
           <div className="status-filter-chips" aria-label={copy.statusFilters}>
-            {([
-              ["all", copy.all],
-              ["favorites", copy.favorites],
-            ] as Array<[PlaceStatusFilter, string]>).map(([filter, label]) => (
+            {statusFilterOptions.map((filter) => (
               <button
-                className={statusFilter === filter ? "active" : ""}
-                key={filter}
-                onClick={() => setStatusFilter(filter)}
+                className={statusFilter === filter.id ? "active" : ""}
+                key={filter.id}
+                onClick={() => setStatusFilter(filter.id)}
                 type="button"
               >
-                {label}
+                {filter.label}
+                <small>{filter.count}</small>
               </button>
             ))}
           </div>
@@ -2348,7 +2938,9 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                   {activeView === "list"
                     ? copy.listTitle
                     : activeView === "walk"
-                      ? activeCategory === "all"
+                      ? activeOfficialWalk
+                        ? activeOfficialWalk.title
+                        : activeCategory === "all"
                         ? copy.chooseThemedWalk
                         : `${copy.walkPrefix}${activeCategoryInfo.label}`
                       : activeCategory === "all"
@@ -2357,7 +2949,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                 </h2>
                 <p>
                   {activeView === "walk"
-                    ? copy.walkLead
+                    ? activeOfficialWalk?.description ?? copy.walkLead
                     : activeCategory === "architektura"
                       ? copy.architectureLead
                       : copy.mapLead}
@@ -2366,11 +2958,64 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
             </div>
 
             {activeView === "walk" && (
+              <section className="official-walks" aria-label={officialWalkCopy.heading}>
+                <div className="official-walks-head">
+                  <div>
+                    <span className="eyebrow">{officialWalkCopy.heading}</span>
+                    <h3>{officialWalkCopy.lead}</h3>
+                  </div>
+                </div>
+
+                <div className="official-walk-grid">
+                  {officialWalks.map((walk) => {
+                    const Icon = walk.icon;
+
+                    return (
+                      <article
+                        className={`official-walk-card ${activeOfficialWalk?.id === walk.id ? "active" : ""}`}
+                        key={walk.id}
+                      >
+                        <button
+                          className="official-walk-select"
+                          onClick={() => selectOfficialWalk(walk.id)}
+                          type="button"
+                        >
+                          <span className="official-walk-icon"><Icon /></span>
+                          <span>
+                            <small>{walk.badge}</small>
+                            <strong>{walk.title}</strong>
+                            <em>{walk.subtitle}</em>
+                          </span>
+                        </button>
+                        <p>{walk.description}</p>
+                        <div className="official-walk-meta">
+                          <span>{walk.places.length} {copy.points}</span>
+                          <span>{formatDistance(walk.distance)}</span>
+                          <span>{formatDuration(walk.time)}</span>
+                        </div>
+                        <div className="official-walk-actions">
+                          <button onClick={() => startOfficialWalk(walk.id)} type="button">
+                            <FaRoute /> {officialWalkCopy.start}
+                          </button>
+                          <button onClick={() => selectOfficialWalk(walk.id)} type="button">
+                            <FaMapMarkerAlt /> {officialWalkCopy.map}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {activeView === "walk" && (
               <section className="walk-planner" aria-label={copy.workspaceWalk}>
                 <div className="walk-summary">
-                  <span className="eyebrow">{copy.selectedTrail}</span>
+                  <span className="eyebrow">{activeOfficialWalk ? officialWalkCopy.selected : copy.selectedTrail}</span>
                   <h3>
-                    {activeCategory === "all"
+                    {activeOfficialWalk
+                      ? activeOfficialWalk.title
+                      : activeCategory === "all"
                       ? `${recommendedCategoryInfo.label} Rossy`
                       : `${activeCategoryInfo.label} Rossy`}
                   </h3>
@@ -2560,7 +3205,9 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                 <div>
                   <span className="eyebrow">{copy.appRoute}</span>
                   <h3>
-                    {hasCategoryRoute
+                    {hasOfficialRoute && activeOfficialWalk
+                      ? activeOfficialWalk.title
+                      : hasCategoryRoute
                       ? `${copy.trailPrefix}${activeCategoryInfo.label}`
                       : `${copy.goTo}${routeTarget?.name}`}
                   </h3>
@@ -2577,7 +3224,13 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                   </p>
                 </div>
 
-                {hasCategoryRoute ? (
+                {hasOfficialRoute && activeOfficialWalk ? (
+                  <ol>
+                    {activeOfficialWalk.places.map((place) => (
+                      <li key={place.id}>{place.name}</li>
+                    ))}
+                  </ol>
+                ) : hasCategoryRoute ? (
                   <ol>
                     {categoryRoutePlaces.map((place) => (
                       <li key={place.id}>{place.name}</li>
@@ -2737,7 +3390,13 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                   <h3>{copy.walkPoints} ({currentWalkPlaces.length})</h3>
                   <button
                     className="small-button"
-                    onClick={startRecommendedRoute}
+                    onClick={() => {
+                      if (activeOfficialWalk) {
+                        startOfficialWalk(activeOfficialWalk.id);
+                        return;
+                      }
+                      startRecommendedRoute();
+                    }}
                     type="button"
                   >
                     {copy.showRoute}

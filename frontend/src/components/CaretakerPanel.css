@@ -429,12 +429,82 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.caretaker-task-row.priority-high {
+  border-color: rgba(220, 38, 38, 0.24);
+  background:
+    radial-gradient(circle at 98% 0%, rgba(220, 38, 38, 0.11), transparent 38%),
+    rgba(255, 255, 255, 0.94);
+}
+
+.caretaker-task-row.priority-medium {
+  border-color: rgba(245, 158, 11, 0.26);
+  background:
+    radial-gradient(circle at 98% 0%, rgba(245, 158, 11, 0.12), transparent 38%),
+    rgba(255, 255, 255, 0.94);
+}
+
+.caretaker-task-row.priority-low {
+  border-color: rgba(37, 99, 235, 0.2);
+  background:
+    radial-gradient(circle at 98% 0%, rgba(37, 99, 235, 0.1), transparent 38%),
+    rgba(255, 255, 255, 0.94);
+}
+
 .caretaker-task-row button,
 .caretaker-admin-report button {
   min-height: 36px;
   padding: 0 12px;
   background: #ffffff;
   color: #1d4ed8;
+}
+
+.caretaker-task-main em {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.priority-high .caretaker-task-main em {
+  background: #fff1f2;
+  color: #a61b49;
+}
+
+.priority-medium .caretaker-task-main em {
+  background: #fff7dd;
+  color: #8a5b00;
+}
+
+.caretaker-task-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(122, 167, 223, 0.28);
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #173b72;
+  font-size: 0.78rem;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.caretaker-task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  gap: 8px;
+}
+
+.caretaker-task-actions button {
+  flex: 1 1 112px;
 }
 
 .caretaker-admin-report textarea {
@@ -1337,6 +1407,7 @@ html[data-theme="night"] .caretaker-task-list,
 html[data-theme="night"] .caretaker-admin-report,
 html[data-theme="night"] .caretaker-place-pill,
 html[data-theme="night"] .caretaker-task-row,
+html[data-theme="night"] .caretaker-task-type,
 html[data-theme="night"] .caretaker-update-card,
 html[data-theme="night"] .place-review-panel,
 html[data-theme="night"] .review-checklist,
@@ -1436,6 +1507,8 @@ html[data-theme="night"] .admin-note-box textarea,
 html[data-theme="night"] .admin-note-box button,
 html[data-theme="night"] .assigned-place-row button,
 html[data-theme="night"] .caretaker-task-row button,
+html[data-theme="night"] .caretaker-task-main em,
+html[data-theme="night"] .caretaker-task-type,
 html[data-theme="night"] .caretaker-admin-report button,
 html[data-theme="night"] .report-card span,
 html[data-theme="night"] .report-status-chip,
@@ -1489,6 +1562,27 @@ html[data-theme="night"] .task-done {
 html[data-theme="night"] .review-status-picker button.active {
   background: linear-gradient(135deg, #1d4ed8, #0b2753);
   color: #ffffff;
+}
+
+html[data-theme="night"] .caretaker-task-row.priority-high {
+  border-color: rgba(251, 113, 133, 0.28);
+  background:
+    radial-gradient(circle at 98% 0%, rgba(251, 113, 133, 0.13), transparent 38%),
+    rgba(13, 37, 79, 0.88);
+}
+
+html[data-theme="night"] .caretaker-task-row.priority-medium {
+  border-color: rgba(251, 191, 36, 0.28);
+  background:
+    radial-gradient(circle at 98% 0%, rgba(251, 191, 36, 0.13), transparent 38%),
+    rgba(13, 37, 79, 0.88);
+}
+
+html[data-theme="night"] .caretaker-task-row.priority-low {
+  border-color: rgba(142, 197, 255, 0.22);
+  background:
+    radial-gradient(circle at 98% 0%, rgba(142, 197, 255, 0.12), transparent 38%),
+    rgba(13, 37, 79, 0.88);
 }
 
 html[data-theme="night"] .report-filter-tabs button.active {
@@ -1575,6 +1669,11 @@ html[data-theme="night"] .admin-caretaker-card.active {
   .caretaker-admin-report button {
     width: 100%;
     justify-content: center;
+  }
+
+  .caretaker-task-type,
+  .caretaker-task-actions {
+    width: 100%;
   }
 
   .admin-overview-head {

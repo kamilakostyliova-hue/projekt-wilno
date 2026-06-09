@@ -4,14 +4,15 @@ import "./App.css";
 import AuthModal, { type AuthLoginRole } from "./components/auth/AuthModal";
 import Layout from "./components/Layout";
 import Navbar from "./components/Navbar";
+import PwaInstallPrompt from "./components/PwaInstallPrompt";
 import { getSavedAuthUser, useAuth } from "./hooks/useAuth";
 import { syncBackendOfflineBundle } from "./services/offlineBundle";
 
-export type ViewId = "home" | "map" | "walk" | "list" | "favorites" | "categories" | "profile" | "project" | "caretaker" | "admin" | "person";
+export type ViewId = "home" | "map" | "walk" | "list" | "favorites" | "categories" | "profile" | "project" | "caretaker" | "volunteer" | "admin" | "person";
 export type ThemeMode = "day" | "night";
 export type AppLanguage = "pl" | "en";
 export type TextSize = "compact" | "normal" | "large";
-export type UserRole = "user" | "caretaker" | "admin";
+export type UserRole = "user" | "volunteer" | "caretaker" | "admin";
 export type UserSettings = {
   audioEnabled: boolean;
   darkMode: boolean;
@@ -42,6 +43,7 @@ const viewIds: ViewId[] = [
   "profile",
   "project",
   "caretaker",
+  "volunteer",
   "admin",
 ];
 
@@ -91,7 +93,7 @@ const createDefaultSettings = (language: AppLanguage = detectAppLanguage()): Use
 const moveScopedStorage = (previousEmail: string, nextEmail: string) => {
   if (previousEmail === nextEmail) return;
 
-  ["favorites", "visited", "want-visit", "saved-routes", "walk-history", "planned-walks", "time-spent", "quiz-results"].forEach((scope) => {
+  ["favorites", "visited", "want-visit", "saved-routes", "walk-history", "planned-walks", "time-spent", "quiz-results", "volunteer-state"].forEach((scope) => {
     const oldKey = `rossa-${scope}-${previousEmail}`;
     const nextKey = `rossa-${scope}-${nextEmail}`;
     const saved = window.localStorage.getItem(oldKey);
@@ -125,6 +127,7 @@ function App() {
     login,
     logout,
     register,
+    volunteerLogin,
     setCurrentUser,
   } = useAuth(language, theme);
 
@@ -281,6 +284,8 @@ function App() {
         ? await register(name, email, password)
         : loginRole === "user"
           ? await login(email, password)
+          : loginRole === "volunteer"
+            ? await volunteerLogin(email, password)
           : await caretakerLogin(email, password);
 
     setAuthMessage(result.message);
@@ -297,6 +302,10 @@ function App() {
 
       if (mode === "login" && loginRole === "caretaker") {
         navigateToView("caretaker");
+      }
+
+      if (mode === "login" && loginRole === "volunteer") {
+        navigateToView("volunteer");
       }
 
       if (mode === "login" && loginRole === "admin") {
@@ -396,6 +405,7 @@ function App() {
           onSubmit={handleAuthSubmit}
         />
       )}
+      <PwaInstallPrompt language={language} online={networkOnline} />
     </>
   );
 }

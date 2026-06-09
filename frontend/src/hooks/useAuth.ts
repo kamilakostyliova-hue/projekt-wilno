@@ -13,7 +13,7 @@ type LocalAuthUser = ApiUser & {
   passwordHash: string;
 };
 
-type AuthEndpoint = "/login" | "/register" | "/caretaker/login";
+type AuthEndpoint = "/login" | "/register" | "/caretaker/login" | "/volunteer/login";
 
 type AuthPayload = {
   username?: string;
@@ -125,8 +125,16 @@ const requestLocalAuth = async (
   const users = getLocalAuthUsers();
   const existingUser = users.find((user) => user.email === email);
 
-  if (endpoint === "/caretaker/login") {
-    const demoCaretakers: Array<Pick<LocalAuthUser, "id" | "username" | "email" | "role" | "created_at"> & { password: string }> = [
+  if (endpoint === "/caretaker/login" || endpoint === "/volunteer/login") {
+    const demoRoleUsers: Array<Pick<LocalAuthUser, "id" | "username" | "email" | "role" | "created_at"> & { password: string }> = [
+      {
+        id: 8901,
+        username: "Wolontariusz Rossy",
+        email: "wolontariusz@na-rossie.local",
+        password: "wolontariusz123",
+        role: "volunteer",
+        created_at: new Date().toISOString(),
+      },
       {
         id: 9001,
         username: "Opiekun Rossy",
@@ -144,7 +152,13 @@ const requestLocalAuth = async (
         created_at: new Date().toISOString(),
       },
     ];
-    const demoUser = demoCaretakers.find((user) => user.email === email && user.password === password);
+    const demoUser = demoRoleUsers.find((user) => {
+      const roleMatches =
+        endpoint === "/volunteer/login"
+          ? user.role === "volunteer"
+          : user.role === "caretaker" || user.role === "admin";
+      return roleMatches && user.email === email && user.password === password;
+    });
 
     if (demoUser) {
       const user: LocalAuthUser = {
@@ -159,7 +173,10 @@ const requestLocalAuth = async (
 
       return {
         ok: true,
-        message: `${prefix}Zalogowano do Panelu Opiekuna Rossy.`,
+        message:
+          endpoint === "/volunteer/login"
+            ? `${prefix}Zalogowano do Panelu Wolontariusza Rossy.`
+            : `${prefix}Zalogowano do Panelu Opiekuna Rossy.`,
         user: apiUserToProfile(user, language, theme),
       };
     }
@@ -167,7 +184,10 @@ const requestLocalAuth = async (
     if (!existingUser) {
       return {
         ok: false,
-        message: `${prefix}Nie znaleziono konta opiekuna. Konto demo: opiekun@na-rossie.local / opiekun123.`,
+        message:
+          endpoint === "/volunteer/login"
+            ? `${prefix}Nie znaleziono konta wolontariusza. Konto demo: wolontariusz@na-rossie.local / wolontariusz123.`
+            : `${prefix}Nie znaleziono konta opiekuna. Konto demo: opiekun@na-rossie.local / opiekun123.`,
       };
     }
   }
@@ -222,6 +242,13 @@ const requestLocalAuth = async (
     };
   }
 
+  if (endpoint === "/volunteer/login" && (existingUser.role ?? "user") !== "volunteer") {
+    return {
+      ok: false,
+      message: `${prefix}To konto nie ma dostepu do Panelu Wolontariusza Rossy.`,
+    };
+  }
+
   return {
     ok: true,
     message: `${prefix}Zalogowano lokalnie na tym urzadzeniu.`,
@@ -259,6 +286,15 @@ const requestBackendAuth = async (
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+
+    if (endpoint === "/volunteer/login" && response.status === 404) {
+      return {
+        ok: false,
+        backendUnavailable: true,
+        message: "Backend nie ma jeszcze endpointu wolontariusza. Uzywam lokalnego trybu telefonu. ",
+      };
+    }
+
     const data = (await response.json()) as Partial<AuthResponse> & {
       detail?: string;
     };
@@ -356,6 +392,22 @@ export const useAuth = (language: AppLanguage, theme: ThemeMode) => {
     [language, theme]
   );
 
+  const volunteerLogin = useCallback(
+    async (email: string, password: string) => {
+      setLoading(true);
+      const result = await requestAuth(
+        "/volunteer/login",
+        { email, password },
+        language,
+        theme
+      );
+      if (result.ok && result.user) setCurrentUser(result.user);
+      setLoading(false);
+      return result;
+    },
+    [language, theme]
+  );
+
   const register = useCallback(
     async (username: string, email: string, password: string) => {
       setLoading(true);
@@ -384,5 +436,6 @@ export const useAuth = (language: AppLanguage, theme: ThemeMode) => {
     logout,
     register,
     setCurrentUser,
+    volunteerLogin,
   };
 };

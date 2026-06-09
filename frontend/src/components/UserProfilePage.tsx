@@ -63,7 +63,7 @@ type SavedRouteRecord = {
   time: number;
   savedAt: string;
   mode: string;
-  routeKind?: "category" | "single";
+  routeKind?: "category" | "single" | "official";
   categoryId?: string;
   categoryLabel?: string;
   start?: {
@@ -97,6 +97,31 @@ type WalkHistoryRecord = {
   distance: number;
   duration: number;
   startedAt: string;
+  mode?: string;
+  routeKind?: "category" | "single" | "official";
+  categoryId?: string;
+  categoryLabel?: string;
+  start?: {
+    label: string;
+    position: [number, number];
+    source: "gate" | "user";
+  };
+  end?: {
+    label: string;
+    position: [number, number] | null;
+  };
+  places?: Array<{
+    id: number;
+    name: string;
+    years: string;
+    category: string;
+    categoryLabel: string;
+    position: [number, number];
+    image: string;
+    shortDescription: string;
+  }>;
+  waypoints?: [number, number][];
+  summarySource?: "online" | "offline";
 };
 
 type QuizResultRecord = {
@@ -649,10 +674,15 @@ function UserProfilePage({
       distance: walk.distance,
       time: walk.duration,
       savedAt: walk.startedAt,
-      mode: "walk",
-      start: { label: "Brama cmentarza", position: [54.66842, 25.30236], source: "gate" },
-      end: { label: walk.routeName, position: null },
-      places: [],
+      mode: walk.mode ?? "walk",
+      routeKind: walk.routeKind,
+      categoryId: walk.categoryId,
+      categoryLabel: walk.categoryLabel,
+      start: walk.start ?? { label: "Brama cmentarza", position: [54.66842, 25.30236], source: "gate" },
+      end: walk.end ?? { label: walk.routeName, position: null },
+      places: walk.places ?? [],
+      waypoints: walk.waypoints,
+      summarySource: walk.summarySource,
       savedOnDevice: true,
     };
 
@@ -1011,6 +1041,45 @@ function UserProfilePage({
                 <div>
                   <strong>{walk.routeName}</strong>
                   <p>{formatDistance(walk.distance)} - {formatDuration(walk.duration)} - {t("profile.points", { count: walk.pointCount })}</p>
+                  <div className="walk-history-tags">
+                    <b>{routeModeLabel(walk.mode ?? "walk", languageKey)}</b>
+                    {walk.categoryLabel && <b>{walk.categoryLabel}</b>}
+                    <b>
+                      {walk.summarySource === "online"
+                        ? languageKey === "en"
+                          ? "online route"
+                          : "trasa online"
+                        : languageKey === "en"
+                          ? "local route"
+                          : "trasa lokalna"}
+                    </b>
+                  </div>
+                  {(walk.start || walk.end) && (
+                    <div className="walk-history-endpoints">
+                      <small>
+                        <b>Start:</b> {walk.start?.label ?? "Brama cmentarza"}
+                      </small>
+                      <small>
+                        <b>{languageKey === "en" ? "Destination" : "Cel"}:</b>{" "}
+                        {walk.end?.label ?? walk.routeName}
+                      </small>
+                    </div>
+                  )}
+                  {walk.places && walk.places.length > 0 && (
+                    <div className="walk-history-points">
+                      {walk.places.slice(0, 4).map((place, index) => (
+                        <button key={`${walk.id}-${place.id}`} onClick={() => onShowPlace(place.id)} type="button">
+                          <span>{index + 1}</span>
+                          <strong>{place.name}</strong>
+                        </button>
+                      ))}
+                      {walk.places.length > 4 && (
+                        <em>
+                          +{walk.places.length - 4} {languageKey === "en" ? "more" : "dalej"}
+                        </em>
+                      )}
+                    </div>
+                  )}
                   <small>{t("profile.startedAt")}: {formatDate(walk.startedAt)}</small>
                   <div className="timeline-actions">
                     <button className="timeline-download" onClick={() => void downloadWalkCard(walk)} type="button">

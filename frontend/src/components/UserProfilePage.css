@@ -710,6 +710,88 @@
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
+.walk-history-tags,
+.walk-history-endpoints,
+.walk-history-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.walk-history-tags b {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 12px;
+}
+
+.walk-history-endpoints {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.walk-history-endpoints small {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  border-radius: 12px;
+  background: #f8fbff;
+}
+
+.walk-history-endpoints b {
+  color: #1d4ed8;
+}
+
+.walk-history-points button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 10px 0 6px;
+  border: 1px solid rgba(37, 99, 235, 0.16);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0c1730;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.walk-history-points button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+}
+
+.walk-history-points button span {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.walk-history-points em {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  color: #53647f;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .timeline-download {
   display: inline-flex;
   align-items: center;
@@ -822,10 +904,22 @@ html[data-theme="night"] .route-device-badge,
 html[data-theme="night"] .saved-route-meta span,
 html[data-theme="night"] .route-card-actions button,
 html[data-theme="night"] .timeline-download,
-html[data-theme="night"] .timeline-delete {
+html[data-theme="night"] .timeline-delete,
+html[data-theme="night"] .walk-history-tags b,
+html[data-theme="night"] .walk-history-endpoints small,
+html[data-theme="night"] .walk-history-points button {
   border-color: rgba(142, 197, 255, 0.24);
   background: rgba(142, 197, 255, 0.1);
   color: #dbeafe;
+}
+
+html[data-theme="night"] .walk-history-endpoints b,
+html[data-theme="night"] .walk-history-points button span {
+  color: #f8fbff;
+}
+
+html[data-theme="night"] .walk-history-points em {
+  color: #c9d6ea;
 }
 
 html[data-theme="night"] .profile-avatar-frame {
@@ -845,7 +939,8 @@ html[data-theme="night"] .profile-avatar-frame {
     grid-template-columns: 1fr;
   }
 
-  .saved-route-endpoints {
+  .saved-route-endpoints,
+  .walk-history-endpoints {
     grid-template-columns: 1fr;
   }
 }
@@ -886,6 +981,7 @@ html[data-theme="night"] .profile-avatar-frame {
   .profile-save-route,
   .profile-primary,
   .route-card-actions button,
+  .walk-history-points button,
   .timeline-download,
   .timeline-delete {
     width: 100%;

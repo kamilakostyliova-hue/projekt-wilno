@@ -4,9 +4,11 @@ import {
   FaCheckCircle,
   FaClipboardList,
   FaDatabase,
+  FaDownload,
   FaEdit,
   FaEye,
   FaEyeSlash,
+  FaHistory,
   FaMapMarkerAlt,
   FaMinus,
   FaPlus,
@@ -53,6 +55,7 @@ type AdminPanelProps = {
 
 type AdminTab = "overview" | "people" | "reports" | "users" | "statistics";
 type AdminReportFilter = "all" | CareReport["status"];
+type AdminChangeAction = "draft" | "publish" | "hide" | "show";
 
 type LocalAuthUser = {
   id: number;
@@ -71,6 +74,20 @@ type AdminPlaceDraft = {
   updatedAt?: string;
 };
 
+type AdminChangeHistoryRecord = {
+  id: string;
+  placeId: number;
+  placeName: string;
+  action: AdminChangeAction;
+  beforeDescription?: string;
+  afterDescription?: string;
+  beforeCategory?: string;
+  afterCategory?: string;
+  note?: string;
+  adminEmail?: string;
+  createdAt: string;
+};
+
 type CaretakerStatus = "active" | "needs_contact" | "new";
 
 type AdminCaretakerRecord = {
@@ -87,6 +104,7 @@ type AdminCaretakerRecord = {
 const reportsStorageKey = "rossa-care-reports";
 const localUsersKey = "rossa-local-auth-users";
 const adminDraftsKey = "rossa-admin-place-drafts";
+const adminHistoryKey = "rossa-admin-change-history";
 const reviewStorageKey = "rossa-care-place-review";
 const adminCaretakerNotesKey = "rossa-admin-caretaker-notes";
 const adminCaretakerAssignmentsKey = "rossa-admin-caretaker-assignments";
@@ -176,6 +194,10 @@ const writeDrafts = (drafts: Record<number, AdminPlaceDraft>) => {
   window.localStorage.setItem(adminDraftsKey, JSON.stringify(drafts));
 };
 
+const writeAdminHistory = (history: AdminChangeHistoryRecord[]) => {
+  window.localStorage.setItem(adminHistoryKey, JSON.stringify(history));
+};
+
 const writeCaretakerNotes = (notes: Record<string, string>) => {
   window.localStorage.setItem(adminCaretakerNotesKey, JSON.stringify(notes));
 };
@@ -208,6 +230,9 @@ function AdminPanel({
   const [reports, setReports] = useState<CareReport[]>(() => readStorageArray<CareReport>(reportsStorageKey));
   const [users, setUsers] = useState<LocalAuthUser[]>(() => readStorageArray<LocalAuthUser>(localUsersKey));
   const [drafts, setDrafts] = useState<Record<number, AdminPlaceDraft>>(() => readStorageRecord<AdminPlaceDraft>(adminDraftsKey));
+  const [historyRecords, setHistoryRecords] = useState<AdminChangeHistoryRecord[]>(() =>
+    readStorageArray<AdminChangeHistoryRecord>(adminHistoryKey)
+  );
   const [selectedPlaceId, setSelectedPlaceId] = useState<number | null>(places[0]?.id ?? null);
   const [editDescription, setEditDescription] = useState("");
   const [editNote, setEditNote] = useState("");
@@ -415,6 +440,15 @@ function AdminPanel({
         caretakerOwner: "Caretaker",
         caretakerReports: "Caretaker reports",
         noCaretakerReports: "This caretaker has not sent a report yet.",
+        exportCsv: "Export CSV",
+        historyTitle: "Change history",
+        historyLead: "Recent catalog decisions and description updates.",
+        noHistory: "No catalog changes have been saved yet.",
+        actionDraft: "Draft saved",
+        actionPublish: "Changes approved",
+        actionHide: "Entry hidden",
+        actionShow: "Entry shown",
+        exportHint: "Download catalog, statuses, caretakers and report counts.",
       }
     : {
         accessTitle: "Dostep administratora",
@@ -473,6 +507,15 @@ function AdminPanel({
         caretakerOwner: "Opiekun",
         caretakerReports: "Raporty opiekuna",
         noCaretakerReports: "Ten opiekun nie wyslal jeszcze raportu.",
+        exportCsv: "Eksport CSV",
+        historyTitle: "Historia zmian",
+        historyLead: "Ostatnie decyzje administratora i zmiany opisow w katalogu.",
+        noHistory: "Nie zapisano jeszcze zmian w katalogu.",
+        actionDraft: "Zapisano szkic",
+        actionPublish: "Zatwierdzono zmiany",
+        actionHide: "Ukryto wpis",
+        actionShow: "Pokazano wpis",
+        exportHint: "Pobierz katalog, statusy, opiekunow i liczbe zgloszen.",
       };
 
   const reportFilterOptions: Array<{ id: AdminReportFilter; label: string }> = [
@@ -487,12 +530,19 @@ function AdminPanel({
     review: copy.statusReview,
     resolved: copy.statusResolved,
   };
+  const historyActionLabels: Record<AdminChangeAction, string> = {
+    draft: copy.actionDraft,
+    publish: copy.actionPublish,
+    hide: copy.actionHide,
+    show: copy.actionShow,
+  };
 
   useEffect(() => {
     const refreshAdminStorage = () => {
       setReports(readStorageArray<CareReport>(reportsStorageKey));
       setUsers(readStorageArray<LocalAuthUser>(localUsersKey));
       setDrafts(readStorageRecord<AdminPlaceDraft>(adminDraftsKey));
+      setHistoryRecords(readStorageArray<AdminChangeHistoryRecord>(adminHistoryKey));
       setCaretakerNotes(readStringStorageRecord(adminCaretakerNotesKey));
       setCaretakerAssignments(readNumberArrayStorageRecord(adminCaretakerAssignmentsKey));
       setCaretakerUpdates(readStorageArray<CaretakerAdminUpdate>(caretakerAdminUpdatesKey));
@@ -565,48 +615,142 @@ function AdminPanel({
   const savePlaceDraft = () => {
     if (!selectedPlace) return;
 
+    const nextDescription = editDescription || selectedPlace.description;
+    const nextCategory = editCategory || selectedPlace.categoryLabel;
     const nextDrafts = {
       ...drafts,
       [selectedPlace.id]: {
         ...drafts[selectedPlace.id],
-        description: editDescription || selectedPlace.description,
-        category: editCategory || selectedPlace.categoryLabel,
+        description: nextDescription,
+        category: nextCategory,
         note: editNote,
         updatedAt: new Date().toISOString(),
       },
     };
     setDrafts(nextDrafts);
     writeDrafts(nextDrafts);
+    addHistoryRecord(selectedPlace.id, "draft", nextDescription, nextCategory, editNote);
   };
 
   const approvePlaceChanges = () => {
     if (!selectedPlace) return;
 
+    const nextDescription = editDescription || selectedPlace.description;
+    const nextCategory = editCategory || selectedPlace.categoryLabel;
+    const nextNote = editNote || (isEnglish ? "Approved by administrator." : "Zatwierdzone przez administratora.");
     const nextDrafts = {
       ...drafts,
       [selectedPlace.id]: {
         ...drafts[selectedPlace.id],
-        description: editDescription || selectedPlace.description,
-        category: editCategory || selectedPlace.categoryLabel,
-        note: editNote || (isEnglish ? "Approved by administrator." : "Zatwierdzone przez administratora."),
+        description: nextDescription,
+        category: nextCategory,
+        note: nextNote,
         updatedAt: new Date().toISOString(),
       },
     };
     setDrafts(nextDrafts);
     writeDrafts(nextDrafts);
+    addHistoryRecord(selectedPlace.id, "publish", nextDescription, nextCategory, nextNote);
   };
 
   const togglePlaceHidden = (placeId: number) => {
+    const place = managedPlaces.find((item) => item.id === placeId);
+    const isHidden = Boolean(drafts[placeId]?.hidden);
     const nextDrafts = {
       ...drafts,
       [placeId]: {
         ...drafts[placeId],
-        hidden: !drafts[placeId]?.hidden,
+        hidden: !isHidden,
         updatedAt: new Date().toISOString(),
       },
     };
     setDrafts(nextDrafts);
     writeDrafts(nextDrafts);
+    if (place) {
+      addHistoryRecord(
+        placeId,
+        isHidden ? "show" : "hide",
+        place.adminDescription,
+        place.adminCategory,
+        isHidden
+          ? isEnglish
+            ? "Entry restored to public catalog."
+            : "Wpis przywrocony do katalogu publicznego."
+          : isEnglish
+            ? "Entry hidden from public catalog."
+            : "Wpis ukryty w katalogu publicznym."
+      );
+    }
+  };
+
+  const addHistoryRecord = (
+    placeId: number,
+    action: AdminChangeAction,
+    afterDescription: string,
+    afterCategory: string,
+    note?: string
+  ) => {
+    const place = managedPlaces.find((item) => item.id === placeId);
+    if (!place) return;
+
+    const record: AdminChangeHistoryRecord = {
+      id: `admin-history-${Date.now()}-${placeId}`,
+      placeId,
+      placeName: place.name,
+      action,
+      beforeDescription: place.adminDescription,
+      afterDescription,
+      beforeCategory: place.adminCategory,
+      afterCategory,
+      note,
+      adminEmail: currentUser?.email,
+      createdAt: new Date().toISOString(),
+    };
+    const nextHistory = [record, ...historyRecords].slice(0, 120);
+    setHistoryRecords(nextHistory);
+    writeAdminHistory(nextHistory);
+  };
+
+  const exportCatalogCsv = () => {
+    const escapeCsv = (value: string | number | undefined | null) => {
+      const text = String(value ?? "");
+      return `"${text.replace(/"/g, '""')}"`;
+    };
+    const headers = [
+      "id",
+      "name",
+      "years",
+      "category",
+      "caretaker",
+      "status",
+      "open_reports",
+      "hidden",
+    ];
+    const rows = managedPlaces.map((place) => {
+      const openReportCount = unresolvedReports.filter((report) => report.placeId === place.id).length;
+      return [
+        place.id,
+        place.name,
+        place.years,
+        place.adminCategory,
+        getCaretakerLabelForPlace(place.id),
+        reviewStates[place.id]?.status ?? "good",
+        openReportCount,
+        place.isHidden ? "yes" : "no",
+      ];
+    });
+    const csv = [headers, ...rows]
+      .map((row) => row.map((value) => escapeCsv(value)).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `na-rossie-katalog-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   const setReportStatus = async (reportId: string, status: CareReport["status"]) => {
@@ -1080,6 +1224,15 @@ function AdminPanel({
             <FaChartLine />
             <h2>{isEnglish ? "Project statistics" : "Statystyki projektu"}</h2>
           </header>
+          <div className="admin-export-strip">
+            <span>
+              <strong>{copy.exportCsv}</strong>
+              <small>{copy.exportHint}</small>
+            </span>
+            <button onClick={exportCatalogCsv} type="button">
+              <FaDownload /> {copy.exportCsv}
+            </button>
+          </div>
           <div className="admin-stats-grid">
             {Object.entries(categoryCounts).map(([category, count]) => (
               <article key={category}>
@@ -1105,6 +1258,42 @@ function AdminPanel({
               </div>
             </article>
           </div>
+
+          <section className="admin-history-panel">
+            <header>
+              <FaHistory />
+              <span>
+                <h3>{copy.historyTitle}</h3>
+                <p>{copy.historyLead}</p>
+              </span>
+            </header>
+
+            {historyRecords.length === 0 ? (
+              <p className="admin-empty-state">{copy.noHistory}</p>
+            ) : (
+              <div className="admin-history-list">
+                {historyRecords.slice(0, 8).map((record) => (
+                  <article className={`admin-history-card action-${record.action}`} key={record.id}>
+                    <span>
+                      <strong>{historyActionLabels[record.action]}</strong>
+                      <small>{formatDate(record.createdAt, language)}</small>
+                    </span>
+                    <h4>{record.placeName}</h4>
+                    <p>
+                      {record.beforeCategory !== record.afterCategory && (
+                        <>
+                          {`${record.beforeCategory} -> ${record.afterCategory}`}
+                          <br />
+                        </>
+                      )}
+                      {record.note || (isEnglish ? "Catalog record updated." : "Wpis katalogu zostal zaktualizowany.")}
+                    </p>
+                    <small>{record.adminEmail ?? currentUser?.email}</small>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
         </section>
       )}
     </main>

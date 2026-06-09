@@ -1,7 +1,7 @@
 ﻿import { useState } from "react";
 
 type AuthMode = "login" | "register";
-export type AuthLoginRole = "user" | "caretaker" | "admin";
+export type AuthLoginRole = "user" | "volunteer" | "caretaker" | "admin";
 
 type AuthModalProps = {
   loading: boolean;
@@ -30,6 +30,13 @@ const roleOptions: Array<{
     hint: "normalny profil",
     email: "",
     password: "",
+  },
+  {
+    id: "volunteer",
+    label: "Wolontariusz",
+    hint: "zadania terenowe",
+    email: "wolontariusz@na-rossie.local",
+    password: "wolontariusz123",
   },
   {
     id: "caretaker",
@@ -68,12 +75,16 @@ function AuthModal({
         ? "Logowanie opiekuna"
         : loginRole === "admin"
           ? "Logowanie administratora"
+          : loginRole === "volunteer"
+            ? "Logowanie wolontariusza"
           : "Zaloguj sie";
   const lead =
     mode === "register"
       ? "Utworz zwykle konto uzytkownika. Profil zostanie zapamietany po odswiezeniu strony."
       : loginRole === "user"
         ? "Zaloguj sie jako zwiedzajacy, zeby zapisac ulubione miejsca i historie spacerow."
+        : loginRole === "volunteer"
+          ? "Ten tryb otwiera panel wolontariusza do przyjmowania miejsc, kontroli terenowej i zadan przy grobach."
         : "Ten tryb otwiera panel roboczy dla osob opiekujacych sie Rossa.";
 
   const submit = () => {

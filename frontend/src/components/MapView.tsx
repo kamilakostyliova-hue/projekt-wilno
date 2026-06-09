@@ -35,6 +35,10 @@ export type MapPlace = {
   position: LatLngTuple;
   image: string;
   shortDescription: string;
+  layerBadges?: Array<{
+    className: "favorite" | "visited" | "want" | "check" | "needs-care" | "missing";
+    label: string;
+  }>;
 };
 
 type MapViewProps = {
@@ -116,7 +120,9 @@ const buildAudioInstructions = ({
   return [opening, ...pointInstructions].join(" ");
 };
 
-const markerIcon = (isSelected: boolean, status: "favorite" | "default") =>
+type MarkerStatus = "favorite" | "default" | "visited" | "want" | "check" | "needs-care" | "missing";
+
+const markerIcon = (isSelected: boolean, status: MarkerStatus) =>
   L.divIcon({
     className: "custom-marker-wrapper",
     html:
@@ -176,8 +182,16 @@ function MapView({
   const audioSupported = speech.supported;
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const getMarkerStatus = (placeId: number): "favorite" | "default" => {
-    if (favoriteIds.includes(placeId)) return "favorite";
+  const getMarkerStatus = (place: MapPlace): MarkerStatus => {
+    const layers = place.layerBadges?.map((badge) => badge.className) ?? [];
+
+    if (layers.includes("needs-care")) return "needs-care";
+    if (layers.includes("missing")) return "missing";
+    if (layers.includes("check")) return "check";
+    if (layers.includes("visited")) return "visited";
+    if (layers.includes("want")) return "want";
+    if (favoriteIds.includes(place.id)) return "favorite";
+
     return "default";
   };
 
@@ -318,7 +332,7 @@ function MapView({
                   (event.target as L.Marker).openPopup();
                 },
               }}
-              icon={markerIcon(place.id === selectedPlaceId, getMarkerStatus(place.id))}
+              icon={markerIcon(place.id === selectedPlaceId, getMarkerStatus(place))}
               key={place.id}
               position={place.position}
             >
@@ -337,7 +351,14 @@ function MapView({
                     <em>{place.categoryLabel}</em>
                     <p>{place.shortDescription}</p>
                     <div className="tooltip-status-row">
-                      {favoriteIds.includes(place.id) && <b className="favorite"><FaHeart /> {t("map.favorite")}</b>}
+                      {(place.layerBadges ?? []).map((badge) => (
+                        <b className={badge.className} key={`${place.id}-${badge.className}`}>
+                          {badge.className === "favorite" && <FaHeart />}
+                          {badge.label}
+                        </b>
+                      ))}
+                      {!place.layerBadges?.some((badge) => badge.className === "favorite") &&
+                        favoriteIds.includes(place.id) && <b className="favorite"><FaHeart /> {t("map.favorite")}</b>}
                     </div>
                     <div className="tooltip-actions">
                       <button onClick={() => onShowDetails(place.id)} type="button"><FaInfoCircle /> {t("map.details")}</button>
