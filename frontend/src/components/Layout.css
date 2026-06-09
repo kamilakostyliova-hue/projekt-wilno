@@ -9874,8 +9874,8 @@ html[data-theme="night"] .issue-report-actions button {
     grid-column: 3 !important;
     position: sticky !important;
     top: 86px !important;
-    max-height: calc(100vh - 110px) !important;
-    overflow: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   .map-layout .mobile-map-details {
@@ -9912,5 +9912,13 @@ html[data-theme="night"] .issue-report-actions button {
   .layout.map-layout > .drawer-scrim,
   .layout.map-layout > .sidebar {
     display: none !important;
+  }
+}
+
+@media (min-width: 761px) {
+  .layout.map-layout > .details:not(.mobile-map-details),
+  .layout.map-layout > .details:not(.mobile-map-details) .card {
+    max-height: none !important;
+    overflow: visible !important;
   }
 }
