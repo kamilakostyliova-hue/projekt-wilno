@@ -3648,7 +3648,7 @@ html[data-theme="night"] .details .card {
 
 .official-walk-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 12px;
 }
 
@@ -3684,6 +3684,7 @@ html[data-theme="night"] .details .card {
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 10px;
   width: 100%;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -3720,14 +3721,19 @@ html[data-theme="night"] .details .card {
 
 .official-walk-select strong {
   display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   color: #0c1730;
   font-family: var(--font-display);
-  font-size: 1.45rem;
-  line-height: 1;
+  font-size: clamp(1.1rem, 1.45vw, 1.32rem);
+  line-height: 1.03;
+  hyphens: auto;
 }
 
 .official-walk-select em {
   display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   margin-top: 5px;
   color: #2f6798;
   font-style: normal;
@@ -3739,6 +3745,7 @@ html[data-theme="night"] .details .card {
   margin: 0;
   font-size: 0.92rem;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .official-walk-meta,
