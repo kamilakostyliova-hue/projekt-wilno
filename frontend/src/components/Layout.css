@@ -9844,3 +9844,57 @@ html[data-theme="night"] .issue-report-actions button {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Desktop map repair: without the sidebar, map must not occupy the old sidebar column. */
+@media (min-width: 761px) {
+  .layout.map-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 390px) !important;
+    align-items: start !important;
+    max-width: 1680px !important;
+    margin: 0 auto !important;
+  }
+
+  .map-layout .center {
+    display: grid !important;
+    grid-column: 1 !important;
+    gap: 16px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .map-layout > .details:not(.mobile-map-details) {
+    display: block !important;
+    grid-column: 2 !important;
+    position: sticky !important;
+    top: 86px !important;
+    max-height: calc(100vh - 110px) !important;
+    overflow: auto !important;
+  }
+
+  .map-layout .mobile-map-details {
+    display: none !important;
+  }
+
+  .map-layout .workspace-bar {
+    display: grid !important;
+    order: 0 !important;
+  }
+
+  .map-layout .map.premium-map {
+    order: 1 !important;
+    min-height: 560px !important;
+  }
+
+  .map-layout .route-panel {
+    order: 2 !important;
+  }
+
+  .map-layout .list {
+    order: 3 !important;
+  }
+
+  .map-category-portal .drawer-toggle,
+  .map-category-portal .sidebar {
+    display: none !important;
+  }
+}
