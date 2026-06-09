@@ -63,6 +63,7 @@ type OfficialWalkId =
   | "poets"
   | "architecture"
   | "revival";
+type WalkBrowseMode = "official" | "categories";
 
 type CemeteryPlace = {
   id: number;
@@ -929,6 +930,29 @@ function Layout({
           },
     [languageKey]
   );
+  const walkModeCopy = useMemo(
+    () =>
+      languageKey === "en"
+        ? {
+            official: "Ready walks",
+            officialHint: "Curated routes",
+            categories: "People categories",
+            categoriesHint: "Choose a group and a person",
+            peopleTitle: "People in this walk",
+            peopleLead: "Choose a person to update the details panel.",
+            pickPerson: "Show details",
+          }
+        : {
+            official: "Gotowe spacery",
+            officialHint: "Przygotowane trasy",
+            categories: "Kategorie osob",
+            categoriesHint: "Wybierz grupe i osobe",
+            peopleTitle: "Osoby w tym spacerze",
+            peopleLead: "Wybierz osobe, a szczegoly zmienia sie po prawej stronie.",
+            pickPerson: "Pokaz szczegoly",
+          },
+    [languageKey]
+  );
   const getCurrentCategoryCount = useCallback(
     (categoryId: CategoryId) =>
       categoryId === "all"
@@ -945,6 +969,7 @@ function Layout({
   );
   const [activeCategory, setActiveCategory] = useState<CategoryId>("all");
   const [activeOfficialWalkId, setActiveOfficialWalkId] = useState<OfficialWalkId | null>("highlights");
+  const [walkBrowseMode, setWalkBrowseMode] = useState<WalkBrowseMode>("official");
   const [selectedId, setSelectedId] = useState<number | null>(places[0].id);
   const favoriteStorageKey = useMemo(
     () => getFavoritesKey(currentUserId),
@@ -1285,9 +1310,9 @@ function Layout({
         ? copy.placesWord[1]
         : copy.placesWord[2];
   const activeOfficialWalk =
-    officialWalks.find((walk) => walk.id === activeOfficialWalkId) ??
-    officialWalks[0] ??
-    null;
+    walkBrowseMode === "official"
+      ? officialWalks.find((walk) => walk.id === activeOfficialWalkId) ?? null
+      : null;
 
   const markerPlaces =
     activeView === "favorites"
@@ -1523,6 +1548,7 @@ function Layout({
 
   const pickCategory = (categoryId: CategoryId) => {
     setActiveCategory(categoryId);
+    setWalkBrowseMode("categories");
     setActiveOfficialWalkId(null);
     setRouteTargetId(null);
     setRouteSummary(null);
@@ -1614,6 +1640,7 @@ function Layout({
     const walk = officialWalks.find((item) => item.id === walkId);
     if (!walk) return;
 
+    setWalkBrowseMode("official");
     setActiveOfficialWalkId(walk.id);
     setActiveCategory("all");
     setRouteTargetId(null);
@@ -1680,6 +1707,7 @@ function Layout({
       });
     }
 
+    setWalkBrowseMode("categories");
     pickCategory(categoryId);
     onViewChange("walk");
   };
@@ -2958,6 +2986,39 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
             </div>
 
             {activeView === "walk" && (
+              <section className="walk-mode-switch" aria-label={copy.workspaceWalk}>
+                <button
+                  className={walkBrowseMode === "official" ? "active" : ""}
+                  onClick={() => selectOfficialWalk(activeOfficialWalkId ?? "highlights")}
+                  type="button"
+                >
+                  <FaRoute />
+                  <span>
+                    <strong>{walkModeCopy.official}</strong>
+                    <small>{walkModeCopy.officialHint}</small>
+                  </span>
+                </button>
+                <button
+                  className={walkBrowseMode === "categories" ? "active" : ""}
+                  onClick={() => {
+                    if (activeCategory === "all") {
+                      pickCategory(recommendedCategoryId);
+                      return;
+                    }
+                    pickCategory(activeCategory);
+                  }}
+                  type="button"
+                >
+                  <FaLayerGroup />
+                  <span>
+                    <strong>{walkModeCopy.categories}</strong>
+                    <small>{walkModeCopy.categoriesHint}</small>
+                  </span>
+                </button>
+              </section>
+            )}
+
+            {activeView === "walk" && walkBrowseMode === "official" && (
               <section className="official-walks" aria-label={officialWalkCopy.heading}>
                 <div className="official-walks-head">
                   <div>
@@ -3008,7 +3069,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
               </section>
             )}
 
-            {activeView === "walk" && (
+            {activeView === "walk" && walkBrowseMode === "categories" && (
               <section className="walk-planner" aria-label={copy.workspaceWalk}>
                 <div className="walk-summary">
                   <span className="eyebrow">{activeOfficialWalk ? officialWalkCopy.selected : copy.selectedTrail}</span>
@@ -3068,6 +3129,38 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
                       </button>
                     );
                   })}
+                </div>
+
+                <div className="walk-person-picker">
+                  <div className="walk-person-picker-head">
+                    <span className="eyebrow">{walkModeCopy.peopleTitle}</span>
+                    <strong>{activeCategoryInfo.label}</strong>
+                    <p>{walkModeCopy.peopleLead}</p>
+                  </div>
+
+                  <div className="walk-person-grid">
+                    {currentWalkPlaces.map((place, index) => (
+                      <button
+                        className={`walk-person-card ${
+                          selectedPlace?.id === place.id ? "active" : ""
+                        }`}
+                        key={place.id}
+                        onClick={() => {
+                          setSelectedId(place.id);
+                          setRouteTargetId(null);
+                          setTourStepIndex(index);
+                        }}
+                        type="button"
+                      >
+                        {renderImage(place)}
+                        <span>
+                          <strong>{place.name}</strong>
+                          <small>{place.years}</small>
+                          <em>{walkModeCopy.pickPerson}</em>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </section>
             )}

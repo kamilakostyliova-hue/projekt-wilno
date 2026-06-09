@@ -5,6 +5,7 @@ import {
   FaBars,
   FaChevronDown,
   FaCopy,
+  FaDownload,
   FaExternalLinkAlt,
   FaGlobeEurope,
   FaMoon,
@@ -33,6 +34,7 @@ type NavbarProps = {
   onLoginClick: () => void;
   onLogout: () => void;
   onOnlineModeToggle: () => void;
+  onPwaInstallClick: () => void;
   onSearchChange: (query: string) => void;
   onThemeToggle: () => void;
   onViewChange: (view: ViewId) => void;
@@ -69,6 +71,7 @@ function Navbar({
   onLoginClick,
   onLogout,
   onOnlineModeToggle,
+  onPwaInstallClick,
   onSearchChange,
   onThemeToggle,
   onViewChange,
@@ -134,6 +137,16 @@ function Navbar({
           localHint:
             "",
         };
+  const installText =
+    language === "en"
+      ? {
+          button: "App",
+          title: "Install app",
+        }
+      : {
+          button: "Aplikacja",
+          title: "Zainstaluj aplikacje",
+        };
   const projectShareUrl = (() => {
     if (typeof window === "undefined") return "";
 
@@ -158,6 +171,13 @@ function Navbar({
     setShareOpen(true);
     setMenuOpen(false);
     setProfileOpen(false);
+  };
+
+  const openInstallPrompt = () => {
+    setMenuOpen(false);
+    setProfileOpen(false);
+    setShareOpen(false);
+    onPwaInstallClick();
   };
 
   const openLogin = () => {
@@ -279,6 +299,16 @@ function Navbar({
           >
             <FaQrcode />
             <span>{shareText.button}</span>
+          </button>
+          <button
+            aria-label={installText.title}
+            className="mode-pill install-nav-button"
+            onClick={openInstallPrompt}
+            title={installText.title}
+            type="button"
+          >
+            <FaDownload />
+            <span>{installText.button}</span>
           </button>
 
           {currentUser ? (

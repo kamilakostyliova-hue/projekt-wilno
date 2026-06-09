@@ -116,6 +116,7 @@ function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [pwaInstallRequest, setPwaInstallRequest] = useState(0);
   const [onlineMode, setOnlineMode] = useState(true);
   const [networkOnline, setNetworkOnline] = useState(
     typeof navigator === "undefined" ? true : navigator.onLine
@@ -358,6 +359,7 @@ function App() {
         onLoginClick={openAuth}
         onLogout={logout}
         onOnlineModeToggle={() => setOnlineMode((current) => !current)}
+        onPwaInstallClick={() => setPwaInstallRequest((request) => request + 1)}
         onSearchChange={(query) => {
           setSearchQuery(query);
 
@@ -405,7 +407,11 @@ function App() {
           onSubmit={handleAuthSubmit}
         />
       )}
-      <PwaInstallPrompt language={language} online={networkOnline} />
+      <PwaInstallPrompt
+        language={language}
+        online={networkOnline}
+        openRequest={pwaInstallRequest}
+      />
     </>
   );
 }

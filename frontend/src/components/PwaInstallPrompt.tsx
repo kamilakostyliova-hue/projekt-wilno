@@ -11,6 +11,7 @@ type BeforeInstallPromptEvent = Event & {
 type PwaInstallPromptProps = {
   language: AppLanguage;
   online: boolean;
+  openRequest: number;
 };
 
 const dismissKey = "rossa-pwa-install-dismissed-at";
@@ -29,10 +30,14 @@ const recentlyDismissed = () => {
   return Date.now() - saved < dismissedDays * 24 * 60 * 60 * 1000;
 };
 
-function PwaInstallPrompt({ language, online }: PwaInstallPromptProps) {
+function PwaInstallPrompt({ language, online, openRequest }: PwaInstallPromptProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [installed, setInstalled] = useState(() => isStandalone());
+  const isIosSafari =
+    typeof window !== "undefined" &&
+    /iphone|ipad|ipod/i.test(window.navigator.userAgent) &&
+    /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
 
   const copy = useMemo(
     () =>
@@ -44,6 +49,7 @@ function PwaInstallPrompt({ language, online }: PwaInstallPromptProps) {
             install: "Install app",
             later: "Later",
             ios: "On iPhone: Share > Add to Home Screen.",
+            browser: "If the install button is not visible, use the browser menu: Add to Home Screen.",
             offline: "Offline-ready",
           }
         : {
@@ -53,21 +59,21 @@ function PwaInstallPrompt({ language, online }: PwaInstallPromptProps) {
             install: "Zainstaluj aplikacje",
             later: "Pozniej",
             ios: "Na iPhone: Udostepnij > Do ekranu poczatkowego.",
+            browser: "Jesli przycisk instalacji sie nie pojawia, uzyj menu przegladarki: Dodaj do ekranu glownego.",
             offline: "Dziala offline",
           },
     [language]
   );
 
   useEffect(() => {
-    if (installed || recentlyDismissed()) return;
-
-    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-    const isSafari = /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
+    if (installed) return;
 
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
-      setVisible(true);
+      if (!recentlyDismissed()) {
+        setVisible(true);
+      }
     };
 
     const onInstalled = () => {
@@ -79,7 +85,7 @@ function PwaInstallPrompt({ language, online }: PwaInstallPromptProps) {
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     window.addEventListener("appinstalled", onInstalled);
 
-    if (isIos && isSafari && !isStandalone()) {
+    if (isIosSafari && !isStandalone() && !recentlyDismissed()) {
       const timer = window.setTimeout(() => setVisible(true), 1600);
       return () => {
         window.clearTimeout(timer);
@@ -92,7 +98,13 @@ function PwaInstallPrompt({ language, online }: PwaInstallPromptProps) {
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
       window.removeEventListener("appinstalled", onInstalled);
     };
-  }, [installed]);
+  }, [installed, isIosSafari]);
+
+  useEffect(() => {
+    if (!installed && openRequest > 0) {
+      setVisible(true);
+    }
+  }, [installed, openRequest]);
 
   const dismiss = () => {
     window.localStorage.setItem(dismissKey, String(Date.now()));
@@ -130,7 +142,7 @@ function PwaInstallPrompt({ language, online }: PwaInstallPromptProps) {
         <span>{copy.eyebrow}</span>
         <h2>{copy.title}</h2>
         <p>{copy.lead}</p>
-        {!deferredPrompt && <small>{copy.ios}</small>}
+        {!deferredPrompt && <small>{isIosSafari ? copy.ios : copy.browser}</small>}
       </div>
       <div className="pwa-actions">
         {deferredPrompt && (
