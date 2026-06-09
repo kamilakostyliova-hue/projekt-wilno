@@ -9845,18 +9845,25 @@ html[data-theme="night"] .issue-report-actions button {
   }
 }
 
-/* Desktop map repair: without the sidebar, map must not occupy the old sidebar column. */
+/* Desktop map: restore the original sidebar | map | details composition. */
 @media (min-width: 761px) {
   .layout.map-layout {
-    grid-template-columns: minmax(0, 1fr) minmax(330px, 390px) !important;
+    grid-template-columns: 300px minmax(0, 1fr) 360px !important;
     align-items: start !important;
-    max-width: 1680px !important;
+    max-width: none !important;
     margin: 0 auto !important;
+  }
+
+  .map-layout > .sidebar {
+    display: grid !important;
+    grid-column: 1 !important;
+    position: sticky !important;
+    top: 86px !important;
   }
 
   .map-layout .center {
     display: grid !important;
-    grid-column: 1 !important;
+    grid-column: 2 !important;
     gap: 16px !important;
     min-width: 0 !important;
     width: 100% !important;
@@ -9882,7 +9889,7 @@ html[data-theme="night"] .issue-report-actions button {
 
   .map-layout .map.premium-map {
     order: 1 !important;
-    min-height: 560px !important;
+    min-height: 430px !important;
   }
 
   .map-layout .route-panel {
@@ -9895,6 +9902,15 @@ html[data-theme="night"] .issue-report-actions button {
 
   .map-category-portal .drawer-toggle,
   .map-category-portal .sidebar {
+    display: none !important;
+  }
+}
+
+/* Mobile map uses only the portal category control, not the desktop sidebar copy. */
+@media (max-width: 760px) {
+  .layout.map-layout > .drawer-toggle,
+  .layout.map-layout > .drawer-scrim,
+  .layout.map-layout > .sidebar {
     display: none !important;
   }
 }

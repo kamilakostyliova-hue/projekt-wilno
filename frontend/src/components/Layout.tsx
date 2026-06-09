@@ -2715,7 +2715,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
           activeView === "list" ? "list-layout" : ""
         } ${activeView === "map" ? "map-layout" : ""}`}
       >
-      {activeView !== "walk" && activeView !== "map" && (
+      {activeView !== "walk" && (
         <>
           <button
             className={`drawer-toggle ${drawerOpen ? "active" : ""}`}
@@ -2740,7 +2740,7 @@ Wydział Ekonomiczno-Informatyczny</figcaption>
           )}
         </>
       )}
-      {activeView !== "walk" && activeView !== "map" && (
+      {activeView !== "walk" && (
       <div className={`sidebar ${drawerOpen ? "open" : ""}`}>
         <button
           aria-label={copy.closeFilters}
