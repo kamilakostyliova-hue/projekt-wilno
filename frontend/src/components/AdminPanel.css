@@ -30,6 +30,9 @@
 .admin-assignment-list article,
 .admin-caretaker-activity,
 .admin-caretaker-updates article,
+.admin-proposals-panel,
+.admin-proposal-card,
+.admin-proposal-mini,
 .admin-stats-grid article {
   border: 1px solid rgba(122, 167, 223, 0.32);
   background: rgba(255, 255, 255, 0.92);
@@ -93,6 +96,7 @@
 .admin-editor-actions button,
 .admin-report-card button,
 .admin-users-table button,
+.admin-proposal-actions button,
 .admin-assigned-place button,
 .admin-assignment-list button,
 .admin-create-actions button,
@@ -131,6 +135,7 @@
 .admin-editor-actions button:hover,
 .admin-report-card button:hover,
 .admin-users-table button:hover,
+.admin-proposal-actions button:hover,
 .admin-assigned-place button:hover,
 .admin-assignment-list button:hover,
 .admin-create-actions button:hover,
@@ -286,6 +291,151 @@
 .admin-export-strip button {
   min-height: 42px;
   padding: 0 14px;
+}
+
+.admin-proposals-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(37, 99, 235, 0.12), transparent 34%),
+    rgba(248, 251, 255, 0.95);
+}
+
+.admin-proposals-panel > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-proposals-panel > header h3 {
+  color: #0c1730;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+}
+
+.admin-proposals-panel > header p,
+.admin-proposal-card p,
+.admin-proposal-card small,
+.admin-reviewed-proposals small {
+  color: #53647f;
+  line-height: 1.45;
+}
+
+.admin-proposals-panel > header > strong {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.2);
+}
+
+.admin-proposal-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-proposal-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 20px;
+}
+
+.admin-proposal-card h3,
+.admin-proposal-mini strong {
+  color: #0c1730;
+}
+
+.proposal-status {
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #fff7dd;
+  color: #9a6500;
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.admin-proposal-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-proposal-meta span {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid rgba(122, 167, 223, 0.24);
+  border-radius: 14px;
+  background: #ffffff;
+  color: #53647f;
+  font-weight: 750;
+}
+
+.admin-proposal-meta strong {
+  color: #1d4ed8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.admin-proposal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-proposal-actions button {
+  min-height: 38px;
+  padding: 0 13px;
+}
+
+.admin-proposal-actions button:first-child {
+  background: linear-gradient(135deg, #0c1730, #2563eb);
+  color: #ffffff;
+}
+
+.admin-reviewed-proposals {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-reviewed-proposals summary {
+  cursor: pointer;
+  color: #1d4ed8;
+  font-weight: 950;
+}
+
+.admin-reviewed-proposals > div {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.admin-proposal-mini {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.admin-proposal-mini span {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 0.74rem;
+  font-weight: 950;
 }
 
 .admin-panel header {
@@ -1233,6 +1383,10 @@ html[data-theme="night"] .admin-assignment-manager,
 html[data-theme="night"] .admin-assignment-list article,
 html[data-theme="night"] .admin-caretaker-activity,
 html[data-theme="night"] .admin-caretaker-updates article,
+html[data-theme="night"] .admin-proposals-panel,
+html[data-theme="night"] .admin-proposal-card,
+html[data-theme="night"] .admin-proposal-mini,
+html[data-theme="night"] .admin-proposal-meta span,
 html[data-theme="night"] .admin-stats-grid article,
 html[data-theme="night"] .admin-export-strip,
 html[data-theme="night"] .admin-history-panel,
@@ -1273,6 +1427,9 @@ html[data-theme="night"] .admin-assignment-list strong,
 html[data-theme="night"] .admin-caretaker-bottom label,
 html[data-theme="night"] .admin-caretaker-activity strong,
 html[data-theme="night"] .admin-caretaker-updates strong,
+html[data-theme="night"] .admin-proposals-panel h3,
+html[data-theme="night"] .admin-proposal-card h3,
+html[data-theme="night"] .admin-proposal-mini strong,
 html[data-theme="night"] .admin-stats-grid strong,
 html[data-theme="night"] .admin-export-strip strong,
 html[data-theme="night"] .admin-history-panel h3,
@@ -1294,6 +1451,10 @@ html[data-theme="night"] .admin-active-users-head p,
 html[data-theme="night"] .admin-active-users-list small,
 html[data-theme="night"] .admin-create-head p,
 html[data-theme="night"] .admin-create-actions small,
+html[data-theme="night"] .admin-proposals-panel p,
+html[data-theme="night"] .admin-proposal-card p,
+html[data-theme="night"] .admin-proposal-card small,
+html[data-theme="night"] .admin-reviewed-proposals small,
 html[data-theme="night"] .admin-caretaker-section header p,
 html[data-theme="night"] .admin-caretaker-card small,
 html[data-theme="night"] .admin-caretaker-card em,
@@ -1456,5 +1617,191 @@ html[data-theme="night"] .admin-history-card.action-show {
   .admin-export-strip button {
     justify-content: center;
     width: 100%;
+  }
+}
+
+/* Mobile admin polish: compact dashboard, no overflowing access cards. */
+@media (max-width: 760px) {
+  .admin-page {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 10px calc(24px + env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden;
+  }
+
+  .admin-access-card,
+  .admin-hero,
+  .admin-user-card,
+  .admin-tabs,
+  .admin-panel,
+  .admin-editor,
+  .admin-caretaker-section,
+  .admin-caretaker-card,
+  .admin-caretaker-detail,
+  .admin-assignment-manager,
+  .admin-proposals-panel,
+  .admin-history-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px !important;
+  }
+
+  .admin-access-card {
+    align-content: center !important;
+    min-height: auto !important;
+    margin: 18px auto !important;
+    padding: 24px 18px !important;
+    overflow: hidden !important;
+  }
+
+  .admin-access-card h1 {
+    max-width: 9ch !important;
+    font-size: clamp(2.2rem, 13vw, 3.2rem) !important;
+    line-height: 0.94 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-access-card p {
+    max-width: 100% !important;
+    font-size: 0.92rem !important;
+  }
+
+  .admin-access-card button {
+    width: 100% !important;
+    min-height: 50px !important;
+    border-radius: 18px !important;
+  }
+
+  .admin-hero {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    padding: 18px !important;
+  }
+
+  .admin-hero h1 {
+    font-size: clamp(2rem, 11vw, 3rem) !important;
+    line-height: 0.96 !important;
+  }
+
+  .admin-overview,
+  .admin-users-table,
+  .admin-active-users-list,
+  .admin-create-grid,
+  .admin-report-grid,
+  .admin-history-list,
+  .report-filter-tabs,
+  .admin-caretaker-stats,
+  .admin-caretaker-layout,
+  .admin-caretaker-head,
+  .admin-caretaker-bottom,
+  .admin-split-page {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .admin-tabs {
+    display: flex !important;
+    gap: 8px !important;
+    padding: 8px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-tabs button {
+    flex: 0 0 auto !important;
+    min-height: 42px !important;
+    padding: 0 14px !important;
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+  }
+
+  .admin-panel,
+  .admin-editor,
+  .admin-caretaker-section,
+  .admin-proposals-panel {
+    padding: 16px !important;
+  }
+
+  .admin-panel header,
+  .admin-create-head,
+  .admin-active-users-head,
+  .admin-caretaker-section header,
+  .admin-proposals-panel > header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    align-items: start !important;
+  }
+
+  .admin-panel h2,
+  .admin-editor h2,
+  .admin-caretaker-section h2,
+  .admin-proposals-panel h3 {
+    font-size: clamp(1.45rem, 7vw, 2rem) !important;
+    line-height: 1 !important;
+  }
+
+  .admin-place-row,
+  .admin-report-card,
+  .admin-users-table article,
+  .admin-active-users-list article,
+  .admin-caretaker-card,
+  .admin-assigned-place,
+  .admin-assignment-list article,
+  .admin-proposal-card,
+  .admin-history-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 12px !important;
+    border-radius: 22px !important;
+  }
+
+  .admin-place-row img,
+  .admin-assigned-place img,
+  .admin-assignment-list img {
+    width: 100% !important;
+    height: 178px !important;
+    border-radius: 18px !important;
+  }
+
+  .admin-place-row button,
+  .admin-report-card button,
+  .admin-users-table button,
+  .admin-assigned-place button,
+  .admin-assignment-list button,
+  .admin-create-actions button,
+  .admin-caretaker-bottom button,
+  .admin-proposal-actions button,
+  .admin-editor-actions button {
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 42px !important;
+  }
+
+  .admin-proposal-actions,
+  .admin-editor-actions,
+  .admin-create-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .admin-export-strip {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 14px !important;
+  }
+
+  .admin-owner-line,
+  .role-chip,
+  .report-status-chip,
+  .auth-status {
+    max-width: 100% !important;
+    white-space: normal !important;
   }
 }

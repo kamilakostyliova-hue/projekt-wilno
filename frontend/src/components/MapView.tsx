@@ -426,11 +426,11 @@ function MapView({
         </div>
         <div>
           <small>{t("map.distance")}</small>
-          <strong>{hasRoute ? formatDistance(activeDistance) : "—"}</strong>
+          <strong>{hasRoute ? formatDistance(activeDistance) : "-"}</strong>
         </div>
         <div>
           <small>{t("map.time")}</small>
-          <strong>{hasRoute ? formatDuration(activeTime) : "—"}</strong>
+          <strong>{hasRoute ? formatDuration(activeTime) : "-"}</strong>
         </div>
         <p>{hasActiveRoute ? routeStatus : t("map.chooseAndRoute")}</p>
       </div>

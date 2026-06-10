@@ -17,6 +17,7 @@ import {
   FaSignOutAlt,
   FaTasks,
   FaUserCog,
+  FaUserShield,
   FaUsers,
 } from "react-icons/fa";
 import type { AppLanguage, UserProfile, UserRole } from "../App";
@@ -27,6 +28,7 @@ import {
   saveCaretakerAssignments,
   updateCareReportStatus,
   type CaretakerAdminUpdate,
+  type CaretakerChangeProposal,
 } from "../services/caretakerData";
 import type { CareReport, ReportType } from "./CaretakerPanel";
 import "./AdminPanel.css";
@@ -125,6 +127,7 @@ const reviewStorageKey = "rossa-care-place-review";
 const adminCaretakerNotesKey = "rossa-admin-caretaker-notes";
 const adminCaretakerAssignmentsKey = "rossa-admin-caretaker-assignments";
 const caretakerAdminUpdatesKey = "rossa-caretaker-admin-updates";
+const caretakerChangeProposalsKey = "rossa-caretaker-change-proposals";
 
 const reportLabels: Record<ReportType, { pl: string; en: string }> = {
   missing_photo: { pl: "Brakuje zdjecia", en: "Missing photo" },
@@ -213,10 +216,16 @@ const writeCustomPlaces = (places: CustomPlaceRecord[]) => {
 
 const writeDrafts = (drafts: Record<number, AdminPlaceDraft>) => {
   window.localStorage.setItem(adminDraftsKey, JSON.stringify(drafts));
+  window.dispatchEvent(new Event("rossa-admin-place-drafts-changed"));
 };
 
 const writeAdminHistory = (history: AdminChangeHistoryRecord[]) => {
   window.localStorage.setItem(adminHistoryKey, JSON.stringify(history));
+};
+
+const writeChangeProposals = (proposals: CaretakerChangeProposal[]) => {
+  window.localStorage.setItem(caretakerChangeProposalsKey, JSON.stringify(proposals));
+  window.dispatchEvent(new Event("rossa-caretaker-change-proposals-changed"));
 };
 
 const writeCaretakerNotes = (notes: Record<string, string>) => {
@@ -279,6 +288,9 @@ function AdminPanel({
   );
   const [caretakerUpdates, setCaretakerUpdates] = useState<CaretakerAdminUpdate[]>(() =>
     readStorageArray<CaretakerAdminUpdate>(caretakerAdminUpdatesKey)
+  );
+  const [changeProposals, setChangeProposals] = useState<CaretakerChangeProposal[]>(() =>
+    readStorageArray<CaretakerChangeProposal>(caretakerChangeProposalsKey)
   );
   const [caretakerNoteDraft, setCaretakerNoteDraft] = useState("");
   const hasAccess = currentUser?.role === "admin";
@@ -493,6 +505,8 @@ function AdminPanel({
   const needsCareCount = Object.values(reviewStates).filter((item) =>
     ["check", "needs_care", "missing_photo", "missing_data"].includes(item.status ?? "")
   ).length;
+  const pendingProposals = changeProposals.filter((proposal) => proposal.status === "pending");
+  const reviewedProposals = changeProposals.filter((proposal) => proposal.status !== "pending");
   const selectedCaretaker = caretakerRecords.find((caretaker) => caretaker.id === selectedCaretakerEmail) ?? caretakerRecords[0] ?? null;
   const selectedCaretakerPlaceIds = new Set(selectedCaretaker?.assignedPlaceIds ?? []);
   const selectedCaretakerPlaces = managedPlaces.filter((place) => selectedCaretakerPlaceIds.has(place.id));
@@ -612,6 +626,14 @@ function AdminPanel({
         actionHide: "Entry hidden",
         actionShow: "Entry shown",
         exportHint: "Download catalog, statuses, caretakers and report counts.",
+        pendingChangesTitle: "Caretaker changes",
+        pendingChangesLead: "Caretakers can propose updates, but the administrator publishes them.",
+        noPendingChanges: "No caretaker changes are waiting for approval.",
+        proposedBy: "Proposed by",
+        proposedStatus: "Proposed grave status",
+        approveProposal: "Approve",
+        rejectProposal: "Reject",
+        reviewedChanges: "Reviewed changes",
       }
     : {
         accessTitle: "Dostep administratora",
@@ -697,6 +719,14 @@ function AdminPanel({
         actionHide: "Ukryto wpis",
         actionShow: "Pokazano wpis",
         exportHint: "Pobierz katalog, statusy, opiekunow i liczbe zgloszen.",
+        pendingChangesTitle: "Zmiany od opiekunow",
+        pendingChangesLead: "Opiekun moze zaproponowac aktualizacje, ale publikuje ja dopiero administrator.",
+        noPendingChanges: "Brak zmian opiekuna czekajacych na zatwierdzenie.",
+        proposedBy: "Zaproponowal",
+        proposedStatus: "Proponowany status grobu",
+        approveProposal: "Zatwierdz",
+        rejectProposal: "Odrzuc",
+        reviewedChanges: "Sprawdzone zmiany",
       };
 
   const reportFilterOptions: Array<{ id: AdminReportFilter; label: string }> = [
@@ -727,19 +757,24 @@ function AdminPanel({
       setCaretakerNotes(readStringStorageRecord(adminCaretakerNotesKey));
       setCaretakerAssignments(readNumberArrayStorageRecord(adminCaretakerAssignmentsKey));
       setCaretakerUpdates(readStorageArray<CaretakerAdminUpdate>(caretakerAdminUpdatesKey));
+      setChangeProposals(readStorageArray<CaretakerChangeProposal>(caretakerChangeProposalsKey));
     };
 
     window.addEventListener("storage", refreshAdminStorage);
     window.addEventListener("rossa-care-reports-changed", refreshAdminStorage);
+    window.addEventListener("rossa-admin-place-drafts-changed", refreshAdminStorage);
     window.addEventListener("rossa-admin-assignments-changed", refreshAdminStorage);
     window.addEventListener("rossa-admin-notes-changed", refreshAdminStorage);
     window.addEventListener("rossa-caretaker-updates-changed", refreshAdminStorage);
+    window.addEventListener("rossa-caretaker-change-proposals-changed", refreshAdminStorage);
     return () => {
       window.removeEventListener("storage", refreshAdminStorage);
       window.removeEventListener("rossa-care-reports-changed", refreshAdminStorage);
+      window.removeEventListener("rossa-admin-place-drafts-changed", refreshAdminStorage);
       window.removeEventListener("rossa-admin-assignments-changed", refreshAdminStorage);
       window.removeEventListener("rossa-admin-notes-changed", refreshAdminStorage);
       window.removeEventListener("rossa-caretaker-updates-changed", refreshAdminStorage);
+      window.removeEventListener("rossa-caretaker-change-proposals-changed", refreshAdminStorage);
     };
   }, []);
 
@@ -950,38 +985,139 @@ function AdminPanel({
     writeAdminHistory(nextHistory);
   };
 
+  const reviewCaretakerProposal = (
+    proposalId: string,
+    status: CaretakerChangeProposal["status"]
+  ) => {
+    const now = new Date().toISOString();
+    const nextProposals = changeProposals.map((proposal) =>
+      proposal.id === proposalId
+        ? {
+            ...proposal,
+            status,
+            reviewedAt: now,
+            reviewedBy: currentUser?.email,
+          }
+        : proposal
+    );
+    setChangeProposals(nextProposals);
+    writeChangeProposals(nextProposals);
+  };
+
+  const approveCaretakerProposal = (proposal: CaretakerChangeProposal) => {
+    const place = managedPlaces.find((item) => item.id === proposal.placeId);
+    if (!place) {
+      reviewCaretakerProposal(proposal.id, "rejected");
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const nextDescription = proposal.description.trim() || place.adminDescription;
+    const nextCategory = proposal.category.trim() || place.adminCategory;
+    const nextNote =
+      proposal.note.trim() ||
+      (isEnglish ? "Caretaker proposal approved." : "Zatwierdzono propozycje opiekuna.");
+    const nextDrafts = {
+      ...drafts,
+      [proposal.placeId]: {
+        ...drafts[proposal.placeId],
+        description: nextDescription,
+        category: nextCategory,
+        note: nextNote,
+        updatedAt: now,
+      },
+    };
+    const currentReviewStates = readStorageRecord<{ status?: string; updatedAt?: string }>(reviewStorageKey);
+    const nextReviewStates = {
+      ...currentReviewStates,
+      [proposal.placeId]: {
+        ...currentReviewStates[proposal.placeId],
+        status: proposal.graveStatus || "good",
+        updatedAt: now,
+      },
+    };
+
+    setDrafts(nextDrafts);
+    writeDrafts(nextDrafts);
+    window.localStorage.setItem(reviewStorageKey, JSON.stringify(nextReviewStates));
+    window.dispatchEvent(new Event("rossa-care-review-changed"));
+    addHistoryRecord(
+      proposal.placeId,
+      "publish",
+      nextDescription,
+      nextCategory,
+      `${isEnglish ? "Caretaker proposal" : "Propozycja opiekuna"}: ${nextNote}`
+    );
+    reviewCaretakerProposal(proposal.id, "approved");
+  };
+
   const exportCatalogCsv = () => {
     const escapeCsv = (value: string | number | undefined | null) => {
       const text = String(value ?? "");
       return `"${text.replace(/"/g, '""')}"`;
     };
-    const headers = [
-      "id",
-      "name",
-      "years",
-      "category",
-      "caretaker",
-      "status",
-      "open_reports",
-      "hidden",
-    ];
+    const separator = ";";
+    const statusExportLabels: Record<string, string> = isEnglish
+      ? {
+          good: "Good",
+          check: "Needs check",
+          needs_care: "Needs care",
+          missing_photo: "Missing photo",
+          missing_data: "Missing data",
+        }
+      : {
+          good: "Zadbany",
+          check: "Do sprawdzenia",
+          needs_care: "Wymaga opieki",
+          missing_photo: "Brak zdjecia",
+          missing_data: "Brak danych",
+        };
+    const headers = isEnglish
+      ? [
+          "ID",
+          "Name",
+          "Years",
+          "Category",
+          "Caretaker",
+          "Grave status",
+          "Open reports",
+          "Publicly visible",
+          "Pending caretaker changes",
+        ]
+      : [
+          "ID",
+          "Imie i nazwisko",
+          "Lata zycia",
+          "Kategoria",
+          "Opiekun",
+          "Status grobu",
+          "Otwarte zgloszenia",
+        "Widoczny publicznie",
+        "Zmiany opiekuna oczekujace",
+      ];
+    const currentReviewStates = readStorageRecord<{ status?: string }>(reviewStorageKey);
     const rows = managedPlaces.map((place) => {
       const openReportCount = unresolvedReports.filter((report) => report.placeId === place.id).length;
+      const pendingChangeCount = pendingProposals.filter((proposal) => proposal.placeId === place.id).length;
+      const status = currentReviewStates[place.id]?.status ?? "good";
       return [
         place.id,
         place.name,
         place.years,
         place.adminCategory,
         getCaretakerLabelForPlace(place.id),
-        reviewStates[place.id]?.status ?? "good",
+        statusExportLabels[status] ?? status,
         openReportCount,
-        place.isHidden ? "yes" : "no",
+        place.isHidden ? (isEnglish ? "No" : "Nie") : (isEnglish ? "Yes" : "Tak"),
+        pendingChangeCount,
       ];
     });
     const csv = [headers, ...rows]
-      .map((row) => row.map((value) => escapeCsv(value)).join(","))
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      .map((row) => row.map((value) => escapeCsv(value)).join(separator))
+      .join("\r\n");
+    const blob = new Blob([`\ufeffsep=${separator}\r\n${csv}`], {
+      type: "text/csv;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -1275,6 +1411,68 @@ function AdminPanel({
             <FaClipboardList />
             <h2>{isEnglish ? "Report moderation" : "Moderacja zgloszen"}</h2>
           </header>
+          <section className="admin-proposals-panel">
+            <header>
+              <FaUserShield />
+              <span>
+                <h3>{copy.pendingChangesTitle}</h3>
+                <p>{copy.pendingChangesLead}</p>
+              </span>
+              <strong>{pendingProposals.length}</strong>
+            </header>
+            <div className="admin-proposal-list">
+              {pendingProposals.length === 0 ? (
+                <p className="admin-empty-state">{copy.noPendingChanges}</p>
+              ) : (
+                pendingProposals.map((proposal) => (
+                  <article className="admin-proposal-card status-pending" key={proposal.id}>
+                    <span className="proposal-status">pending</span>
+                    <h3>{proposal.placeName}</h3>
+                    <small>
+                      {copy.proposedBy}: {proposal.caretakerName} ({proposal.caretakerEmail})
+                    </small>
+                    <p>{proposal.note || proposal.description}</p>
+                    <div className="admin-proposal-meta">
+                      <span>
+                        <strong>{copy.category}</strong>
+                        {proposal.category}
+                      </span>
+                      <span>
+                        <strong>{copy.proposedStatus}</strong>
+                        {proposal.graveStatus}
+                      </span>
+                      <span>
+                        <strong>{copy.created}</strong>
+                        {formatDate(proposal.createdAt, language)}
+                      </span>
+                    </div>
+                    <div className="admin-proposal-actions">
+                      <button onClick={() => approveCaretakerProposal(proposal)} type="button">
+                        <FaCheckCircle /> {copy.approveProposal}
+                      </button>
+                      <button onClick={() => reviewCaretakerProposal(proposal.id, "rejected")} type="button">
+                        <FaEyeSlash /> {copy.rejectProposal}
+                      </button>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+            {reviewedProposals.length > 0 && (
+              <details className="admin-reviewed-proposals">
+                <summary>{copy.reviewedChanges}</summary>
+                <div>
+                  {reviewedProposals.slice(0, 6).map((proposal) => (
+                    <article className={`admin-proposal-mini status-${proposal.status}`} key={proposal.id}>
+                      <strong>{proposal.placeName}</strong>
+                      <span>{proposal.status}</span>
+                      <small>{proposal.reviewedAt ? formatDate(proposal.reviewedAt, language) : formatDate(proposal.createdAt, language)}</small>
+                    </article>
+                  ))}
+                </div>
+              </details>
+            )}
+          </section>
           <div className="report-dashboard-head">
             <div className="report-filter-tabs" aria-label={isEnglish ? "Report status filter" : "Filtr statusu zgloszen"}>
               {reportFilterOptions.map((filter) => (

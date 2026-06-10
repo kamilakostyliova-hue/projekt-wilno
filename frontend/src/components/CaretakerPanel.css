@@ -33,6 +33,7 @@
 .review-task,
 .report-card,
 .selected-report,
+.caretaker-proposal-box,
 .status-row {
   border: 1px solid rgba(122, 167, 223, 0.32);
   background: rgba(255, 255, 255, 0.92);
@@ -1108,7 +1109,8 @@
   font-weight: 900;
 }
 
-.review-side-panel textarea {
+.review-side-panel textarea,
+.caretaker-proposal-box input {
   min-height: 116px;
   resize: vertical;
   padding: 12px;
@@ -1120,7 +1122,13 @@
   outline: none;
 }
 
-.review-side-panel textarea:focus {
+.caretaker-proposal-box input {
+  min-height: 44px;
+  resize: none;
+}
+
+.review-side-panel textarea:focus,
+.caretaker-proposal-box input:focus {
   border-color: #7aa7df;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
@@ -1176,6 +1184,51 @@
   justify-self: start;
   min-height: 34px;
   padding: 0 12px;
+}
+
+.caretaker-proposal-box {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(37, 99, 235, 0.13), transparent 34%),
+    rgba(248, 251, 255, 0.96);
+}
+
+.caretaker-proposal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.caretaker-proposal-head strong {
+  color: #0c1730;
+  font-size: 1.05rem;
+}
+
+.proposal-badge,
+.proposal-notice {
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #1d4ed8;
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+.proposal-notice {
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.proposal-status-picker {
+  padding: 10px;
+  border: 1px solid rgba(122, 167, 223, 0.28);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .caretaker-grid {
@@ -1436,11 +1489,13 @@ html[data-theme="night"] .review-side-panel,
 html[data-theme="night"] .review-task,
 html[data-theme="night"] .report-card,
 html[data-theme="night"] .selected-report,
+html[data-theme="night"] .caretaker-proposal-box,
 html[data-theme="night"] .status-row,
 html[data-theme="night"] .caretaker-user-card,
 html[data-theme="night"] .caretaker-login-card input,
 html[data-theme="night"] .caretaker-admin-report textarea,
-html[data-theme="night"] .review-side-panel textarea {
+html[data-theme="night"] .review-side-panel textarea,
+html[data-theme="night"] .caretaker-proposal-box input {
   border-color: rgba(142, 197, 255, 0.22);
   background: rgba(13, 37, 79, 0.88);
   color: #f8fbff;
@@ -1474,6 +1529,7 @@ html[data-theme="night"] .review-side-panel h3,
 html[data-theme="night"] .review-side-panel label,
 html[data-theme="night"] .review-status-picker strong,
 html[data-theme="night"] .selected-report-list > strong,
+html[data-theme="night"] .caretaker-proposal-head strong,
 html[data-theme="night"] .review-task strong,
 html[data-theme="night"] .report-card h3,
 html[data-theme="night"] .status-row strong,
@@ -1536,6 +1592,8 @@ html[data-theme="night"] .report-status-chip,
 html[data-theme="night"] .status-row b,
 html[data-theme="night"] .review-status-badge,
 html[data-theme="night"] .selected-report span,
+html[data-theme="night"] .proposal-badge,
+html[data-theme="night"] .proposal-notice,
 html[data-theme="night"] .review-back,
 html[data-theme="night"] .place-review-actions button:first-child,
 html[data-theme="night"] .review-side-panel button,
@@ -1740,5 +1798,159 @@ html[data-theme="night"] .admin-caretaker-card.active {
   .report-actions button,
   .status-row button {
     width: 100%;
+  }
+}
+
+/* Mobile caretaker polish: compact work mode without oversized side panels. */
+@media (max-width: 760px) {
+  .caretaker-page {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 10px calc(24px + env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden;
+  }
+
+  .caretaker-login-card,
+  .caretaker-hero,
+  .caretaker-stats article,
+  .caretaker-panel,
+  .admin-overview-panel,
+  .admin-caretaker-card,
+  .admin-caretaker-detail,
+  .admin-contact-card,
+  .assigned-place-row,
+  .caretaker-task-board,
+  .caretaker-admin-note,
+  .caretaker-assignment-focus,
+  .caretaker-task-list,
+  .caretaker-admin-report,
+  .place-review-panel,
+  .review-checklist,
+  .review-side-panel,
+  .report-card,
+  .selected-report,
+  .caretaker-proposal-box,
+  .status-row,
+  .caretaker-user-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 26px !important;
+  }
+
+  .caretaker-login-card {
+    min-height: auto !important;
+    margin: 18px auto !important;
+    padding: 24px 18px !important;
+  }
+
+  .caretaker-login-card h1,
+  .caretaker-hero h1 {
+    max-width: 10ch !important;
+    font-size: clamp(2.15rem, 12vw, 3.15rem) !important;
+    line-height: 0.95 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .caretaker-login-card button,
+  .caretaker-user-card button {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  .caretaker-hero,
+  .caretaker-grid,
+  .caretaker-task-columns,
+  .admin-overview-grid,
+  .admin-detail-head,
+  .admin-detail-bottom,
+  .place-review-layout,
+  .review-workgrid,
+  .caretaker-stats,
+  .caretaker-task-grid,
+  .report-filter-tabs,
+  .admin-mini-stats {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .caretaker-hero,
+  .caretaker-panel,
+  .admin-overview-panel,
+  .caretaker-task-board,
+  .place-review-panel {
+    padding: 16px !important;
+  }
+
+  .caretaker-task-head,
+  .admin-overview-head,
+  .place-review-top,
+  .place-review-actions,
+  .review-status-picker {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+    align-items: stretch !important;
+  }
+
+  .caretaker-panel h2,
+  .caretaker-task-head h2,
+  .admin-overview-head h2,
+  .place-review-content h2,
+  .review-checklist h3,
+  .review-side-panel h3 {
+    font-size: clamp(1.45rem, 7vw, 2rem) !important;
+    line-height: 1 !important;
+  }
+
+  .assigned-place-row,
+  .caretaker-task-row,
+  .review-task,
+  .status-row,
+  .report-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  .assigned-place-row img,
+  .status-row img,
+  .caretaker-place-pill img {
+    width: 100% !important;
+    height: 170px !important;
+    border-radius: 18px !important;
+    object-fit: cover !important;
+  }
+
+  .caretaker-task-head > strong,
+  .admin-overview-head > strong,
+  .assigned-place-row button,
+  .caretaker-task-row button,
+  .caretaker-admin-report button,
+  .report-actions button,
+  .status-row button,
+  .review-status-badge,
+  .review-back,
+  .place-review-actions button,
+  .review-checklist button,
+  .review-side-panel button,
+  .review-status-picker button {
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 42px !important;
+  }
+
+  .caretaker-task-type,
+  .caretaker-task-actions,
+  .report-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .caretaker-proposal-box input,
+  .caretaker-proposal-box textarea,
+  .review-side-panel textarea,
+  .admin-note-box textarea {
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }

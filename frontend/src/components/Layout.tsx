@@ -642,6 +642,16 @@ const issueTypeLabels: Record<ReportType, { pl: string; en: string }> = {
 };
 
 const customPlacesStorageKey = "rossa-custom-places";
+const adminDraftsKey = "rossa-admin-place-drafts";
+
+type PublicPlaceDraft = {
+  description?: string;
+  category?: string;
+  hidden?: boolean;
+  note?: string;
+  updatedAt?: string;
+};
+
 const editableCategoryIds: Array<Exclude<CategoryId, "all">> = [
   "wojskowi",
   "politycy",
@@ -909,20 +919,41 @@ function Layout({
     [languageKey]
   );
   const [customPlaces, setCustomPlaces] = useState<CemeteryPlace[]>(() => readCustomPlaces());
+  const [adminDrafts, setAdminDrafts] = useState<Record<number, PublicPlaceDraft>>(() =>
+    readStorageRecord<PublicPlaceDraft>(adminDraftsKey)
+  );
   const categories = useMemo(
     () => baseCategories.map((category) => localizeCategory(category, languageKey)),
     [languageKey]
   );
   const places = useMemo(
-    () => [
-      ...basePlaces.map((place) => localizePlace(place, languageKey)),
-      ...customPlaces.map((place) => ({
-        ...place,
-        categoryLabel:
-          categoryText[place.category]?.label[languageKey] ?? place.categoryLabel,
-      })),
-    ],
-    [customPlaces, languageKey]
+    () =>
+      [
+        ...basePlaces.map((place) => localizePlace(place, languageKey)),
+        ...customPlaces.map((place) => ({
+          ...place,
+          categoryLabel:
+            categoryText[place.category]?.label[languageKey] ?? place.categoryLabel,
+        })),
+      ]
+        .map((place) => {
+          const draft = adminDrafts[place.id];
+          if (draft?.hidden) return null;
+
+          const description = draft?.description?.trim() || place.description;
+          const categoryLabel = draft?.category?.trim() || place.categoryLabel;
+
+          return {
+            ...place,
+            categoryLabel,
+            description,
+            shortDescription: draft?.description
+              ? `${description.slice(0, 145)}${description.length > 145 ? "..." : ""}`
+              : place.shortDescription,
+          };
+        })
+        .filter((place): place is CemeteryPlace => place !== null),
+    [adminDrafts, customPlaces, languageKey]
   );
   const homeTimeline = useMemo(
     () => baseHomeTimeline.map((period) => localizeTimelinePeriod(period, languageKey)),
@@ -1232,6 +1263,19 @@ function Layout({
     return () => {
       window.removeEventListener("storage", refreshCustomPlaces);
       window.removeEventListener("rossa-custom-places-changed", refreshCustomPlaces);
+    };
+  }, []);
+
+  useEffect(() => {
+    const refreshAdminDrafts = () =>
+      setAdminDrafts(readStorageRecord<PublicPlaceDraft>(adminDraftsKey));
+
+    window.addEventListener("storage", refreshAdminDrafts);
+    window.addEventListener("rossa-admin-place-drafts-changed", refreshAdminDrafts);
+
+    return () => {
+      window.removeEventListener("storage", refreshAdminDrafts);
+      window.removeEventListener("rossa-admin-place-drafts-changed", refreshAdminDrafts);
     };
   }, []);
 

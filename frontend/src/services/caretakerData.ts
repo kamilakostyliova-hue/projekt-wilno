@@ -8,6 +8,24 @@ export type CaretakerAdminUpdate = {
   openTasksCount: number;
 };
 
+export type CaretakerChangeStatus = "pending" | "approved" | "rejected";
+
+export type CaretakerChangeProposal = {
+  id: string;
+  placeId: number;
+  placeName: string;
+  caretakerEmail: string;
+  caretakerName: string;
+  description: string;
+  category: string;
+  graveStatus: string;
+  note: string;
+  status: CaretakerChangeStatus;
+  createdAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+};
+
 export type CaretakerAssignments = Record<string, number[]>;
 
 type CaretakerUpdatePayload = Omit<CaretakerAdminUpdate, "id" | "createdAt">;

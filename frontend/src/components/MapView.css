@@ -1044,3 +1044,244 @@ html[data-theme="night"] .map-compass,html[data-theme="night"] .tooltip-actions 
     line-height: 1 !important;
   }
 }
+
+/* Mobile map v3: larger map, compact controls, no layout jump after marker tap. */
+@media (max-width: 760px) {
+  .map.premium-map,
+  .map.premium-map.is-fullscreen {
+    display: grid !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 10px !important;
+    overflow: hidden !important;
+    border-radius: 30px !important;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(96, 165, 250, 0.18), transparent 34%),
+      rgba(255, 255, 255, 0.96) !important;
+    box-shadow:
+      0 22px 58px rgba(10, 31, 68, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+    contain: layout paint !important;
+  }
+
+  .map-premium-head {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .map-premium-head .eyebrow {
+    display: inline-flex !important;
+    color: #2563eb !important;
+    font-size: 0.72rem !important;
+  }
+
+  .map-premium-head h3 {
+    display: block !important;
+    max-width: 12ch !important;
+    color: #0c1730 !important;
+    font-size: clamp(1.9rem, 8.2vw, 2.5rem) !important;
+    line-height: 0.98 !important;
+  }
+
+  .transport-switcher {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    width: 100% !important;
+    padding: 5px !important;
+    border-radius: 999px !important;
+    background: rgba(238, 245, 255, 0.9) !important;
+  }
+
+  .transport-switcher button {
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding: 0 6px !important;
+    border-radius: 999px !important;
+    font-size: clamp(0.78rem, 3.35vw, 0.92rem) !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .transport-switcher button svg {
+    flex: 0 0 auto !important;
+  }
+
+  .map-premium-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .map-premium-actions button {
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 0 10px !important;
+    border-radius: 17px !important;
+    font-size: clamp(0.78rem, 3.4vw, 0.92rem) !important;
+    font-weight: 900 !important;
+    line-height: 1.05 !important;
+    white-space: normal !important;
+  }
+
+  .map-premium-actions button svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+  }
+
+  .map.premium-map .map-canvas,
+  .map.premium-map.is-fullscreen .map-canvas,
+  .map.premium-map:not(.is-fullscreen) .map-canvas {
+    width: 100% !important;
+    height: min(62svh, 640px) !important;
+    min-height: 440px !important;
+    max-height: 640px !important;
+    flex: none !important;
+    overflow: hidden !important;
+    border-radius: 26px !important;
+  }
+
+  .map-canvas .leaflet-container,
+  .leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+  }
+
+  .leaflet-control-zoom {
+    overflow: hidden !important;
+    border-radius: 16px !important;
+  }
+
+  .map-legend {
+    top: 10px !important;
+    right: 10px !important;
+    display: inline-flex !important;
+    max-width: calc(100% - 84px) !important;
+    gap: 7px !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+  }
+
+  .map-legend span:nth-child(n + 3) {
+    display: none !important;
+  }
+
+  .map-compass {
+    right: 12px !important;
+    bottom: 12px !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    min-height: 46px !important;
+  }
+
+  .map-audio-panel {
+    right: 82px !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: calc(100% - 106px) !important;
+    height: 48px !important;
+    padding: 5px !important;
+    border-radius: 999px !important;
+  }
+
+  .map-audio-panel span {
+    display: none !important;
+  }
+
+  .map-audio-panel button {
+    width: 100% !important;
+    min-height: 38px !important;
+    padding: 0 12px !important;
+    border-radius: 999px !important;
+    font-size: clamp(0.78rem, 3.4vw, 0.9rem) !important;
+    white-space: nowrap !important;
+  }
+
+  .route-info-card {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    border-radius: 24px !important;
+  }
+
+  .route-info-card > div {
+    min-width: 0 !important;
+    padding: 9px !important;
+    border-radius: 17px !important;
+  }
+
+  .route-info-card small {
+    font-size: 0.66rem !important;
+  }
+
+  .route-info-card strong {
+    overflow: hidden !important;
+    font-size: 0.83rem !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .route-info-card p {
+    grid-column: 1 / -1 !important;
+    margin: 0 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .premium-popup .leaflet-popup-content-wrapper,
+  .marker-tooltip-card {
+    max-width: min(280px, calc(100vw - 48px)) !important;
+  }
+
+  .marker-tooltip-card {
+    grid-template-columns: 74px minmax(0, 1fr) !important;
+  }
+
+  .marker-tooltip-card img {
+    width: 74px !important;
+    height: 74px !important;
+    flex: 0 0 74px !important;
+  }
+
+  html[data-theme="night"] .map.premium-map,
+  html[data-theme="night"] .route-info-card,
+  html[data-theme="night"] .route-info-card > div,
+  html[data-theme="night"] .map-audio-panel {
+    border-color: rgba(142, 197, 255, 0.24) !important;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(125, 211, 252, 0.12), transparent 34%),
+      rgba(13, 37, 79, 0.9) !important;
+  }
+
+  html[data-theme="night"] .map-premium-head h3,
+  html[data-theme="night"] .route-info-card strong {
+    color: #f8fbff !important;
+  }
+}
+
+@media (max-width: 370px) {
+  .map.premium-map .map-canvas,
+  .map.premium-map.is-fullscreen .map-canvas,
+  .map.premium-map:not(.is-fullscreen) .map-canvas {
+    height: 58svh !important;
+    min-height: 390px !important;
+  }
+
+  .map-premium-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

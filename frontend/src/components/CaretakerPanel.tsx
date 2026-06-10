@@ -23,6 +23,7 @@ import {
   saveCaretakerUpdate,
   updateCareReportStatus,
   type CaretakerAdminUpdate,
+  type CaretakerChangeProposal,
 } from "../services/caretakerData";
 import "./CaretakerPanel.css";
 
@@ -86,6 +87,7 @@ const reviewStorageKey = "rossa-care-place-review";
 const adminNotesStorageKey = "rossa-admin-caretaker-notes";
 const adminCaretakerAssignmentsKey = "rossa-admin-caretaker-assignments";
 const caretakerAdminUpdatesKey = "rossa-caretaker-admin-updates";
+const caretakerChangeProposalsKey = "rossa-caretaker-change-proposals";
 
 type PlaceReviewState = {
   status?: GraveStatus;
@@ -233,6 +235,23 @@ const readCaretakerUpdates = (): CaretakerAdminUpdate[] => {
   }
 };
 
+const readChangeProposals = (): CaretakerChangeProposal[] => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const saved = window.localStorage.getItem(caretakerChangeProposalsKey);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? (parsed as CaretakerChangeProposal[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeChangeProposals = (proposals: CaretakerChangeProposal[]) => {
+  window.localStorage.setItem(caretakerChangeProposalsKey, JSON.stringify(proposals));
+  window.dispatchEvent(new Event("rossa-caretaker-change-proposals-changed"));
+};
+
 const formatDate = (value: string, language: AppLanguage) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -261,6 +280,12 @@ function CaretakerPanel({
   );
   const [caretakerUpdates, setCaretakerUpdates] = useState<CaretakerAdminUpdate[]>(() => readCaretakerUpdates());
   const [caretakerUpdateDraft, setCaretakerUpdateDraft] = useState("");
+  const [changeProposals, setChangeProposals] = useState<CaretakerChangeProposal[]>(() => readChangeProposals());
+  const [proposalDescription, setProposalDescription] = useState("");
+  const [proposalCategory, setProposalCategory] = useState("");
+  const [proposalStatus, setProposalStatus] = useState<GraveStatus>("good");
+  const [proposalNote, setProposalNote] = useState("");
+  const [proposalNotice, setProposalNotice] = useState("");
   const [selectedCaretakerId, setSelectedCaretakerId] = useState("rossa-main");
   const [adminNoteDraft, setAdminNoteDraft] = useState("");
   const isEnglish = language === "en";
@@ -274,6 +299,7 @@ function CaretakerPanel({
       setAdminNotes(readAdminNotes());
       setCaretakerAssignments(readNumberArrayRecord(adminCaretakerAssignmentsKey));
       setCaretakerUpdates(readCaretakerUpdates());
+      setChangeProposals(readChangeProposals());
     };
     window.addEventListener("storage", refresh);
     window.addEventListener("rossa-care-reports-changed", refresh);
@@ -281,6 +307,7 @@ function CaretakerPanel({
     window.addEventListener("rossa-admin-notes-changed", refresh);
     window.addEventListener("rossa-admin-assignments-changed", refresh);
     window.addEventListener("rossa-caretaker-updates-changed", refresh);
+    window.addEventListener("rossa-caretaker-change-proposals-changed", refresh);
     return () => {
       window.removeEventListener("storage", refresh);
       window.removeEventListener("rossa-care-reports-changed", refresh);
@@ -288,6 +315,7 @@ function CaretakerPanel({
       window.removeEventListener("rossa-admin-notes-changed", refresh);
       window.removeEventListener("rossa-admin-assignments-changed", refresh);
       window.removeEventListener("rossa-caretaker-updates-changed", refresh);
+      window.removeEventListener("rossa-caretaker-change-proposals-changed", refresh);
     };
   }, []);
 
@@ -622,6 +650,11 @@ function CaretakerPanel({
   const selectedPlace = selectedRow?.place ?? null;
   const selectedStatus = selectedRow?.status ?? "good";
   const selectedReview = selectedPlace ? reviewStates[selectedPlace.id] ?? {} : {};
+  const selectedPendingProposal = selectedPlace
+    ? changeProposals.find(
+        (proposal) => proposal.placeId === selectedPlace.id && proposal.status === "pending"
+      )
+    : undefined;
   const selectedReports = selectedPlace
     ? visibleReports.filter((report) => report.placeId === selectedPlace.id && report.status !== "resolved")
     : [];
@@ -629,6 +662,24 @@ function CaretakerPanel({
     (update) => update.caretakerEmail === currentCaretaker.email
   );
   const caretakerOpenTasksCount = unresolvedReports.length + needsCare.length + missingPhoto.length;
+
+  useEffect(() => {
+    if (!selectedPlace) {
+      setProposalDescription("");
+      setProposalCategory("");
+      setProposalStatus("good");
+      setProposalNote("");
+      setProposalNotice("");
+      return;
+    }
+
+    setProposalDescription(selectedPlace.description ?? selectedPlace.shortDescription);
+    setProposalCategory(selectedPlace.categoryLabel);
+    setProposalStatus(selectedStatus);
+    setProposalNote("");
+    setProposalNotice("");
+  }, [selectedPlace?.categoryLabel, selectedPlace?.description, selectedPlace?.id, selectedPlace?.shortDescription, selectedStatus]);
+
   const selectedTasks = useMemo<ReviewTask[]>(() => {
     if (!selectedPlace) return [];
 
@@ -839,6 +890,47 @@ function CaretakerPanel({
     window.localStorage.setItem(caretakerAdminUpdatesKey, JSON.stringify(nextUpdates));
     window.dispatchEvent(new Event("rossa-caretaker-updates-changed"));
     setCaretakerUpdateDraft("");
+  };
+
+  const sendChangeProposal = () => {
+    if (!currentUser || !selectedPlace) return;
+
+    const proposal: CaretakerChangeProposal = {
+      id: `caretaker-proposal-${Date.now()}-${selectedPlace.id}`,
+      placeId: selectedPlace.id,
+      placeName: selectedPlace.name,
+      caretakerEmail: currentCaretaker.email,
+      caretakerName: currentUser.name || currentCaretaker.name,
+      description: proposalDescription.trim() || selectedPlace.description || selectedPlace.shortDescription,
+      category: proposalCategory.trim() || selectedPlace.categoryLabel,
+      graveStatus: proposalStatus,
+      note:
+        proposalNote.trim() ||
+        (isEnglish
+          ? "Caretaker asks the administrator to approve this update."
+          : "Opiekun prosi administratora o zatwierdzenie tej aktualizacji."),
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+    const nextProposals = [
+      proposal,
+      ...changeProposals.filter(
+        (item) =>
+          !(
+            item.placeId === selectedPlace.id &&
+            item.caretakerEmail === currentCaretaker.email &&
+            item.status === "pending"
+          )
+      ),
+    ].slice(0, 80);
+
+    setChangeProposals(nextProposals);
+    writeChangeProposals(nextProposals);
+    setProposalNotice(
+      isEnglish
+        ? "Proposal sent to administrator for approval."
+        : "Propozycja wyslana do administratora do zatwierdzenia."
+    );
   };
 
   if (!hasAccess) {
@@ -1333,6 +1425,62 @@ function CaretakerPanel({
                     </div>
                   ))
                 )}
+              </div>
+
+              <div className="caretaker-proposal-box">
+                <div className="caretaker-proposal-head">
+                  <strong>{isEnglish ? "Propose update for admin" : "Zaproponuj zmiane dla admina"}</strong>
+                  {selectedPendingProposal && (
+                    <span className="proposal-badge">
+                      {isEnglish ? "Waiting for approval" : "Czeka na zatwierdzenie"}
+                    </span>
+                  )}
+                </div>
+                <label>
+                  {isEnglish ? "Description" : "Opis"}
+                  <textarea
+                    onChange={(event) => setProposalDescription(event.target.value)}
+                    value={proposalDescription}
+                  />
+                </label>
+                <label>
+                  {isEnglish ? "Category" : "Kategoria"}
+                  <input
+                    onChange={(event) => setProposalCategory(event.target.value)}
+                    value={proposalCategory}
+                  />
+                </label>
+                <div className="review-status-picker proposal-status-picker">
+                  <strong>{isEnglish ? "Proposed status" : "Proponowany status"}</strong>
+                  <div>
+                    {(Object.keys(statusLabels) as GraveStatus[]).map((status) => (
+                      <button
+                        className={proposalStatus === status ? "active" : ""}
+                        key={status}
+                        onClick={() => setProposalStatus(status)}
+                        type="button"
+                      >
+                        {statusLabels[status][language]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <label>
+                  {isEnglish ? "Note for admin" : "Notatka dla admina"}
+                  <textarea
+                    onChange={(event) => setProposalNote(event.target.value)}
+                    placeholder={
+                      isEnglish
+                        ? "What exactly should be approved?"
+                        : "Co dokladnie ma zostac zatwierdzone?"
+                    }
+                    value={proposalNote}
+                  />
+                </label>
+                <button onClick={sendChangeProposal} type="button">
+                  <FaPaperPlane /> {isEnglish ? "Send for approval" : "Wyslij do zatwierdzenia"}
+                </button>
+                {proposalNotice && <small className="proposal-notice">{proposalNotice}</small>}
               </div>
             </article>
           </div>
